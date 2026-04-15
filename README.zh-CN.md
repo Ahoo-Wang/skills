@@ -1,5 +1,7 @@
 # Ahoo Skills
 
+![Logo](./logo.jpg)
+
 Ahoo Wang 的开源项目 skills 仓库，包含以下技能：
 
 ## Skills
