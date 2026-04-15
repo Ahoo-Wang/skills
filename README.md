@@ -1,5 +1,7 @@
 # Ahoo Skills
 
+![Logo](./logo.jpg)
+
 Ahoo Wang's open source project skills repository, containing skills for:
 
 ## Skills
