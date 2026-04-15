@@ -1,0 +1,23 @@
+{
+  "name": "ahoo-skills",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Ahoo 的开源项目 skills - Wow 框架与 FluentAssert 断言库",
+  "author": {
+    "name": "Ahoo Wang",
+    "email": "ahoowang@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ahoo-Wang/skills"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "skills",
+    "wow",
+    "fluent-assert",
+    "ddd",
+    "cqrs",
+    "event-sourcing"
+  ]
+}

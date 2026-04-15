@@ -1,0 +1,40 @@
+{
+  "skill_name": "fluent-assert",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write a test for a function that returns a List<String>. Assert the list is not empty, has exactly 3 elements, contains \"foo\" and \"bar\", and each element starts with a lowercase letter.",
+      "expected_output": "Kotlin test using FluentAssert with isNotEmpty, hasSize, contains, allMatch"
+    },
+    {
+      "id": 2,
+      "prompt": "Write a JUnit 5 test that verifies a list does NOT contain \"forbidden\". Assert the list has size 2 and contains exactly \"a\" and \"b\" in that order.",
+      "expected_output": "Kotlin test with doesNotContain, hasSize, containsExactly"
+    },
+    {
+      "id": 3,
+      "prompt": "Write a test that checks a nullable String is null, and another that checks a nullable Int is not null and greater than 0.",
+      "expected_output": "Two tests: nullableString.assert().isNull() and nullableInt.assert().isNotNull().isGreaterThan(0)"
+    },
+    {
+      "id": 4,
+      "prompt": "Write a test that uses assertThrownBy<> to verify a function throws IllegalArgumentException with message \"invalid input\" when passed an empty string.",
+      "expected_output": "assertThrownBy<IllegalArgumentException> { function(\"\") }.assert().hasMessage(\"invalid input\")"
+    },
+    {
+      "id": 5,
+      "prompt": "Write assertions for a Map<String, Int> that verify it has size 2, contains key \"count\", has value 42 for that key, and contains entry (\"count\", 42).",
+      "expected_output": "map.assert().hasSize(2).containsKey(\"count\").containsValue(42).containsEntry(\"count\", 42)"
+    },
+    {
+      "id": 6,
+      "prompt": "Write assertions for an Instant that verify it is in the past (before now), and for a LocalDate that verifies it is today and has month April.",
+      "expected_output": "instant.assert().isBefore(Instant.now()) and localDate.assert().isToday().hasMonth(4)"
+    },
+    {
+      "id": 7,
+      "prompt": "Write a test that asserts a custom data class Person(name: String, age: Int) is not null, has name \"Alice\", and has age greater than 18 using recursive comparison.",
+      "expected_output": "person.assert().isNotNull().hasFieldOrPropertyWithValue(\"name\", \"Alice\").isGreaterThan(18)"
+    }
+  ]
+}
