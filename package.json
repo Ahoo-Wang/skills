@@ -1,6 +1,6 @@
 {
   "name": "ahoo-skills",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "Ahoo 的开源项目 skills - Wow 框架与 FluentAssert 断言库",
   "author": {
