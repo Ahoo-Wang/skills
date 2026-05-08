@@ -16,6 +16,7 @@ Skills 通过 GitHub Actions **每 6 小时**自动从源仓库同步。
 | [CosId](https://github.com/Ahoo-Wang/CosId) | [`cosid-manual-integration`](./skills/cosid-manual-integration/SKILL.md)、[`cosid-sharding`](./skills/cosid-sharding/SKILL.md)、[`cosid-spring-boot`](./skills/cosid-spring-boot/SKILL.md)、[`cosid-strategy-guide`](./skills/cosid-strategy-guide/SKILL.md) |
 | [FluentAssert](https://github.com/Ahoo-Wang/FluentAssert) | [`fluent-assert`](./skills/fluent-assert/SKILL.md) |
 | [Fetcher](https://github.com/Ahoo-Wang/fetcher) | [`fetcher-cosec-auth`](./skills/fetcher-cosec-auth/SKILL.md)、[`fetcher-decorator-service`](./skills/fetcher-decorator-service/SKILL.md)、[`fetcher-eventbus`](./skills/fetcher-eventbus/SKILL.md)、[`fetcher-integration`](./skills/fetcher-integration/SKILL.md)、[`fetcher-llm-streaming`](./skills/fetcher-llm-streaming/SKILL.md)、[`fetcher-openai-client`](./skills/fetcher-openai-client/SKILL.md)、[`fetcher-openapi-generator`](./skills/fetcher-openapi-generator/SKILL.md)、[`fetcher-openapi-types`](./skills/fetcher-openapi-types/SKILL.md)、[`fetcher-react-hooks`](./skills/fetcher-react-hooks/SKILL.md)、[`fetcher-storage`](./skills/fetcher-storage/SKILL.md)、[`fetcher-viewer-components`](./skills/fetcher-viewer-components/SKILL.md)、[`fetcher-wow-cqrs`](./skills/fetcher-wow-cqrs/SKILL.md) |
+| [CoCache](https://github.com/Ahoo-Wang/CoCache) | [`cocache`](./skills/cocache/SKILL.md) |
 
 ## 安装
 
