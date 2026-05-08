@@ -2,7 +2,7 @@
 
 ![Logo](./logo.jpg)
 
-A central aggregation repository for [Claude Code](https://claude.ai/code) skills from [Ahoo-Wang](https://github.com/Ahoo-Wang)'s open source projects.
+A central aggregation repository for [Agent Skills](https://agentskills.io/) from [Ahoo-Wang](https://github.com/Ahoo-Wang)'s open source projects.
 
 Skills are automatically synced from source repositories **every 6 hours** via GitHub Actions.
 

@@ -2,7 +2,7 @@
 
 ![Logo](./logo.jpg)
 
-[Ahoo-Wang](https://github.com/Ahoo-Wang) 开源项目的 [Claude Code](https://claude.ai/code) Skills 聚合仓库。
+[Ahoo-Wang](https://github.com/Ahoo-Wang) 开源项目的 [Agent Skills](https://agentskills.io/) 聚合仓库。
 
 Skills 通过 GitHub Actions **每 6 小时**自动从源仓库同步。
 
