@@ -36,6 +36,13 @@ jobs:
           SYNC_DIR=$(mktemp -d)
           TRACKED_SKILLS=""
 
+          # Clean up existing workspace skills
+          for dir in skills/*-workspace/; do
+            [ -d "$dir" ] || continue
+            echo "Removing workspace skill: $(basename "$dir")"
+            rm -rf "$dir"
+          done
+
           for i in $(seq 0 $((REPO_COUNT - 1))); do
             URL=$(jq -r ".repos[$i].url" "$CONFIG_FILE")
             BRANCH=$(jq -r ".repos[$i].branch // \"main\"" "$CONFIG_FILE")
@@ -57,6 +64,11 @@ jobs:
             for skill_dir in "$SOURCE_SKILLS_DIR"/*/; do
               [ -d "$skill_dir" ] || continue
               SKILL_NAME=$(basename "$skill_dir")
+              # Skip workspace skills
+              if [[ "$SKILL_NAME" == *-workspace ]]; then
+                echo "  Skipping workspace skill: $SKILL_NAME"
+                continue
+              fi
               TRACKED_SKILLS="$TRACKED_SKILLS $SKILL_NAME"
 
               PREV_COUNT=$(echo "$TRACKED_SKILLS" | tr ' ' '\n' | grep -c "^${SKILL_NAME}$" || true)
