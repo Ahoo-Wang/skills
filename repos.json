@@ -1,0 +1,29 @@
+{
+  "repos": [
+    {
+      "url": "https://github.com/Ahoo-Wang/Wow.git",
+      "branch": "main",
+      "skills_path": "skills"
+    },
+    {
+      "url": "https://github.com/Ahoo-Wang/CoApi.git",
+      "branch": "main",
+      "skills_path": "skills"
+    },
+    {
+      "url": "https://github.com/Ahoo-Wang/CoSec.git",
+      "branch": "main",
+      "skills_path": "skills"
+    },
+    {
+      "url": "https://github.com/Ahoo-Wang/CosId.git",
+      "branch": "main",
+      "skills_path": "skills"
+    },
+    {
+      "url": "https://github.com/Ahoo-Wang/FluentAssert.git",
+      "branch": "main",
+      "skills_path": "skills"
+    }
+  ]
+}
