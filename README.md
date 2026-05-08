@@ -1,6 +1,6 @@
 # Ahoo Skills
 
-<img src="./logo.jpg" width="200" alt="Logo">
+<p align="center"><img src="./logo.jpg" width="200" alt="Logo"></p>
 
 A central aggregation repository for [Agent Skills](https://agentskills.io/) from [Ahoo-Wang](https://github.com/Ahoo-Wang)'s open source projects.
 
