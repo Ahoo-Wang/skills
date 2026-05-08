@@ -1,6 +1,6 @@
 # Ahoo Skills
 
-![Logo](./logo.jpg)
+<img src="./logo.jpg" width="200" alt="Logo">
 
 [Ahoo-Wang](https://github.com/Ahoo-Wang) 开源项目的 [Agent Skills](https://agentskills.io/) 聚合仓库。
 
