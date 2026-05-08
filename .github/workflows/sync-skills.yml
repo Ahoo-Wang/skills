@@ -23,79 +23,10 @@ jobs:
       - name: Sync skills from source repos
         id: sync
         run: |
-          CONFIG_FILE="repos.json"
-          if [ ! -f "$CONFIG_FILE" ]; then
-            echo "::error::repos.json not found"
-            exit 1
-          fi
-
-          REPO_COUNT=$(jq '.repos | length' "$CONFIG_FILE")
-          echo "Found $REPO_COUNT source repos to sync"
-          echo ""
-
-          SYNC_DIR=$(mktemp -d)
-          TRACKED_SKILLS=""
-
-          # Clean up existing workspace skills
-          for dir in skills/*-workspace/; do
-            [ -d "$dir" ] || continue
-            echo "Removing workspace skill: $(basename "$dir")"
-            rm -rf "$dir"
-          done
-
-          for i in $(seq 0 $((REPO_COUNT - 1))); do
-            URL=$(jq -r ".repos[$i].url" "$CONFIG_FILE")
-            BRANCH=$(jq -r ".repos[$i].branch // \"main\"" "$CONFIG_FILE")
-            SKILLS_PATH=$(jq -r ".repos[$i].skills_path // \"skills\"" "$CONFIG_FILE")
-            REPO_NAME=$(basename "$URL" .git)
-
-            echo "::group::Syncing from $REPO_NAME ($BRANCH)"
-
-            CLONE_DIR="$SYNC_DIR/$REPO_NAME"
-            git clone --depth 1 --branch "$BRANCH" "$URL" "$CLONE_DIR" 2>/dev/null
-
-            SOURCE_SKILLS_DIR="$CLONE_DIR/$SKILLS_PATH"
-            if [ ! -d "$SOURCE_SKILLS_DIR" ]; then
-              echo "Warning: $SKILLS_PATH/ not found in $REPO_NAME, skipping"
-              echo "::endgroup::"
-              continue
-            fi
-
-            for skill_dir in "$SOURCE_SKILLS_DIR"/*/; do
-              [ -d "$skill_dir" ] || continue
-              SKILL_NAME=$(basename "$skill_dir")
-              # Skip workspace skills
-              if [[ "$SKILL_NAME" == *-workspace ]]; then
-                echo "  Skipping workspace skill: $SKILL_NAME"
-                continue
-              fi
-              TRACKED_SKILLS="$TRACKED_SKILLS $SKILL_NAME"
-
-              PREV_COUNT=$(echo "$TRACKED_SKILLS" | tr ' ' '\n' | grep -c "^${SKILL_NAME}$" || true)
-              if [ "$PREV_COUNT" -gt 1 ]; then
-                echo "Warning: Skill '$SKILL_NAME' already synced from another repo, overwriting with $REPO_NAME"
-              fi
-
-              echo "  Copying skill: $SKILL_NAME (from $REPO_NAME)"
-              rsync -a --delete "$skill_dir" "skills/$SKILL_NAME/"
-            done
-
-            echo "::endgroup::"
-          done
-
-          rm -rf "$SYNC_DIR"
-
-          # Stage all changes (additions, modifications, deletions)
-          git add -A skills/
-
-          # Check if there are staged changes
-          if git diff --cached --quiet; then
-            echo "No changes detected"
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Changes detected:"
-            git diff --cached --stat
+          if scripts/sync-skills.sh repos.json skills; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Commit and push changes
