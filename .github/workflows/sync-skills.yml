@@ -85,12 +85,16 @@ jobs:
 
           rm -rf "$SYNC_DIR"
 
-          if git diff --quiet HEAD -- skills/; then
+          # Stage all changes (additions, modifications, deletions)
+          git add -A skills/
+
+          # Check if there are staged changes
+          if git diff --cached --quiet; then
             echo "No changes detected"
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "Changes detected:"
-            git diff --stat
+            git diff --cached --stat
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
@@ -99,6 +103,5 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A skills/
           git commit -m "chore: sync skills from source repos [skip ci]"
           git push
