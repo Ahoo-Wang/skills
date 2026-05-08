@@ -4,8 +4,8 @@ name: Sync Skills
 
 on:
   schedule:
-    # Run daily at 02:00 UTC (10:00 Beijing time)
-    - cron: '0 2 * * *'
+    # Run every 6 hours (02:00, 08:00, 14:00, 20:00 UTC)
+    - cron: '0 2,8,14,20 * * *'
   workflow_dispatch:
 
 permissions:
