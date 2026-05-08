@@ -1,0 +1,23 @@
+{
+  "skill_name": "agent-system-prompt",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我想做一个客服机器人，专门回答关于我们电商平台的退货、退款、物流问题。要求语气亲切但专业，遇到超出范围的问题要引导用户联系人工客服。",
+      "expected_output": "生成一个结构完整的客服系统提示词，包含角色定义、职责范围、语气要求、边界处理和输出格式",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I need a system prompt for a code review agent that focuses on Python best practices and PEP 8 compliance. It should give ratings and specific fix suggestions.",
+      "expected_output": "Generate a well-structured system prompt for a Python code review agent with role, responsibilities, output format, and examples",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "我有一个现有的系统提示词，太长了而且效果不好，帮我重构一下：你是一个AI助手，你要帮助用户回答各种问题。你要友好、专业、准确。如果用户问你不知道的事情，你就说你不知道。你要尽量提供详细的回答。你要用中文回答。你要注意安全，不要回答有害的问题。你要……（后面还有很多条规则）",
+      "expected_output": "诊断现有提示词的问题（太泛、缺乏结构、全是负面指令），并重构为一个清晰、结构化的版本",
+      "files": []
+    }
+  ]
+}
