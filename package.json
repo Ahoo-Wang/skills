@@ -2,7 +2,7 @@
   "name": "ahoo-skills",
   "version": "0.0.3",
   "type": "module",
-  "description": "Ahoo 的开源项目 skills - Wow 框架与 FluentAssert 断言库",
+  "description": "Claude Code Skills aggregation repository for Ahoo-Wang's open source projects",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
@@ -15,7 +15,11 @@
   "keywords": [
     "skills",
     "wow",
+    "coapi",
+    "cosec",
+    "cosid",
     "fluent-assert",
+    "fetcher",
     "ddd",
     "cqrs",
     "event-sourcing"

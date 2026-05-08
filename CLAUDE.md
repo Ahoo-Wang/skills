@@ -4,24 +4,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a **skills repository** containing Claude Code skills for specific domains. Each skill is a self-contained module with documentation, references, and evaluation criteria.
+This is an **aggregation repository** that collects Claude Code skills from multiple Ahoo-Wang open source projects into a single location. Skills are automatically synced from source repositories via GitHub Actions.
+
+## Architecture
+
+**Source repos** are listed in `repos.json`. The GitHub Actions workflow (`.github/workflows/sync-skills.yml`) runs every 6 hours, shallow-clones each source repo, and rsync's its `skills/` directory into this repo's `skills/` directory.
+
+To add a new source repo, add an entry to `repos.json`:
+```json
+{ "url": "https://github.com/Ahoo-Wang/<repo>.git", "branch": "main", "skills_path": "skills" }
+```
+
+Skills can also be added directly to this repo (not synced) — the workflow only overwrites skills that exist in source repos.
 
 ## Skill Structure
 
-Each skill lives in `skills/<skill-name>/` with this layout:
+Each skill lives in `skills/<skill-name>/`:
 
 ```
 skills/<skill-name>/
-├── SKILL.md          # Main skill file (YAML frontmatter + markdown content)
-├── references/        # Detailed reference documentation
+├── SKILL.md          # Main skill file (YAML frontmatter + markdown)
+├── references/       # Detailed reference documentation (optional)
 │   └── *.md
-└── evals/            # Evaluation criteria for skill validation
+└── evals/            # Evaluation criteria (optional)
     └── evals.json
 ```
 
-### Skill Frontmatter
-
-Each SKILL.md begins with YAML frontmatter defining:
+### SKILL.md Frontmatter
 
 ```yaml
 ---
@@ -32,26 +41,8 @@ compatibility: <comma-separated list of technologies>
 ---
 ```
 
-## Skills Available
-
-### `wow`
-DDD + Event Sourcing + CQRS microservices framework for Kotlin/Spring Boot.
-
-Key modules: `wow-api`, `wow-core`, `wow-mongo`, `wow-kafka`, `wow-query`, `wow-test`
-
-Key concepts: Aggregate Roots, Command/Event sourcing, Sagas, Projections, Command Gateway
-
-Reference files: `annotations.md`, `command-gateway.md`, `dsl.md`, `modeling.md`, `prepare-key.md`, `testing.md`
-
-### `fluent-assert`
-Kotlin assertion library wrapping AssertJ with Kotlin idioms.
-
-Import: `me.ahoo.test.asserts.assert`
-
-Pattern: `value.assert().assertionMethod()` instead of AssertJ's `assertThat(value).isEqualTo(expected)`
-
 ## Working with Skills
 
-- **Creating a new skill**: Follow the structure above - SKILL.md with YAML frontmatter, references/, evals/
-- **Evaluating skills**: Skills have `evals.json` containing evaluation criteria
-- **No build/test commands**: This repository only contains documentation and skill definitions - no build system or tests to run
+- **Creating a new skill**: Follow the structure above — SKILL.md with YAML frontmatter, optional references/ and evals/
+- **Adding a source repo**: Edit `repos.json`, the next sync will pick it up
+- **No build/test commands**: This repository only contains documentation and skill definitions — no build system or tests to run
