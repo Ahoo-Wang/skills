@@ -85,7 +85,7 @@ jobs:
 
           rm -rf "$SYNC_DIR"
 
-          if git diff --quiet; then
+          if git diff --quiet HEAD -- skills/; then
             echo "No changes detected"
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
@@ -99,6 +99,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add skills/
+          git add -A skills/
           git commit -m "chore: sync skills from source repos [skip ci]"
           git push
