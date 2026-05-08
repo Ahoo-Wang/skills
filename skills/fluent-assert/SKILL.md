@@ -25,6 +25,7 @@ description: |
 - [References](#references)
 - [Integration with Wow/Saga Tests](#integration-with-wowsaga-tests)
 - [When AssertJ Direct is Still Needed](#when-assertj-direct-is-still-needed)
+- [AssertProvider](#assertprovider)
 - [Custom Type Assertions](#custom-type-assertions)
 
 ---
@@ -283,6 +284,30 @@ throwable.assert()
     .isInstanceOf(Exception::class.java)
     .isNotInstanceOf(Error::class.java)
 ```
+
+---
+
+## AssertProvider
+
+For types implementing AssertJ's `AssertProvider<A>` interface, `.assert()` delegates to `assertThat(this)` and returns the provider's custom assertion type:
+
+```kotlin
+import org.assertj.core.api.AssertProvider
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.BigDecimalAssert
+
+class MoneyAssertProvider(private val amount: BigDecimal) : AssertProvider<BigDecimalAssert> {
+    override fun actual(): BigDecimalAssert = assertThat(amount)
+}
+
+val provider = MoneyAssertProvider(BigDecimal("99.99"))
+provider.assert().isPositive().isLessThan(BigDecimal("100"))
+```
+
+**Key points:**
+- Receiver is non-nullable: `AssertProvider<A>.assert(): A`
+- Returns the type parameter `A` (the custom assertion class)
+- Delegates to AssertJ's `assertThat(this)`, not `actual()` directly
 
 ---
 
