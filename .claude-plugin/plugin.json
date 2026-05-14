@@ -1,0 +1,12 @@
+{
+  "name": "ahoo-skills",
+  "description": "Claude Code Skills for Ahoo-Wang open source projects — DDD, CQRS, Event Sourcing, distributed systems, and more",
+  "version": "0.0.3",
+  "author": {
+    "name": "Ahoo Wang",
+    "email": "ahoowang@gmail.com"
+  },
+  "homepage": "https://github.com/Ahoo-Wang/skills",
+  "repository": "https://github.com/Ahoo-Wang/skills",
+  "license": "Apache-2.0"
+}

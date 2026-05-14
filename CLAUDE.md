@@ -4,18 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is an **aggregation repository** that collects Claude Code skills from multiple Ahoo-Wang open source projects into a single location. Skills are automatically synced from source repositories via GitHub Actions.
+This is an **aggregation repository** (npm package: `ahoo-skills`) that collects Claude Code skills from multiple Ahoo-Wang open source projects into a single location. Skills are automatically synced from source repositories via GitHub Actions.
+
+Install as a Claude Code plugin: `/plugin install ahoo-skills@github`
 
 ## Architecture
 
-**Source repos** are listed in `repos.json`. The GitHub Actions workflow (`.github/workflows/sync-skills.yml`) runs every 6 hours, shallow-clones each source repo, and rsync's its `skills/` directory into this repo's `skills/` directory.
+**Source repos** are listed in `repos.json`. The GitHub Actions workflow (`.github/workflows/sync-skills.yml`) runs every 6 hours (02:00, 08:00, 14:00, 20:00 UTC) via `scripts/sync-skills.sh`, which shallow-clones each source repo and rsync's its `skills/` directory into `skills/`.
 
 To add a new source repo, add an entry to `repos.json`:
 ```json
 { "url": "https://github.com/Ahoo-Wang/<repo>.git", "branch": "main", "skills_path": "skills" }
 ```
 
-Skills can also be added directly to this repo (not synced) — the workflow only overwrites skills that exist in source repos.
+Sync behavior:
+- Skills can also be added directly to this repo (not synced) — the workflow only overwrites skills that exist in source repos
+- Workspace skills (directories ending in `-workspace`) are skipped during sync and existing ones are cleaned up
+- Duplicate skill names across repos produce a warning; the last repo wins
 
 ## Skill Structure
 
@@ -41,8 +46,29 @@ compatibility: <comma-separated list of technologies>
 ---
 ```
 
+## Plugin Structure
+
+This repository is a valid [Claude Code plugin](https://code.claude.com/docs/en/plugins). The plugin manifest lives at `.claude-plugin/plugin.json` and defines the `ahoo-skills` namespace.
+
+```
+./
+├── .claude-plugin/
+│   └── plugin.json     # Plugin manifest (name, version, metadata)
+├── skills/             # Plugin skills (model-invoked)
+│   └── <skill-name>/
+│       ├── SKILL.md
+│       ├── references/
+│       └── evals/
+├── repos.json          # Source repos for skill sync
+├── scripts/            # Sync scripts
+└── package.json        # npm package metadata
+```
+
+Skills are namespaced under the plugin name (e.g., `/ahoo-skills:wow`, `/ahoo-skills:simba`).
+
 ## Working with Skills
 
 - **Creating a new skill**: Follow the structure above — SKILL.md with YAML frontmatter, optional references/ and evals/
 - **Adding a source repo**: Edit `repos.json`, the next sync will pick it up
+- **Sync does not touch `.claude-plugin/`**: The sync script only operates on `skills/`, so the plugin manifest is maintained separately
 - **No build/test commands**: This repository only contains documentation and skill definitions — no build system or tests to run
