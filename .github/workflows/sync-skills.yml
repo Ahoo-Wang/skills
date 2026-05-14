@@ -14,6 +14,7 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout skills repo
         uses: actions/checkout@v5
@@ -23,11 +24,33 @@ jobs:
       - name: Sync skills from source repos
         id: sync
         run: |
-          if scripts/sync-skills.sh repos.json skills; then
+          set +e
+          scripts/sync-skills.sh repos.json skills
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -eq 0 ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
+          elif [ $EXIT_CODE -eq 2 ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Error: Sync failed with exit code $EXIT_CODE" >&2
+            exit 1
           fi
+
+      - name: Validate skill files
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          for skill_dir in skills/*/; do
+            skill_file="$skill_dir/SKILL.md"
+            if [ ! -f "$skill_file" ]; then
+              echo "Error: Missing SKILL.md in $skill_dir" >&2
+              exit 1
+            fi
+            if ! head -1 "$skill_file" | grep -q "^---"; then
+              echo "Error: Missing YAML frontmatter in $skill_file" >&2
+              exit 1
+            fi
+          done
+          echo "All skills validated successfully"
 
       - name: Commit and push changes
         if: steps.sync.outputs.changed == 'true'

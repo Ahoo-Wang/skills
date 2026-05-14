@@ -6,7 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is an **aggregation repository** (npm package: `ahoo-skills`) that collects Claude Code skills from multiple Ahoo-Wang open source projects into a single location. Skills are automatically synced from source repositories via GitHub Actions.
 
-Install as a Claude Code plugin: `/plugin install ahoo-skills@github`
+## Installation
+
+This repository is a valid [Claude Code plugin](https://code.claude.com/docs/en/plugins). The plugin manifest lives at `.claude-plugin/plugin.json` and defines the `ahoo-skills` namespace.
+
+```bash
+/plugin marketplace add https://github.com/Ahoo-Wang/skills
+/plugin install ahoo-skills
+```
+
+Skills are namespaced under the plugin name (e.g., `/ahoo-skills:wow`, `/ahoo-skills:simba`).
 
 ## Architecture
 
@@ -42,29 +51,9 @@ skills/<skill-name>/
 name: <skill-name>
 description: |
   When to invoke this skill and what it covers
-compatibility: <comma-separated list of technologies>
+compatibility: <comma-separated list of technologies>  # optional
 ---
 ```
-
-## Plugin Structure
-
-This repository is a valid [Claude Code plugin](https://code.claude.com/docs/en/plugins). The plugin manifest lives at `.claude-plugin/plugin.json` and defines the `ahoo-skills` namespace.
-
-```
-./
-├── .claude-plugin/
-│   └── plugin.json     # Plugin manifest (name, version, metadata)
-├── skills/             # Plugin skills (model-invoked)
-│   └── <skill-name>/
-│       ├── SKILL.md
-│       ├── references/
-│       └── evals/
-├── repos.json          # Source repos for skill sync
-├── scripts/            # Sync scripts
-└── package.json        # npm package metadata
-```
-
-Skills are namespaced under the plugin name (e.g., `/ahoo-skills:wow`, `/ahoo-skills:simba`).
 
 ## Working with Skills
 

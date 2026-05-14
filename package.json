@@ -1,7 +1,6 @@
 {
   "name": "ahoo-skills",
   "version": "0.0.3",
-  "type": "module",
   "description": "Claude Code Skills aggregation repository for Ahoo-Wang's open source projects",
   "author": {
     "name": "Ahoo Wang",
@@ -23,5 +22,12 @@
     "ddd",
     "cqrs",
     "event-sourcing"
-  ]
+  ],
+  "files": [
+    ".claude-plugin/",
+    "skills/"
+  ],
+  "scripts": {
+    "sync": "bash scripts/sync-skills.sh"
+  }
 }
