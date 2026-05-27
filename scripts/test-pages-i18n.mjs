@@ -4,6 +4,11 @@ import vm from "node:vm";
 const html = readFileSync(new URL("../docs/index.html", import.meta.url), "utf8");
 const zhHtml = readFileSync(new URL("../docs/zh-CN/index.html", import.meta.url), "utf8");
 const cname = readFileSync(new URL("../docs/CNAME", import.meta.url), "utf8").trim();
+const tokenCss = readFileSync(new URL("../docs/assets/tokens/skills-brand.css", import.meta.url), "utf8");
+const brandGuideHtml = readFileSync(
+  new URL("../design/assets/guidelines/skills-brand-guidelines.html", import.meta.url),
+  "utf8",
+);
 
 const checks = [
   ["English language toggle", 'data-lang-option="en"'],
@@ -68,6 +73,29 @@ if (missingZh.length > 0) {
 
 if (cname !== "skills.ahoo.me") {
   console.error(`Expected docs/CNAME to be skills.ahoo.me, got ${cname}`);
+  process.exit(1);
+}
+
+const definedTokens = new Set([...tokenCss.matchAll(/--skills-[\w-]+(?=\s*:)/g)].map(([token]) => token));
+const referencedTokens = new Set(
+  [...`${html}\n${zhHtml}`.matchAll(/var\((--skills-[\w-]+)\)/g)].map(([, token]) => token),
+);
+const missingTokens = [...referencedTokens].filter((token) => !definedTokens.has(token));
+if (missingTokens.length > 0) {
+  console.error(`Pages reference undefined brand tokens: ${missingTokens.join(", ")}`);
+  process.exit(1);
+}
+
+const seenIds = new Set();
+const duplicateIds = new Set();
+for (const [, id] of brandGuideHtml.matchAll(/\bid="([^"]+)"/g)) {
+  if (seenIds.has(id)) {
+    duplicateIds.add(id);
+  }
+  seenIds.add(id);
+}
+if (duplicateIds.size > 0) {
+  console.error(`Brand guide contains duplicate HTML ids: ${[...duplicateIds].join(", ")}`);
   process.exit(1);
 }
 
