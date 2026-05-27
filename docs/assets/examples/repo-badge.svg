@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420">
+  <rect width="760" height="420" rx="32" fill="#F5F7FB"/>
+  <rect x="70" y="68" width="620" height="280" rx="28" fill="#FFFFFF" stroke="#DDE6F2"/>
+  <circle cx="132" cy="135" r="42" fill="#0B1020"/>
+  <text x="113" y="151" font-family="Arial" font-size="44" fill="white">G</text>
+  <text x="200" y="124" font-family="Inter, Arial" font-size="36" font-weight="800" fill="#0B1020">skills</text>
+  <text x="200" y="162" font-family="Inter, Arial" font-size="22" fill="#6B7280">Open Source Agent Skills Hub</text>
+  <text x="200" y="194" font-family="Inter, Arial" font-size="22" fill="#6B7280">by Ahoo Wang</text>
+  <rect x="112" y="252" width="126" height="40" rx="10" fill="#0B1020"/><text x="130" y="279" font-family="Inter, Arial" font-size="19" fill="white">Apache-2.0</text>
+  <rect x="252" y="252" width="100" height="40" rx="10" fill="#346CFF"/><text x="278" y="279" font-family="Inter, Arial" font-size="19" fill="white">sync 6h</text>
+  <rect x="368" y="252" width="216" height="40" rx="10" fill="#E8F0FF"/><text x="390" y="279" font-family="Inter, Arial" font-size="19" fill="#346CFF">source-owned plugins</text>
+</svg>

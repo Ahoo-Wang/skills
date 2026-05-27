@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" width="760" height="420">
+  <rect width="760" height="420" rx="32" fill="#F5F7FB"/>
+  <rect x="60" y="58" width="640" height="304" rx="24" fill="#0B1020"/>
+  <text x="96" y="112" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="23" fill="#73F0C0">$ skills</text>
+  <text x="96" y="162" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="23" fill="#FFFFFF">$ plugin add </text>
+  <text x="288" y="162" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="23" fill="#39D0FF">ahoo-wow-skills</text>
+  <text x="96" y="218" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="21" fill="#DDE6F2">Resolving plugin...</text>
+  <text x="96" y="258" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="21" fill="#DDE6F2">Fetching from Wow...</text>
+  <text x="96" y="298" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="21" fill="#DDE6F2">Installed ahoo-wow-skills</text>
+  <text x="96" y="340" font-family="JetBrains Mono, Menlo, Consolas, monospace" font-size="21" fill="#73F0C0">Done. Ready to use.</text>
+</svg>

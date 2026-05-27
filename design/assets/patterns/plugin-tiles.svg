@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" width="900" height="420">
+  <rect width="900" height="420" rx="28" fill="#F5F7FB"/>
+  <g font-family="Inter, Noto Sans CJK SC, Arial" font-size="26" font-weight="700">
+    <rect x="100" y="80" width="160" height="120" rx="24" fill="#346CFF"/><text x="148" y="151" fill="white">Plugin</text>
+    <rect x="360" y="70" width="160" height="120" rx="24" fill="#39D0FF"/><text x="414" y="141" fill="#0B1020">API</text>
+    <rect x="620" y="95" width="160" height="120" rx="24" fill="#73F0C0"/><text x="666" y="166" fill="#0B1020">Skill</text>
+    <rect x="250" y="255" width="180" height="100" rx="24" fill="#0B1020"/><text x="296" y="316" fill="white">CLI</text>
+    <rect x="520" y="250" width="200" height="100" rx="24" fill="white" stroke="#DDE6F2"/><text x="562" y="312" fill="#0B1020">Source</text>
+  </g>
+  <g fill="none" stroke="#346CFF" stroke-width="4" opacity="0.65"><path d="M260 140 C315 130, 315 130, 360 130"/><path d="M520 130 C570 140, 575 150, 620 155"/><path d="M340 255 C370 220, 430 190, 520 130"/><path d="M620 250 C640 220, 660 205, 700 215"/></g>
+</svg>

@@ -1,6 +1,17 @@
 # Ahoo Skills
 
-<p align="center"><img src="./logo.jpg" width="200" alt="Logo"></p>
+<p align="center">
+  <a href="https://ahoo-wang.github.io/skills/">
+    <img src="./docs/assets/logo/skills-logo-primary.svg" width="280" alt="Ahoo-Wang's skills logo">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://ahoo-wang.github.io/skills/">GitHub Pages</a> ·
+  <a href="./design/assets/guidelines/skills-brand-guidelines.pdf">Brand Guide</a> ·
+  <a href="./.agents/plugins/marketplace.json">Codex Marketplace</a> ·
+  <a href="./.claude-plugin/marketplace.json">Claude Code Marketplace</a>
+</p>
 
 A central aggregation repository for [Agent Skills](https://agentskills.io/) from [Ahoo-Wang](https://github.com/Ahoo-Wang)'s open source projects.
 
