@@ -72,7 +72,7 @@
         white-space: nowrap;
       }
 
-      .nav-links {
+      .top-actions {
         align-items: center;
         display: flex;
         flex-wrap: wrap;
@@ -80,7 +80,15 @@
         justify-content: flex-end;
       }
 
+      .nav-links {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
       .nav-links a,
+      .language-switch button,
       .ghost-button,
       .solid-button {
         align-items: center;
@@ -97,15 +105,35 @@
       }
 
       .nav-links a,
+      .language-switch button,
       .ghost-button {
         background: rgba(255, 255, 255, 0.74);
         border: 1px solid rgba(221, 230, 242, 0.92);
       }
 
       .nav-links a:hover,
+      .language-switch button:hover,
       .ghost-button:hover,
       .solid-button:hover {
         transform: translateY(-1px);
+      }
+
+      .language-switch {
+        align-items: center;
+        display: inline-flex;
+        gap: 4px;
+      }
+
+      .language-switch button {
+        color: var(--skills-slate);
+        cursor: pointer;
+        min-width: 48px;
+      }
+
+      .language-switch button.is-active {
+        background: var(--skills-midnight);
+        border-color: var(--skills-midnight);
+        color: var(--skills-white);
       }
 
       .solid-button {
@@ -144,7 +172,12 @@
         max-width: 700px;
       }
 
-      h1 span {
+      h1 .title-prefix {
+        color: inherit;
+        display: block;
+      }
+
+      h1 .title-accent {
         color: var(--skills-electric-blue);
         display: block;
       }
@@ -389,6 +422,7 @@
           flex-direction: column;
         }
 
+        .top-actions,
         .nav-links {
           justify-content: flex-start;
         }
@@ -450,58 +484,72 @@
   <body>
     <div class="site-shell">
       <header class="topbar">
-        <a class="brand-link" href="https://github.com/Ahoo-Wang/skills" aria-label="Ahoo-Wang's skills repository">
+        <a
+          class="brand-link"
+          href="https://github.com/Ahoo-Wang/skills"
+          aria-label="Ahoo-Wang's skills repository"
+          data-i18n-aria="brand.repositoryLabel"
+        >
           <img src="./assets/logo/skills-mark.svg" alt="">
-          <span class="brand-text">Ahoo-Wang's skills</span>
+          <span class="brand-text" data-i18n="brand.name">Ahoo-Wang's skills</span>
         </a>
-        <nav class="nav-links" aria-label="Primary navigation">
-          <a href="#plugins">Plugins</a>
-          <a href="#distribution">Distribution</a>
-          <a href="https://github.com/Ahoo-Wang/skills">GitHub</a>
-          <a href="./assets/guidelines/skills-brand-guidelines.pdf">Brand Guide</a>
-        </nav>
+        <div class="top-actions">
+          <nav class="nav-links" aria-label="Primary navigation" data-i18n-aria="nav.label">
+            <a href="#plugins" data-i18n="nav.plugins">Plugins</a>
+            <a href="#distribution" data-i18n="nav.distribution">Distribution</a>
+            <a href="https://github.com/Ahoo-Wang/skills" data-i18n="nav.github">GitHub</a>
+            <a href="./assets/guidelines/skills-brand-guidelines.pdf" data-i18n="nav.brandGuide">Brand Guide</a>
+          </nav>
+          <div class="language-switch" role="group" aria-label="Language selector" data-i18n-aria="language.label">
+            <button type="button" data-lang-option="en" aria-pressed="false">EN</button>
+            <button type="button" data-lang-option="zh-CN" aria-pressed="false">中文</button>
+          </div>
+        </div>
       </header>
 
       <main>
         <section class="hero" aria-labelledby="hero-title">
           <div class="hero-copy">
-            <p class="kicker">Open Source Agent Skills Hub</p>
-            <h1 id="hero-title">Ahoo-Wang's <span>skills</span></h1>
-            <p class="hero-subtitle">
+            <p class="kicker" data-i18n="hero.kicker">Open Source Agent Skills Hub</p>
+            <h1 id="hero-title">
+              <span class="title-prefix" data-i18n="hero.titlePrefix">Ahoo-Wang's</span>
+              <span class="title-accent" data-i18n="hero.titleAccent">skills</span>
+            </h1>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">
               A repository and plugin marketplace entry for Ahoo-Wang open source agent skills,
               distributed as split plugins for Codex and Claude Code.
             </p>
-            <div class="hero-actions" aria-label="Primary actions">
-              <a class="solid-button" href="https://github.com/Ahoo-Wang/skills">Open repository</a>
-              <a class="ghost-button" href="#plugins">Browse plugins</a>
+            <div class="hero-actions" aria-label="Primary actions" data-i18n-aria="hero.actionsLabel">
+              <a class="solid-button" href="https://github.com/Ahoo-Wang/skills" data-i18n="hero.openRepository">Open repository</a>
+              <a class="ghost-button" href="#plugins" data-i18n="hero.browsePlugins">Browse plugins</a>
             </div>
-            <div class="quick-meta" aria-label="Repository highlights">
-              <span>Auto synced every 6 hours</span>
-              <span>Codex marketplace ready</span>
-              <span>Claude Code marketplace ready</span>
+            <div class="quick-meta" aria-label="Repository highlights" data-i18n-aria="hero.highlightsLabel">
+              <span data-i18n="hero.meta.sync">Auto synced every 6 hours</span>
+              <span data-i18n="hero.meta.codex">Codex marketplace ready</span>
+              <span data-i18n="hero.meta.claude">Claude Code marketplace ready</span>
             </div>
           </div>
 
-          <aside class="market-entry" aria-label="Marketplace install commands">
+          <aside class="market-entry" aria-label="Marketplace install commands" data-i18n-aria="market.ariaLabel">
             <div class="market-entry-header">
               <img src="./assets/logo/skills-mark.svg" alt="">
-              <span class="status-pill">Marketplace entry</span>
+              <span class="status-pill" data-i18n="market.status">Marketplace entry</span>
             </div>
             <div>
-              <h2>Install the hub, then add the plugin you need.</h2>
-              <p>
+              <h2 data-i18n="market.title">Install the hub, then add the plugin you need.</h2>
+              <p data-i18n="market.description">
                 This repository aggregates upstream skill sources and publishes generated plugin
                 manifests under a single distribution point.
               </p>
             </div>
             <div class="install-stack">
               <div class="code-block">
-                <header><span>Codex</span><span>marketplace</span></header>
+                <header><span>Codex</span><span data-i18n="market.codeLabel">marketplace</span></header>
                 <code>codex plugin marketplace add Ahoo-Wang/skills --ref main
 codex plugin add ahoo-wow-skills@ahoo-skills</code>
               </div>
               <div class="code-block">
-                <header><span>Claude Code</span><span>marketplace</span></header>
+                <header><span>Claude Code</span><span data-i18n="market.codeLabel">marketplace</span></header>
                 <code>/plugin marketplace add https://github.com/Ahoo-Wang/skills
 /plugin install ahoo-wow-skills</code>
               </div>
@@ -512,10 +560,10 @@ codex plugin add ahoo-wow-skills@ahoo-skills</code>
         <section class="section" id="plugins" aria-labelledby="plugins-title">
           <div class="section-heading">
             <div>
-              <p class="kicker">Split plugins</p>
-              <h2 id="plugins-title">Project-scoped skill packages</h2>
+              <p class="kicker" data-i18n="plugins.kicker">Split plugins</p>
+              <h2 id="plugins-title" data-i18n="plugins.title">Project-scoped skill packages</h2>
             </div>
-            <p>
+            <p data-i18n="plugins.description">
               Install one focused plugin per source project. The generated manifests stay aligned
               with the upstream skills and this repository's local plugin sources.
             </p>
@@ -523,39 +571,39 @@ codex plugin add ahoo-wow-skills@ahoo-skills</code>
           <div class="plugin-grid">
             <article class="plugin-card">
               <strong><code>ahoo-wow-skills</code></strong>
-              <p>Wow, code review, debugging, and development workflow skills.</p>
+              <p data-i18n="plugin.wow">Wow, code review, debugging, and development workflow skills.</p>
             </article>
             <article class="plugin-card">
               <strong><code>ahoo-fetcher-skills</code></strong>
-              <p>Fetcher client, decorators, React hooks, OpenAPI, storage, event bus, and streaming.</p>
+              <p data-i18n="plugin.fetcher">Fetcher client, decorators, React hooks, OpenAPI, storage, event bus, and streaming.</p>
             </article>
             <article class="plugin-card">
               <strong><code>ahoo-cosec-skills</code></strong>
-              <p>CoSec integration, policy authoring, custom matchers, and troubleshooting.</p>
+              <p data-i18n="plugin.cosec">CoSec integration, policy authoring, custom matchers, and troubleshooting.</p>
             </article>
             <article class="plugin-card">
               <strong><code>ahoo-coapi-skills</code></strong>
-              <p>CoApi Spring HTTP client development guidance.</p>
+              <p data-i18n="plugin.coapi">CoApi Spring HTTP client development guidance.</p>
             </article>
             <article class="plugin-card">
               <strong><code>ahoo-cosid-skills</code></strong>
-              <p>CosId ID generation, sharding, Spring Boot setup, and strategy guidance.</p>
+              <p data-i18n="plugin.cosid">CosId ID generation, sharding, Spring Boot setup, and strategy guidance.</p>
             </article>
             <article class="plugin-card">
               <strong><code>ahoo-fluent-assert-skills</code></strong>
-              <p>FluentAssert Kotlin assertion workflow for test authors.</p>
+              <p data-i18n="plugin.fluentAssert">FluentAssert Kotlin assertion workflow for test authors.</p>
             </article>
             <article class="plugin-card">
               <strong><code>ahoo-cocache-skills</code></strong>
-              <p>CoCache distributed cache integration and operation guidance.</p>
+              <p data-i18n="plugin.cocache">CoCache distributed cache integration and operation guidance.</p>
             </article>
             <article class="plugin-card">
               <strong><code>ahoo-simba-skills</code></strong>
-              <p>Simba distributed mutex, leader election, and test guidance.</p>
+              <p data-i18n="plugin.simba">Simba distributed mutex, leader election, and test guidance.</p>
             </article>
             <article class="plugin-card">
               <strong><code>ahoo-agent-skills</code></strong>
-              <p>Local agent prompt skills maintained directly by this marketplace repository.</p>
+              <p data-i18n="plugin.agent">Local agent prompt skills maintained directly by this marketplace repository.</p>
             </article>
           </div>
         </section>
@@ -564,10 +612,10 @@ codex plugin add ahoo-wow-skills@ahoo-skills</code>
           <div class="section">
             <div class="section-heading">
               <div>
-                <p class="kicker">Distribution model</p>
-                <h2 id="distribution-title">Upstream owns skills. This repo distributes plugins.</h2>
+                <p class="kicker" data-i18n="distribution.kicker">Distribution model</p>
+                <h2 id="distribution-title" data-i18n="distribution.title">Upstream owns skills. This repo distributes plugins.</h2>
               </div>
-              <p>
+              <p data-i18n="distribution.description">
                 Source repositories provide their own skill content and plugin source metadata.
                 The marketplace mirror syncs, validates, generates, and publishes distribution output.
               </p>
@@ -575,35 +623,35 @@ codex plugin add ahoo-wow-skills@ahoo-skills</code>
             <div class="repo-grid">
               <article class="repo-card">
                 <strong><a href="https://github.com/Ahoo-Wang/Wow">Wow</a></strong>
-                <p>DDD, Event Sourcing, CQRS, review, and workflow skills.</p>
+                <p data-i18n="repo.wow">DDD, Event Sourcing, CQRS, review, and workflow skills.</p>
               </article>
               <article class="repo-card">
                 <strong><a href="https://github.com/Ahoo-Wang/fetcher">Fetcher</a></strong>
-                <p>Type-safe HTTP client and frontend integration skills.</p>
+                <p data-i18n="repo.fetcher">Type-safe HTTP client and frontend integration skills.</p>
               </article>
               <article class="repo-card">
                 <strong><a href="https://github.com/Ahoo-Wang/CoSec">CoSec</a></strong>
-                <p>Security integration, policy authoring, and matcher skills.</p>
+                <p data-i18n="repo.cosec">Security integration, policy authoring, and matcher skills.</p>
               </article>
               <article class="repo-card">
                 <strong><a href="https://github.com/Ahoo-Wang/CoApi">CoApi</a></strong>
-                <p>Spring interface HTTP client guidance.</p>
+                <p data-i18n="repo.coapi">Spring interface HTTP client guidance.</p>
               </article>
               <article class="repo-card">
                 <strong><a href="https://github.com/Ahoo-Wang/CosId">CosId</a></strong>
-                <p>ID generation and sharding guidance.</p>
+                <p data-i18n="repo.cosid">ID generation and sharding guidance.</p>
               </article>
               <article class="repo-card">
                 <strong><a href="https://github.com/Ahoo-Wang/FluentAssert">FluentAssert</a></strong>
-                <p>Kotlin fluent assertion guidance.</p>
+                <p data-i18n="repo.fluentAssert">Kotlin fluent assertion guidance.</p>
               </article>
               <article class="repo-card">
                 <strong><a href="https://github.com/Ahoo-Wang/CoCache">CoCache</a></strong>
-                <p>Distributed cache guidance.</p>
+                <p data-i18n="repo.cocache">Distributed cache guidance.</p>
               </article>
               <article class="repo-card">
                 <strong><a href="https://github.com/Ahoo-Wang/Simba">Simba</a></strong>
-                <p>Distributed mutex and leader election guidance.</p>
+                <p data-i18n="repo.simba">Distributed mutex and leader election guidance.</p>
               </article>
             </div>
           </div>
@@ -614,13 +662,222 @@ codex plugin add ahoo-wow-skills@ahoo-skills</code>
         <div class="footer-inner">
           <img src="./assets/logo/skills-logo-mono.svg" alt="Ahoo-Wang's skills">
           <div class="footer-links">
-            <a href="https://github.com/Ahoo-Wang/skills">Repository</a>
-            <a href="https://github.com/Ahoo-Wang/skills/tree/main/plugins">Plugins</a>
-            <a href="https://github.com/Ahoo-Wang/skills/tree/main/sources">Sources</a>
-            <a href="./assets/guidelines/skills-brand-guidelines.pdf">Brand Guide</a>
+            <a href="https://github.com/Ahoo-Wang/skills" data-i18n="footer.repository">Repository</a>
+            <a href="https://github.com/Ahoo-Wang/skills/tree/main/plugins" data-i18n="footer.plugins">Plugins</a>
+            <a href="https://github.com/Ahoo-Wang/skills/tree/main/sources" data-i18n="footer.sources">Sources</a>
+            <a href="./assets/guidelines/skills-brand-guidelines.pdf" data-i18n="footer.brandGuide">Brand Guide</a>
           </div>
         </div>
       </footer>
     </div>
+    <script>
+      const storageKey = "skills.preferredLanguage";
+      const translations = {
+        en: {
+          metaTitle: "Ahoo-Wang's skills | Open Source Agent Skills Hub",
+          metaDescription: "Ahoo-Wang's open source agent skills hub for Codex and Claude Code plugin distribution.",
+          "brand.name": "Ahoo-Wang's skills",
+          "brand.repositoryLabel": "Ahoo-Wang's skills repository",
+          "language.label": "Language selector",
+          "nav.label": "Primary navigation",
+          "nav.plugins": "Plugins",
+          "nav.distribution": "Distribution",
+          "nav.github": "GitHub",
+          "nav.brandGuide": "Brand Guide",
+          "hero.kicker": "Open Source Agent Skills Hub",
+          "hero.titlePrefix": "Ahoo-Wang's",
+          "hero.titleAccent": "skills",
+          "hero.subtitle": "A repository and plugin marketplace entry for Ahoo-Wang open source agent skills, distributed as split plugins for Codex and Claude Code.",
+          "hero.actionsLabel": "Primary actions",
+          "hero.openRepository": "Open repository",
+          "hero.browsePlugins": "Browse plugins",
+          "hero.highlightsLabel": "Repository highlights",
+          "hero.meta.sync": "Auto synced every 6 hours",
+          "hero.meta.codex": "Codex marketplace ready",
+          "hero.meta.claude": "Claude Code marketplace ready",
+          "market.ariaLabel": "Marketplace install commands",
+          "market.status": "Marketplace entry",
+          "market.title": "Install the hub, then add the plugin you need.",
+          "market.description": "This repository aggregates upstream skill sources and publishes generated plugin manifests under a single distribution point.",
+          "market.codeLabel": "marketplace",
+          "plugins.kicker": "Split plugins",
+          "plugins.title": "Project-scoped skill packages",
+          "plugins.description": "Install one focused plugin per source project. The generated manifests stay aligned with the upstream skills and this repository's local plugin sources.",
+          "plugin.wow": "Wow, code review, debugging, and development workflow skills.",
+          "plugin.fetcher": "Fetcher client, decorators, React hooks, OpenAPI, storage, event bus, and streaming.",
+          "plugin.cosec": "CoSec integration, policy authoring, custom matchers, and troubleshooting.",
+          "plugin.coapi": "CoApi Spring HTTP client development guidance.",
+          "plugin.cosid": "CosId ID generation, sharding, Spring Boot setup, and strategy guidance.",
+          "plugin.fluentAssert": "FluentAssert Kotlin assertion workflow for test authors.",
+          "plugin.cocache": "CoCache distributed cache integration and operation guidance.",
+          "plugin.simba": "Simba distributed mutex, leader election, and test guidance.",
+          "plugin.agent": "Local agent prompt skills maintained directly by this marketplace repository.",
+          "distribution.kicker": "Distribution model",
+          "distribution.title": "Upstream owns skills. This repo distributes plugins.",
+          "distribution.description": "Source repositories provide their own skill content and plugin source metadata. The marketplace mirror syncs, validates, generates, and publishes distribution output.",
+          "repo.wow": "DDD, Event Sourcing, CQRS, review, and workflow skills.",
+          "repo.fetcher": "Type-safe HTTP client and frontend integration skills.",
+          "repo.cosec": "Security integration, policy authoring, and matcher skills.",
+          "repo.coapi": "Spring interface HTTP client guidance.",
+          "repo.cosid": "ID generation and sharding guidance.",
+          "repo.fluentAssert": "Kotlin fluent assertion guidance.",
+          "repo.cocache": "Distributed cache guidance.",
+          "repo.simba": "Distributed mutex and leader election guidance.",
+          "footer.repository": "Repository",
+          "footer.plugins": "Plugins",
+          "footer.sources": "Sources",
+          "footer.brandGuide": "Brand Guide",
+        },
+        "zh-CN": {
+          metaTitle: "Ahoo-Wang 的 skills | 开源 Agent Skills Hub",
+          metaDescription: "Ahoo-Wang 开源 Agent Skills 聚合与插件市场分发入口，支持 Codex 与 Claude Code。",
+          "brand.name": "Ahoo-Wang 的 skills",
+          "brand.repositoryLabel": "Ahoo-Wang 的 skills 仓库",
+          "language.label": "语言切换",
+          "nav.label": "主导航",
+          "nav.plugins": "插件",
+          "nav.distribution": "分发模型",
+          "nav.github": "GitHub",
+          "nav.brandGuide": "品牌指南",
+          "hero.kicker": "开源 Agent Skills Hub",
+          "hero.titlePrefix": "Ahoo-Wang 的",
+          "hero.titleAccent": "skills",
+          "hero.subtitle": "面向 Ahoo-Wang 开源项目的 Agent Skills 聚合仓库与插件市场入口，并按项目拆分为 Codex 与 Claude Code 插件统一分发。",
+          "hero.actionsLabel": "主要操作",
+          "hero.openRepository": "打开仓库",
+          "hero.browsePlugins": "浏览插件",
+          "hero.highlightsLabel": "仓库亮点",
+          "hero.meta.sync": "每 6 小时自动同步",
+          "hero.meta.codex": "Codex 插件市场就绪",
+          "hero.meta.claude": "Claude Code 插件市场就绪",
+          "market.ariaLabel": "插件市场安装命令",
+          "market.status": "插件市场入口",
+          "market.title": "先添加市场，再安装需要的插件。",
+          "market.description": "本仓库聚合上游 skill 源，并在统一分发入口下发布生成后的插件清单。",
+          "market.codeLabel": "插件市场",
+          "plugins.kicker": "拆分插件",
+          "plugins.title": "按项目拆分的 skill 包",
+          "plugins.description": "按源项目安装一个聚焦的插件。生成的清单会与上游 skills 以及本仓库的本地插件源保持一致。",
+          "plugin.wow": "Wow、代码审查、调试与开发流程 skills。",
+          "plugin.fetcher": "Fetcher client、decorator、React hooks、OpenAPI、storage、event bus 与 streaming skills。",
+          "plugin.cosec": "CoSec 集成、策略编写、自定义匹配器与排障 skills。",
+          "plugin.coapi": "CoApi Spring HTTP client 开发指南。",
+          "plugin.cosid": "CosId ID 生成、分片、Spring Boot 接入与策略指南。",
+          "plugin.fluentAssert": "面向 Kotlin 测试作者的 FluentAssert 断言 workflow。",
+          "plugin.cocache": "CoCache 分布式缓存集成与运维指南。",
+          "plugin.simba": "Simba 分布式锁、leader election 与测试指南。",
+          "plugin.agent": "当前 marketplace 仓库直接维护的本地 agent prompt skills。",
+          "distribution.kicker": "分发模型",
+          "distribution.title": "上游维护 skills，当前仓库负责插件分发。",
+          "distribution.description": "源仓库维护 skill 内容与 plugins.json 源元数据；本仓库同步、校验、生成并发布插件市场分发产物。",
+          "repo.wow": "DDD、Event Sourcing、CQRS、review 与 workflow skills。",
+          "repo.fetcher": "类型安全 HTTP client 与前端集成 skills。",
+          "repo.cosec": "安全集成、策略编写与 matcher skills。",
+          "repo.coapi": "Spring interface HTTP client 指南。",
+          "repo.cosid": "ID 生成与分片指南。",
+          "repo.fluentAssert": "Kotlin fluent assertion 指南。",
+          "repo.cocache": "分布式缓存指南。",
+          "repo.simba": "分布式锁与 leader election 指南。",
+          "footer.repository": "仓库",
+          "footer.plugins": "插件",
+          "footer.sources": "源镜像",
+          "footer.brandGuide": "品牌指南",
+        },
+      };
+
+      function normalizeLanguage(value) {
+        if (!value) {
+          return "en";
+        }
+
+        const normalized = value.toLowerCase();
+        if (normalized.startsWith("zh")) {
+          return "zh-CN";
+        }
+
+        return "en";
+      }
+
+      function getSavedLanguage() {
+        try {
+          const saved = localStorage.getItem(storageKey);
+          return translations[saved] ? saved : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function saveLanguage(language) {
+        try {
+          localStorage.setItem(storageKey, language);
+        } catch {
+          // Storage can be unavailable in restrictive browser modes.
+        }
+      }
+
+      function detectLanguage() {
+        const saved = getSavedLanguage();
+        if (saved) {
+          return saved;
+        }
+
+        const browserLanguages = navigator.languages && navigator.languages.length
+          ? navigator.languages
+          : [navigator.language];
+
+        for (const language of browserLanguages) {
+          const normalized = normalizeLanguage(language);
+          if (translations[normalized]) {
+            return normalized;
+          }
+        }
+
+        return "en";
+      }
+
+      function setLanguage(language, options = {}) {
+        const activeLanguage = translations[language] ? language : "en";
+        const dictionary = translations[activeLanguage];
+        const description = document.querySelector('meta[name="description"]');
+
+        document.documentElement.lang = activeLanguage;
+        document.title = dictionary.metaTitle;
+        if (description) {
+          description.setAttribute("content", dictionary.metaDescription);
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-i18n");
+          if (dictionary[key]) {
+            element.textContent = dictionary[key];
+          }
+        });
+
+        document.querySelectorAll("[data-i18n-aria]").forEach((element) => {
+          const key = element.getAttribute("data-i18n-aria");
+          if (dictionary[key]) {
+            element.setAttribute("aria-label", dictionary[key]);
+          }
+        });
+
+        document.querySelectorAll("[data-lang-option]").forEach((button) => {
+          const isActive = button.getAttribute("data-lang-option") === activeLanguage;
+          button.classList.toggle("is-active", isActive);
+          button.setAttribute("aria-pressed", String(isActive));
+        });
+
+        if (options.persist) {
+          saveLanguage(activeLanguage);
+        }
+      }
+
+      document.querySelectorAll("[data-lang-option]").forEach((button) => {
+        button.addEventListener("click", () => {
+          setLanguage(button.getAttribute("data-lang-option"), { persist: true });
+        });
+      });
+
+      setLanguage(detectLanguage());
+    </script>
   </body>
 </html>
