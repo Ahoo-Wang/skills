@@ -61,7 +61,7 @@ Install the specific split plugin you need from the table above.
 - `.agents/plugins/marketplace.json` — generated Codex marketplace
 - `.github/workflows/sync-skills.yml` — sync workflow (runs every 6 hours)
 - Each source repo is shallow-cloned and mirrored into `sources/<source>/`
-- `.sync-sources.json` tracks synced source ownership and metadata
+- `.sync-sources.json` tracks synced source repositories, paths, and commits
 - `scripts/generate-plugins.sh` rebuilds source-owned `plugins/<plugin-name>/` from `sources/` and keeps local plugins in `plugins/`
 - `scripts/validate-skills.sh` checks source mirrors, generated plugin copies, local plugins, and marketplace consistency
 - `.github/workflows/ci.yml` validates pull requests with `npm test` and `git diff --check`

@@ -26,6 +26,12 @@ assert_contains() {
   grep -Fq "$expected" "$file" || fail "Expected '$expected' in $file"
 }
 
+assert_not_contains() {
+  local file="$1"
+  local unexpected="$2"
+  ! grep -Fq "$unexpected" "$file" || fail "Did not expect '$unexpected' in $file"
+}
+
 assert_exit_code() {
   local actual="$1"
   local expected="$2"
@@ -143,7 +149,7 @@ EOF
   assert_contains "$output" "Failed to clone"
 }
 
-test_syncs_source_skills_and_plugin_metadata() {
+test_syncs_source_skills_and_compact_manifest() {
   local tmp
   tmp="$(mktemp -d "$TMP_ROOT/sync-source.XXXXXX")"
 
@@ -173,6 +179,9 @@ EOF
   assert_file_exists "$aggregate/sources/source/plugins.json"
   assert_file_exists "$aggregate/.sync-sources.json"
   assert_contains "$aggregate/.sync-sources.json" '"source": "source"'
+  assert_contains "$aggregate/.sync-sources.json" '"commit":'
+  assert_not_contains "$aggregate/.sync-sources.json" '"skills":'
+  assert_not_contains "$aggregate/.sync-sources.json" '"plugins":'
 }
 
 test_fails_on_duplicate_skill_names() {
@@ -336,7 +345,7 @@ EOF
 
 main() {
   test_fails_when_source_repo_cannot_be_cloned
-  test_syncs_source_skills_and_plugin_metadata
+  test_syncs_source_skills_and_compact_manifest
   test_fails_on_duplicate_skill_names
   test_sync_does_not_stage_changes
   test_fails_when_configured_skills_path_is_missing

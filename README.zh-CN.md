@@ -61,7 +61,7 @@ codex plugin add ahoo-wow-skills@ahoo-skills
 - `.agents/plugins/marketplace.json` — 生成的 Codex marketplace
 - `.github/workflows/sync-skills.yml` — 同步工作流（每 6 小时运行）
 - 对每个源仓库 shallow clone 后镜像到 `sources/<source>/`
-- `.sync-sources.json` 记录同步源仓库、skills 与插件元数据
+- `.sync-sources.json` 记录同步源仓库、路径与 commit
 - `scripts/generate-plugins.sh` 根据 `sources/` 重建上游插件，并保留 `plugins/` 下本地插件
 - `scripts/validate-skills.sh` 校验 source 镜像、生成插件、本地插件与 marketplace 列表一致性
 - `.github/workflows/ci.yml` 在 PR 中运行 `npm test` 和 `git diff --check`

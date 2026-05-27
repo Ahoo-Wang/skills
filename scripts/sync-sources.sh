@@ -97,8 +97,6 @@ for ((i = 0; i < REPO_COUNT; i++)); do
   fi
 
   SOURCE_OUTPUT_DIR="$SYNCED_SOURCES_DIR/$SOURCE_NAME"
-  SOURCE_SKILL_NAMES_FILE="$SYNC_DIR/$SOURCE_NAME-skills.txt"
-  : > "$SOURCE_SKILL_NAMES_FILE"
   mkdir -p "$SOURCE_OUTPUT_DIR/skills"
   cp "$SOURCE_PLUGINS_FILE" "$SOURCE_OUTPUT_DIR/plugins.json"
 
@@ -118,14 +116,12 @@ for ((i = 0; i < REPO_COUNT; i++)); do
       continue
     fi
     printf '%s\n' "$SKILL_NAME" >> "$TRACKED_SKILLS_FILE"
-    printf '%s\n' "$SKILL_NAME" >> "$SOURCE_SKILL_NAMES_FILE"
 
     echo "  Copying skill: $SKILL_NAME (from $SOURCE_NAME)"
     rsync -a --delete "$skill_dir" "$SOURCE_OUTPUT_DIR/skills/$SKILL_NAME/"
     strip_whitespace_only_markdown_lines "$SOURCE_OUTPUT_DIR/skills/$SKILL_NAME"
   done
 
-  sort -u "$SOURCE_SKILL_NAMES_FILE" -o "$SOURCE_SKILL_NAMES_FILE"
   COMMIT=$(git -C "$CLONE_DIR" rev-parse HEAD)
   jq -n \
     --arg source "$SOURCE_NAME" \
@@ -134,9 +130,7 @@ for ((i = 0; i < REPO_COUNT; i++)); do
     --arg commit "$COMMIT" \
     --arg skills_path "$SRC_SKILLS_PATH" \
     --arg plugins_path "$SRC_PLUGINS_PATH" \
-    --argjson skills "$(jq -R -s 'split("\n") | map(select(length > 0))' "$SOURCE_SKILL_NAMES_FILE")" \
-    --argjson plugins "$(jq '[.plugins[].name]' "$SOURCE_PLUGINS_FILE")" \
-    '{source: $source, url: $url, branch: $branch, commit: $commit, skills_path: $skills_path, plugins_path: $plugins_path, skills: $skills, plugins: $plugins}' \
+    '{source: $source, url: $url, branch: $branch, commit: $commit, skills_path: $skills_path, plugins_path: $plugins_path}' \
     >> "$MANIFEST_ENTRIES_FILE"
 
   echo ""
