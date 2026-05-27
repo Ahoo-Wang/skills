@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 156" width="520" height="156" role="img" aria-label="skills logo">
+  <rect width="100%" height="100%" fill="none"/>
+  <g transform="translate(0 0) scale(0.65625)">
+
+  <g filter="">
+    <path d="M190 44H91C62 44 42 63 42 91v3c0 28 20 47 49 47h74c29 0 49 19 49 47v2c0 28-20 47-49 47H64" fill="none" stroke="#0B1020" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M190 44H91C62 44 42 63 42 91" fill="none" stroke="#0B1020" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+    <circle cx="190" cy="44" r="14" fill="#FFFFFF" stroke="#0B1020" stroke-width="7"/>
+    <circle cx="74" cy="141" r="13" fill="#FFFFFF" stroke="#0B1020" stroke-width="7"/>
+    <circle cx="64" cy="237" r="14" fill="#FFFFFF" stroke="#0B1020" stroke-width="7"/>
+    <circle cx="214" cy="190" r="8" fill="#FFFFFF" stroke="#0B1020" stroke-width="5"/>
+  </g>
+
+        <rect x="24" y="174" width="10" height="10" rx="2" fill="#0B1020" opacity="0.95"/>
+        <rect x="42" y="194" width="8" height="8" rx="2" fill="#0B1020" opacity="0.75"/>
+        <rect x="24" y="210" width="6" height="6" rx="1.5" fill="#0B1020" opacity="0.55"/>
+        <rect x="58" y="218" width="7" height="7" rx="1.5" fill="#0B1020" opacity="0.55"/>
+
+</g>
+  <text x="162" y="104" font-family="Inter, Avenir Next, Noto Sans, Arial, sans-serif" font-size="76" font-weight="850" letter-spacing="-3" fill="#0B1020">skills</text>
+</svg>

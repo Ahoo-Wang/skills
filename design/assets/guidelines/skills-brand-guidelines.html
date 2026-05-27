@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang='zh-CN'>
+<head>
+<meta charset='utf-8'>
+<title>skills Brand Guidelines v1</title>
+<style>
+  @page { size: A4; margin: 14mm; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: 'Noto Sans CJK SC', 'Noto Sans SC', Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color:#0B1020; background:#fff; line-height:1.5; }
+  .page { page-break-after: always; min-height: 267mm; position: relative; padding: 2mm 0; }
+  .page:last-child { page-break-after: auto; }
+  h1,h2,h3 { margin:0; letter-spacing:-0.02em; }
+  h1 { font-size: 44px; line-height: 1.05; }
+  h2 { font-size: 25px; margin-bottom: 14px; color:#346CFF; }
+  h3 { font-size: 16px; color:#0B1020; margin: 12px 0 6px; }
+  p { margin: 0 0 10px; color:#27324A; }
+  .muted { color:#6B7280; }
+  .eyebrow { color:#346CFF; font-weight:800; text-transform:uppercase; letter-spacing:.08em; font-size:12px; }
+  .cover { display:grid; grid-template-columns: 1.2fr .8fr; gap:20px; align-items:center; min-height: 260mm; }
+  .cover-logo svg { width: 360px; height:auto; }
+  .hero-title { margin-top:18px; font-size:64px; font-weight:900; letter-spacing:-0.05em; }
+  .hero-sub { color:#346CFF; font-size:25px; font-weight:800; margin:12px 0 12px; }
+  .hero-copy { font-size:17px; max-width:520px; }
+  .hero-card { border:1px solid #DDE6F2; background:#F5F7FB; border-radius:28px; padding:26px; box-shadow: 0 18px 45px rgba(11,16,32,.08); }
+  .node-grid { background-image: radial-gradient(#BFD0EA 1px, transparent 1px); background-size: 16px 16px; border-radius:24px; min-height:260px; padding:28px; position:relative; overflow:hidden; }
+  .float-tile { display:inline-flex; align-items:center; justify-content:center; width:74px; height:74px; border-radius:18px; margin:20px; color:#fff; font-size:30px; font-weight:900; box-shadow:0 14px 26px rgba(11,16,32,.18); }
+  .tile-blue { background:#346CFF; } .tile-cyan { background:#39D0FF; color:#0B1020; } .tile-mint { background:#73F0C0; color:#0B1020; } .tile-dark { background:#0B1020; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .card { border:1px solid #DDE6F2; border-radius:22px; padding:18px; background:#fff; break-inside:avoid; }
+  .card.fill { background:#F5F7FB; }
+  .pill { display:inline-flex; align-items:center; gap:7px; padding:8px 13px; border-radius:999px; background:#F5F7FB; border:1px solid #DDE6F2; margin:4px 4px 4px 0; font-weight:700; }
+  .list { display:grid; gap:10px; margin-top:8px; }
+  .item { display:flex; gap:10px; align-items:flex-start; }
+  .icon { width:24px; height:24px; flex:0 0 24px; border-radius:8px; border:2px solid #346CFF; color:#346CFF; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; }
+  .mark-lg svg { width:220px; height:auto; }
+  .logo-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; align-items:center; }
+  .logo-sample { display:flex; min-height:140px; align-items:center; justify-content:center; background:#F5F7FB; border:1px solid #DDE6F2; border-radius:20px; padding:15px; }
+  .logo-sample svg { max-width:100%; max-height:110px; }
+  .caption { font-size:12px; text-align:center; color:#6B7280; margin-top:6px; }
+  .swatches { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .swatch { display:grid; grid-template-columns:72px 1fr; gap:12px; align-items:center; border:1px solid #DDE6F2; border-radius:18px; padding:12px; background:#fff; }
+  .chip { width:72px; height:58px; border-radius:14px; border:1px solid rgba(11,16,32,.08); }
+  code { font-family:'JetBrains Mono','SFMono-Regular',Consolas,monospace; display:inline-block; color:#346CFF; margin-left:8px; font-size:12px; }
+  .type-sample { display:grid; grid-template-columns:110px 1fr; align-items:center; gap:12px; border-top:1px solid #DDE6F2; padding:16px 0; }
+  .aa { font-size:64px; font-weight:900; letter-spacing:-0.05em; }
+  .codebox { background:#0B1020; color:#DDE6F2; border-radius:18px; padding:20px; font-family:'JetBrains Mono','SFMono-Regular',Consolas,monospace; font-size:13px; line-height:1.55; }
+  .codebox b { color:#39D0FF; } .codebox .ok { color:#73F0C0; }
+  .brandboard { height:230mm; width:auto; max-width:100%; display:block; margin:0 auto; border-radius:18px; border:1px solid #DDE6F2; }
+  .footer { position:absolute; bottom:0; left:0; right:0; color:#6B7280; font-size:10px; display:flex; justify-content:space-between; border-top:1px solid #DDE6F2; padding-top:8px; }
+  table { width:100%; border-collapse:collapse; font-size:11px; } th,td { text-align:left; padding:7px 8px; border-bottom:1px solid #DDE6F2; } th { color:#346CFF; }
+</style>
+</head>
+<body>
+  <section class='page cover'>
+    <div>
+      <div class='cover-logo'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 178" width="560" height="178" role="img" aria-label="skills logo">
+  <rect width="100%" height="100%" fill="none"/>
+  <g transform="translate(0 0) scale(0.65625)">
+
+  <defs>
+    <linearGradient id="skillGradientCover" x1="40" y1="36" x2="206" y2="228" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#346CFF"/>
+      <stop offset="0.52" stop-color="#39D0FF"/>
+      <stop offset="1" stop-color="#73F0C0"/>
+    </linearGradient>
+    <filter id="softShadowCover" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0B1020" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadowCover)">
+    <path d="M190 44H91C62 44 42 63 42 91v3c0 28 20 47 49 47h74c29 0 49 19 49 47v2c0 28-20 47-49 47H64" fill="none" stroke="url(#skillGradientCover)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M190 44H91C62 44 42 63 42 91" fill="none" stroke="url(#skillGradientCover)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+    <circle cx="190" cy="44" r="14" fill="#FFFFFF" stroke="#346CFF" stroke-width="7"/>
+    <circle cx="74" cy="141" r="13" fill="#FFFFFF" stroke="#39D0FF" stroke-width="7"/>
+    <circle cx="64" cy="237" r="14" fill="#FFFFFF" stroke="#73F0C0" stroke-width="7"/>
+    <circle cx="214" cy="190" r="8" fill="#FFFFFF" stroke="#39D0FF" stroke-width="5"/>
+  </g>
+
+        <rect x="24" y="174" width="10" height="10" rx="2" fill="#39D0FF" opacity="0.95"/>
+        <rect x="42" y="194" width="8" height="8" rx="2" fill="#39D0FF" opacity="0.75"/>
+        <rect x="24" y="210" width="6" height="6" rx="1.5" fill="#39D0FF" opacity="0.55"/>
+        <rect x="58" y="218" width="7" height="7" rx="1.5" fill="#39D0FF" opacity="0.55"/>
+
+</g>
+  <text x="182" y="116" font-family="Inter, Avenir Next, Noto Sans, Arial, sans-serif" font-size="86" font-weight="850" letter-spacing="-3" fill="#0B1020">skills</text>
+</svg></div>
+      <div class='eyebrow'>Brand Guidelines v1 / 2026-05-27</div>
+      <div class='hero-title'>skills</div>
+      <div class='hero-sub'>Open Source Agent Skills Hub</div>
+      <p class='hero-copy'>面向 Ahoo Wang 开源生态的 Agent Skills 聚合品牌系统。视觉语言以模块化的 S、插件节点、同步流线和开发者工具界面为核心，表达“可组合、可同步、可分发”的工程气质。</p>
+      <div style='margin-top:18px'>
+        <span class='pill'>Modular</span><span class='pill'>Open Source</span><span class='pill'>Agent Workflow</span><span class='pill'>Plugin Sync</span>
+      </div>
+    </div>
+    <div class='hero-card'>
+      <div class='node-grid'>
+        <span class='float-tile tile-blue'>+</span><span class='float-tile tile-cyan'>&lt;/&gt;</span><span class='float-tile tile-mint'>&gt;_</span><span class='float-tile tile-dark'>S</span>
+      </div>
+      <h3>设计定位</h3>
+      <p>专业、冷静、可信赖；服务于 README、插件市场、CLI 文档、工程控制台与开源社区传播。</p>
+    </div>
+    <div class='footer'><span>skills brand guidelines</span><span>01</span></div>
+  </section>
+
+  <section class='page'>
+    <h2>01. 品牌战略 / Brand Essence</h2>
+    <div class='grid-2'>
+      <div class='card fill'>
+        <h3>一句话定位</h3>
+        <p>skills 是面向 AI Agent 的开源技能聚合枢纽，将多个源仓库的技能以 source-owned plugin 的方式同步、拆分并分发。</p>
+        <h3>核心关键词</h3>
+        <div class='list'>
+          <div class='item'><span class='icon'>M</span><span><b>Modular 模块化</b><br><span class='muted'>每个 Skill 与 Plugin 都可按源项目独立组织。</span></span></div>
+          <div class='item'><span class='icon'>O</span><span><b>Open 开放</b><br><span class='muted'>围绕开源协作、可追踪元数据与透明同步构建。</span></span></div>
+          <div class='item'><span class='icon'>{ }</span><span><b>Developer-first 开发者优先</b><br><span class='muted'>文档、命令、徽章、插件卡片优先服务工程使用场景。</span></span></div>
+          <div class='item'><span class='icon'>↻</span><span><b>Automated 自动化</b><br><span class='muted'>用 sync、flow、clock 等视觉符号强化“持续同步”。</span></span></div>
+          <div class='item'><span class='icon'>✓</span><span><b>Reliable 可靠</b><br><span class='muted'>使用深色基调、明确边框、清晰层级体现工程可信度。</span></span></div>
+          <div class='item'><span class='icon'>+</span><span><b>Extensible 可扩展</b><br><span class='muted'>插件瓦片与节点网络可无限延展到更多源项目。</span></span></div>
+        </div>
+      </div>
+      <div class='card'>
+        <h3>品牌叙事</h3>
+        <p>从“单个技能文件”升级为“技能生态入口”：标志中的连接节点代表技能源、插件、Agent 工作流和自动化同步之间的连接关系。</p>
+        <h3>受众</h3>
+        <p>开源维护者、AI Agent 用户、Claude Code / Codex 插件使用者、架构师与全栈工程团队。</p>
+        <h3>语气</h3>
+        <p>精确、直接、帮助型、工程级。避免营销夸张，不使用虚构指标或无法验证的能力宣称。</p>
+        <h3>视觉原则</h3>
+        <p>多用网格、圆角卡片、流程线、状态徽章和 CLI 片段；少用复杂插画、过度霓虹或过度拟物。</p>
+      </div>
+    </div>
+    <div class='footer'><span>Brand Strategy</span><span>02</span></div>
+  </section>
+
+  <section class='page'>
+    <h2>02. 标志系统 / Logo System</h2>
+    <div class='grid-2'>
+      <div class='card fill'>
+        <h3>Logo Concept</h3>
+        <p>一个由连接 skill blocks 构成的模块化 “S”。上、中、下三个节点分别象征 source、plugin 与 agent flow；渐变表达跨仓库同步与知识流动。</p>
+        <div class='mark-lg' style='text-align:center;margin:20px 0'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="skills modular S logo mark">
+
+  <defs>
+    <linearGradient id="skillGradientConcept" x1="40" y1="36" x2="206" y2="228" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#346CFF"/>
+      <stop offset="0.52" stop-color="#39D0FF"/>
+      <stop offset="1" stop-color="#73F0C0"/>
+    </linearGradient>
+    <filter id="softShadowConcept" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0B1020" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadowConcept)">
+    <path d="M190 44H91C62 44 42 63 42 91v3c0 28 20 47 49 47h74c29 0 49 19 49 47v2c0 28-20 47-49 47H64" fill="none" stroke="url(#skillGradientConcept)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M190 44H91C62 44 42 63 42 91" fill="none" stroke="url(#skillGradientConcept)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+    <circle cx="190" cy="44" r="14" fill="#FFFFFF" stroke="#346CFF" stroke-width="7"/>
+    <circle cx="74" cy="141" r="13" fill="#FFFFFF" stroke="#39D0FF" stroke-width="7"/>
+    <circle cx="64" cy="237" r="14" fill="#FFFFFF" stroke="#73F0C0" stroke-width="7"/>
+    <circle cx="214" cy="190" r="8" fill="#FFFFFF" stroke="#39D0FF" stroke-width="5"/>
+  </g>
+
+        <rect x="24" y="174" width="10" height="10" rx="2" fill="#39D0FF" opacity="0.95"/>
+        <rect x="42" y="194" width="8" height="8" rx="2" fill="#39D0FF" opacity="0.75"/>
+        <rect x="24" y="210" width="6" height="6" rx="1.5" fill="#39D0FF" opacity="0.55"/>
+        <rect x="58" y="218" width="7" height="7" rx="1.5" fill="#39D0FF" opacity="0.55"/>
+
+</svg></div>
+      </div>
+      <div class='card'>
+        <h3>Logo Suite</h3>
+        <div class='logo-row'>
+          <div><div class='logo-sample'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 178" width="560" height="178" role="img" aria-label="skills logo">
+  <rect width="100%" height="100%" fill="none"/>
+  <g transform="translate(0 0) scale(0.65625)">
+
+  <defs>
+    <linearGradient id="skillGradientPrimary" x1="40" y1="36" x2="206" y2="228" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#346CFF"/>
+      <stop offset="0.52" stop-color="#39D0FF"/>
+      <stop offset="1" stop-color="#73F0C0"/>
+    </linearGradient>
+    <filter id="softShadowPrimary" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0B1020" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadowPrimary)">
+    <path d="M190 44H91C62 44 42 63 42 91v3c0 28 20 47 49 47h74c29 0 49 19 49 47v2c0 28-20 47-49 47H64" fill="none" stroke="url(#skillGradientPrimary)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M190 44H91C62 44 42 63 42 91" fill="none" stroke="url(#skillGradientPrimary)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+    <circle cx="190" cy="44" r="14" fill="#FFFFFF" stroke="#346CFF" stroke-width="7"/>
+    <circle cx="74" cy="141" r="13" fill="#FFFFFF" stroke="#39D0FF" stroke-width="7"/>
+    <circle cx="64" cy="237" r="14" fill="#FFFFFF" stroke="#73F0C0" stroke-width="7"/>
+    <circle cx="214" cy="190" r="8" fill="#FFFFFF" stroke="#39D0FF" stroke-width="5"/>
+  </g>
+
+        <rect x="24" y="174" width="10" height="10" rx="2" fill="#39D0FF" opacity="0.95"/>
+        <rect x="42" y="194" width="8" height="8" rx="2" fill="#39D0FF" opacity="0.75"/>
+        <rect x="24" y="210" width="6" height="6" rx="1.5" fill="#39D0FF" opacity="0.55"/>
+        <rect x="58" y="218" width="7" height="7" rx="1.5" fill="#39D0FF" opacity="0.55"/>
+
+</g>
+  <text x="182" y="116" font-family="Inter, Avenir Next, Noto Sans, Arial, sans-serif" font-size="86" font-weight="850" letter-spacing="-3" fill="#0B1020">skills</text>
+</svg></div><div class='caption'>Primary logo</div></div>
+          <div><div class='logo-sample'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="skills modular S logo mark">
+
+  <defs>
+    <linearGradient id="skillGradientMark" x1="40" y1="36" x2="206" y2="228" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#346CFF"/>
+      <stop offset="0.52" stop-color="#39D0FF"/>
+      <stop offset="1" stop-color="#73F0C0"/>
+    </linearGradient>
+    <filter id="softShadowMark" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0B1020" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadowMark)">
+    <path d="M190 44H91C62 44 42 63 42 91v3c0 28 20 47 49 47h74c29 0 49 19 49 47v2c0 28-20 47-49 47H64" fill="none" stroke="url(#skillGradientMark)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M190 44H91C62 44 42 63 42 91" fill="none" stroke="url(#skillGradientMark)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+    <circle cx="190" cy="44" r="14" fill="#FFFFFF" stroke="#346CFF" stroke-width="7"/>
+    <circle cx="74" cy="141" r="13" fill="#FFFFFF" stroke="#39D0FF" stroke-width="7"/>
+    <circle cx="64" cy="237" r="14" fill="#FFFFFF" stroke="#73F0C0" stroke-width="7"/>
+    <circle cx="214" cy="190" r="8" fill="#FFFFFF" stroke="#39D0FF" stroke-width="5"/>
+  </g>
+
+        <rect x="24" y="174" width="10" height="10" rx="2" fill="#39D0FF" opacity="0.95"/>
+        <rect x="42" y="194" width="8" height="8" rx="2" fill="#39D0FF" opacity="0.75"/>
+        <rect x="24" y="210" width="6" height="6" rx="1.5" fill="#39D0FF" opacity="0.55"/>
+        <rect x="58" y="218" width="7" height="7" rx="1.5" fill="#39D0FF" opacity="0.55"/>
+
+</svg></div><div class='caption'>Icon only</div></div>
+          <div><div class='logo-sample'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 156" width="520" height="156" role="img" aria-label="skills logo">
+  <rect width="100%" height="100%" fill="none"/>
+  <g transform="translate(0 0) scale(0.65625)">
+
+  <g filter="">
+    <path d="M190 44H91C62 44 42 63 42 91v3c0 28 20 47 49 47h74c29 0 49 19 49 47v2c0 28-20 47-49 47H64" fill="none" stroke="#0B1020" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M190 44H91C62 44 42 63 42 91" fill="none" stroke="#0B1020" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+    <circle cx="190" cy="44" r="14" fill="#FFFFFF" stroke="#0B1020" stroke-width="7"/>
+    <circle cx="74" cy="141" r="13" fill="#FFFFFF" stroke="#0B1020" stroke-width="7"/>
+    <circle cx="64" cy="237" r="14" fill="#FFFFFF" stroke="#0B1020" stroke-width="7"/>
+    <circle cx="214" cy="190" r="8" fill="#FFFFFF" stroke="#0B1020" stroke-width="5"/>
+  </g>
+
+        <rect x="24" y="174" width="10" height="10" rx="2" fill="#0B1020" opacity="0.95"/>
+        <rect x="42" y="194" width="8" height="8" rx="2" fill="#0B1020" opacity="0.75"/>
+        <rect x="24" y="210" width="6" height="6" rx="1.5" fill="#0B1020" opacity="0.55"/>
+        <rect x="58" y="218" width="7" height="7" rx="1.5" fill="#0B1020" opacity="0.55"/>
+
+</g>
+  <text x="162" y="104" font-family="Inter, Avenir Next, Noto Sans, Arial, sans-serif" font-size="76" font-weight="850" letter-spacing="-3" fill="#0B1020">skills</text>
+</svg></div><div class='caption'>Monochrome</div></div>
+        </div>
+        <h3>使用规则</h3>
+        <p>全彩标志用于白色或 Cloud 背景；单色标志用于低色彩、印刷、代码文档或深浅对比受限的场景。</p>
+        <p>数字端最小尺寸：图标 24px；完整字标宽度 120px。标志四周至少保留 1 个节点半径的留白。</p>
+      </div>
+    </div>
+    <div class='card' style='margin-top:14px'>
+      <h3>不要这样使用</h3>
+      <div class='grid-3'>
+        <p>不要改变渐变方向或替换为随机颜色。</p><p>不要压扁、拉伸、旋转或加复杂描边。</p><p>不要置于高噪声背景或低对比图像上。</p>
+      </div>
+    </div>
+    <div class='footer'><span>Logo System</span><span>03</span></div>
+  </section>
+
+  <section class='page'>
+    <h2>03. 色彩与 Token / Color System</h2>
+    <div class='swatches'><div class='swatch'><div class='chip' style='background:#0B1020'></div><div><strong>Midnight</strong><code>#0B1020</code><p>Primary text, monochrome logo, terminal surfaces</p></div></div><div class='swatch'><div class='chip' style='background:#346CFF'></div><div><strong>Electric Blue</strong><code>#346CFF</code><p>Primary brand action, section headings, sync accents</p></div></div><div class='swatch'><div class='chip' style='background:#39D0FF'></div><div><strong>Cyan</strong><code>#39D0FF</code><p>Flow lines, code/API accents, secondary highlights</p></div></div><div class='swatch'><div class='chip' style='background:#73F0C0'></div><div><strong>Mint</strong><code>#73F0C0</code><p>Success states, active plugin nodes, positive completion</p></div></div><div class='swatch'><div class='chip' style='background:#F5F7FB'></div><div><strong>Cloud</strong><code>#F5F7FB</code><p>Background surfaces, cards, panels</p></div></div><div class='swatch'><div class='chip' style='background:#6B7280'></div><div><strong>Slate</strong><code>#6B7280</code><p>Secondary copy, captions, metadata</p></div></div></div>
+    <div class='grid-2' style='margin-top:16px'>
+      <div class='card fill'>
+        <h3>比例建议</h3>
+        <p><b>70%</b> Cloud / White 用于背景与留白；<b>20%</b> Midnight / Slate 用于文本和结构；<b>10%</b> Electric Blue / Cyan / Mint 用于强调、状态与连接线。</p>
+      </div>
+      <div class='card'>
+        <h3>状态映射</h3>
+        <p>Electric Blue = primary/action/sync；Cyan = API/code/flow；Mint = success/ready/agent active；Midnight = terminal/serious context。</p>
+      </div>
+    </div>
+    <div class='card' style='margin-top:16px'>
+      <h3>CSS Token 示例</h3>
+      <div class='codebox'>:root {<br>  --skills-midnight: #0B1020;<br>  --skills-electric-blue: #346CFF;<br>  --skills-cyan: #39D0FF;<br>  --skills-mint: #73F0C0;<br>  --skills-cloud: #F5F7FB;<br>}</div>
+    </div>
+    <div class='footer'><span>Color System</span><span>04</span></div>
+  </section>
+
+  <section class='page'>
+    <h2>04. 字体、图形语言与界面组件</h2>
+    <div class='grid-2'>
+      <div class='card'>
+        <h3>Typography</h3>
+        <div class='type-sample'><div class='aa'>Aa</div><div><b>Primary</b><br><span class='muted'>Geometric Sans - 标题、主导航、品牌化标签</span></div></div>
+        <div class='type-sample'><div class='aa' style='font-weight:650'>Aa</div><div><b>Secondary</b><br><span class='muted'>Clean Grotesk - 正文、说明、长文档</span></div></div>
+        <div class='type-sample'><div class='aa' style='font-family:Consolas,monospace;font-size:56px'>Aa</div><div><b>Code</b><br><span class='muted'>Monospace - CLI、路径、代码片段</span></div></div>
+      </div>
+      <div class='card fill'>
+        <h3>Graphic Language</h3>
+        <p>连接节点、插件瓦片、流线、圆角几何和 terminal cues 构成主要图形语言。</p>
+        <div class='list'>
+          <div class='item'><span class='icon'>•</span><span>节点用于表示 source、plugin、skill、agent 的连接点。</span></div>
+          <div class='item'><span class='icon'>▦</span><span>瓦片用于表示插件模块、仓库或功能块。</span></div>
+          <div class='item'><span class='icon'>~</span><span>流线用于表示同步、分发、知识流动。</span></div>
+          <div class='item'><span class='icon'>&gt;_</span><span>CLI 元素用于强化开发者工具属性。</span></div>
+        </div>
+      </div>
+    </div>
+    <div class='grid-3' style='margin-top:16px'>
+      <div class='card'><img src='../examples/plugin-card.svg' style='width:100%'><div class='caption'>Plugin card</div></div>
+      <div class='card'><img src='../examples/cli-snippet.svg' style='width:100%'><div class='caption'>CLI snippet</div></div>
+      <div class='card'><img src='../examples/repo-badge.svg' style='width:100%'><div class='caption'>Repo badge</div></div>
+    </div>
+    <div class='footer'><span>Typography & Graphic Language</span><span>05</span></div>
+  </section>
+
+  <section class='page'>
+    <h2>05. 应用规范 / Applications</h2>
+    <div class='grid-2'>
+      <div class='card fill'>
+        <h3>README / GitHub</h3>
+        <p>顶部使用完整 logo 与一句话说明。徽章保持事实性，例如 Apache-2.0、sync 6h、source-owned plugins。避免虚构 star、下载量或性能指标。</p>
+        <h3>插件市场 / Plugin Marketplace</h3>
+        <p>插件卡片优先显示 plugin name、source project、简短功能描述、标签与安装命令。</p>
+        <h3>CLI / Docs</h3>
+        <p>命令行片段使用 Midnight 背景，Cyan 标示命令参数，Mint 标示成功状态。</p>
+      </div>
+      <div class='card'>
+        <h3>CLI 示例</h3>
+        <div class='codebox'><span class='ok'>$ skills</span><br>$ plugin add <b>ahoo-wow-skills</b><br>Resolving plugin... ✓<br>Fetching from Wow... ✓<br>Installing... ✓<br><span class='ok'>Done. Ready to use.</span></div>
+        <h3 style='margin-top:18px'>文案原则</h3>
+        <p>短句、明确、可验证。以“如何使用”和“状态反馈”为主，避免宏大但不可验证的口号。</p>
+      </div>
+    </div>
+    <div class='card' style='margin-top:16px'>
+      <h3>可访问性</h3>
+      <p>正文优先使用 Midnight on White / Cloud；Slate 仅用于辅助文本。蓝色小字不要直接放在 Cyan 或 Mint 上。交互状态除了颜色，还应使用图标、文字或形状差异。</p>
+    </div>
+    <div class='footer'><span>Applications</span><span>06</span></div>
+  </section>
+
+  <section class='page'>
+    <h2>06. Brand Board 总览</h2>
+    <img src='../brand-board/skills-brand-board.png' class='brandboard'>
+    <div class='footer'><span>Brand Board</span><span>07</span></div>
+  </section>
+
+  <section class='page'>
+    <h2>07. 资产清单 / Asset Inventory</h2>
+    <p>资产包已按可直接放入仓库的结构整理。完整文件列表见 <code>manifest.json</code>；以下是主要交付物。</p>
+    <div class='grid-2'>
+      <div class='card fill'><h3>Guidelines</h3><p><code>guidelines/skills-brand-guidelines.pdf</code><br>中文品牌设计规范指南</p><p><code>guidelines/skills-brand-guidelines.html</code><br>可编辑 HTML 源文件</p></div>
+      <div class='card'><h3>Logo</h3><p><code>logo/svg/</code><br>主标志、图标、横版、单色、构造图</p><p><code>logo/png/</code><br>透明 PNG，多尺寸导出</p></div>
+      <div class='card'><h3>Tokens</h3><p><code>tokens/skills-brand.css</code><br>CSS 变量，可直接用于网页</p><p><code>tokens/skills-brand.tokens.json</code><br>设计系统 token</p></div>
+      <div class='card fill'><h3>Visual Assets</h3><p><code>brand-board/skills-brand-board.png</code><br>确认版 Brand Board</p><p><code>examples/</code> 与 <code>patterns/</code><br>应用示例和图形语言素材</p></div>
+    </div>
+    <div class='card' style='margin-top:16px'>
+      <h3>落地建议</h3>
+      <p>优先将 <code>logo/svg/skills-logo-primary.svg</code>、<code>brand-board/skills-brand-board.png</code>、<code>tokens/skills-brand.css</code> 提交到仓库，用于 README、文档站和插件市场页。</p>
+    </div>
+    <div class='footer'><span>Asset Inventory</span><span>08</span></div>
+  </section>
+</body>
+</html>

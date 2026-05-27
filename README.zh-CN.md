@@ -1,6 +1,16 @@
 # Ahoo Skills
 
-<p align="center"><img src="./logo.jpg" width="200" alt="Logo"></p>
+<p align="center">
+  <a href="https://skills.ahoo.me/">
+    <img src="./docs/assets/logo/skills-logo-primary.svg" width="280" alt="Ahoo-Wang's skills logo">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://skills.ahoo.me/">GitHub Pages</a> ·
+  <a href="./.agents/plugins/marketplace.json">Codex Marketplace</a> ·
+  <a href="./.claude-plugin/marketplace.json">Claude Code Marketplace</a>
+</p>
 
 [Ahoo-Wang](https://github.com/Ahoo-Wang) 开源项目的 [Agent Skills](https://agentskills.io/) 聚合仓库。
 

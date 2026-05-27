@@ -1,0 +1,119 @@
+{
+  "name": "skills brand tokens",
+  "version": "1.0.0",
+  "updated": "2026-05-27",
+  "colors": {
+    "midnight": {
+      "name": "Midnight",
+      "hex": "#0B1020",
+      "rgb": [
+        11,
+        16,
+        32
+      ],
+      "usage": "Primary text, monochrome logo, terminal surfaces"
+    },
+    "electric_blue": {
+      "name": "Electric Blue",
+      "hex": "#346CFF",
+      "rgb": [
+        52,
+        108,
+        255
+      ],
+      "usage": "Primary brand action, section headings, sync accents"
+    },
+    "cyan": {
+      "name": "Cyan",
+      "hex": "#39D0FF",
+      "rgb": [
+        57,
+        208,
+        255
+      ],
+      "usage": "Flow lines, code/API accents, secondary highlights"
+    },
+    "mint": {
+      "name": "Mint",
+      "hex": "#73F0C0",
+      "rgb": [
+        115,
+        240,
+        192
+      ],
+      "usage": "Success states, active plugin nodes, positive completion"
+    },
+    "cloud": {
+      "name": "Cloud",
+      "hex": "#F5F7FB",
+      "rgb": [
+        245,
+        247,
+        251
+      ],
+      "usage": "Background surfaces, cards, panels"
+    },
+    "slate": {
+      "name": "Slate",
+      "hex": "#6B7280",
+      "rgb": [
+        107,
+        114,
+        128
+      ],
+      "usage": "Secondary copy, captions, metadata"
+    },
+    "line": {
+      "name": "Line",
+      "hex": "#DDE6F2",
+      "rgb": [
+        221,
+        230,
+        242
+      ],
+      "usage": "Borders, dividers, low-emphasis connectors"
+    },
+    "white": {
+      "name": "White",
+      "hex": "#FFFFFF",
+      "rgb": [
+        255,
+        255,
+        255
+      ],
+      "usage": "Negative space and card backgrounds"
+    }
+  },
+  "typography": {
+    "primary": {
+      "role": "Primary",
+      "family": "Geometric Sans",
+      "recommended_stack": "Noto Sans CJK SC, Inter, ui-sans-serif, system-ui, sans-serif",
+      "usage": "Headings, wordmark-adjacent UI, key labels"
+    },
+    "secondary": {
+      "role": "Secondary",
+      "family": "Clean Grotesk",
+      "recommended_stack": "Noto Sans CJK SC, Inter, ui-sans-serif, system-ui, sans-serif",
+      "usage": "Body copy, captions, long content"
+    },
+    "code": {
+      "role": "Code",
+      "family": "Monospace",
+      "recommended_stack": "JetBrains Mono, SFMono-Regular, Menlo, Consolas, monospace",
+      "usage": "CLI snippets, commands, file paths"
+    }
+  },
+  "spacing": {
+    "clearspace_logo": "Use at least one node radius around the mark",
+    "card_radius": "24px",
+    "chip_radius": "999px"
+  },
+  "logo": {
+    "concept": "Modular S built from connected skill blocks",
+    "minimum_size_px": {
+      "mark": 24,
+      "wordmark_width": 120
+    }
+  }
+}

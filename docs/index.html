@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ahoo-Wang's skills | Open Source Agent Skills Hub</title>
+    <meta
+      name="description"
+      content="Ahoo-Wang's open source agent skills hub for Codex and Claude Code plugin distribution."
+    >
+    <link rel="canonical" href="https://skills.ahoo.me/">
+    <link rel="alternate" hreflang="en" href="https://skills.ahoo.me/">
+    <link rel="alternate" hreflang="zh-CN" href="https://skills.ahoo.me/zh-CN/">
+    <link rel="alternate" hreflang="x-default" href="https://skills.ahoo.me/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Ahoo-Wang's skills">
+    <meta property="og:title" content="Ahoo-Wang's skills | Open Source Agent Skills Hub">
+    <meta
+      property="og:description"
+      content="Ahoo-Wang's open source agent skills hub for Codex and Claude Code plugin distribution."
+    >
+    <meta property="og:url" content="https://skills.ahoo.me/">
+    <meta property="og:image" content="https://skills.ahoo.me/assets/brand-board/skills-brand-board.webp">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Ahoo-Wang's skills | Open Source Agent Skills Hub">
+    <meta
+      name="twitter:description"
+      content="Ahoo-Wang's open source agent skills hub for Codex and Claude Code plugin distribution."
+    >
+    <meta name="twitter:image" content="https://skills.ahoo.me/assets/brand-board/skills-brand-board.webp">
+    <link rel="icon" href="./assets/logo/skills-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./assets/tokens/skills-brand.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Ahoo-Wang's skills",
+        "url": "https://skills.ahoo.me/",
+        "description": "Ahoo-Wang's open source agent skills hub for Codex and Claude Code plugin distribution.",
+        "inLanguage": ["en", "zh-CN"],
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ahoo-Wang",
+          "url": "https://github.com/Ahoo-Wang"
+        }
+      }
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--skills-cloud);
+        color: var(--skills-midnight);
+        font-family: var(--skills-font-sans);
+        letter-spacing: 0;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .site-shell {
+        min-height: 100vh;
+        background:
+          linear-gradient(180deg, rgba(245, 247, 251, 0.96), rgba(245, 247, 251, 1) 48%),
+          url("./assets/patterns/flow-lines.svg") top center / 1180px auto no-repeat;
+      }
+
+      .topbar {
+        align-items: center;
+        display: flex;
+        gap: 24px;
+        justify-content: space-between;
+        margin: 0 auto;
+        max-width: 1160px;
+        padding: 22px 24px 10px;
+      }
+
+      .brand-link {
+        align-items: center;
+        display: inline-flex;
+        gap: 12px;
+        min-width: 0;
+        text-decoration: none;
+      }
+
+      .brand-link img {
+        height: 36px;
+        width: auto;
+      }
+
+      .brand-text {
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .top-actions {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .nav-links {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .nav-links a,
+      .language-switch a,
+      .ghost-button,
+      .solid-button {
+        align-items: center;
+        border-radius: var(--skills-radius-chip);
+        display: inline-flex;
+        font-size: 14px;
+        font-weight: 750;
+        justify-content: center;
+        line-height: 1;
+        min-height: 40px;
+        padding: 0 14px;
+        text-decoration: none;
+        transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+      }
+
+      .nav-links a,
+      .language-switch a,
+      .ghost-button {
+        background: rgba(255, 255, 255, 0.74);
+        border: 1px solid rgba(221, 230, 242, 0.92);
+      }
+
+      .nav-links a:hover,
+      .language-switch a:hover,
+      .ghost-button:hover,
+      .solid-button:hover {
+        transform: translateY(-1px);
+      }
+
+      .language-switch {
+        align-items: center;
+        display: inline-flex;
+        gap: 4px;
+      }
+
+      .language-switch a {
+        color: var(--skills-slate);
+        cursor: pointer;
+        min-width: 48px;
+      }
+
+      .language-switch a.is-active {
+        background: var(--skills-midnight);
+        border-color: var(--skills-midnight);
+        color: var(--skills-white);
+      }
+
+      .solid-button {
+        background: var(--skills-electric-blue);
+        border: 1px solid var(--skills-electric-blue);
+        color: var(--skills-white);
+      }
+
+      .hero {
+        display: grid;
+        gap: 28px;
+        grid-template-columns: minmax(0, 1.04fr) minmax(320px, 0.96fr);
+        margin: 0 auto;
+        max-width: 1160px;
+        padding: 78px 24px 52px;
+      }
+
+      .hero-copy {
+        align-self: center;
+        max-width: 680px;
+      }
+
+      .kicker {
+        color: var(--skills-electric-blue);
+        font-size: 13px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        margin: 0 0 16px;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(44px, 6vw, 82px);
+        line-height: 0.94;
+        margin: 0;
+        max-width: 700px;
+      }
+
+      h1 .title-prefix {
+        color: inherit;
+        display: block;
+      }
+
+      h1 .title-accent {
+        color: var(--skills-electric-blue);
+        display: block;
+      }
+
+      .hero-subtitle {
+        color: var(--skills-slate);
+        font-size: 20px;
+        line-height: 1.55;
+        margin: 24px 0 0;
+        max-width: 640px;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .quick-meta {
+        color: var(--skills-slate);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .quick-meta span {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid var(--skills-line);
+        border-radius: 999px;
+        display: inline-flex;
+        font-size: 13px;
+        font-weight: 750;
+        min-height: 34px;
+        padding: 0 12px;
+      }
+
+      .market-entry {
+        align-self: stretch;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(221, 230, 242, 0.94);
+        border-radius: var(--skills-radius-card);
+        box-shadow: var(--skills-shadow-soft);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        justify-content: space-between;
+        overflow: hidden;
+        padding: 22px;
+      }
+
+      .market-entry-header {
+        align-items: flex-start;
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+      }
+
+      .market-entry-header img {
+        height: 48px;
+        width: 48px;
+      }
+
+      .status-pill {
+        background: rgba(115, 240, 192, 0.18);
+        border: 1px solid rgba(55, 184, 142, 0.3);
+        border-radius: 999px;
+        color: #147a59;
+        font-size: 12px;
+        font-weight: 850;
+        padding: 8px 10px;
+        white-space: nowrap;
+      }
+
+      .market-entry h2,
+      .section-heading h2 {
+        font-size: 28px;
+        line-height: 1.12;
+        margin: 0;
+      }
+
+      .market-entry p,
+      .section-heading p,
+      .plugin-card p,
+      .repo-card p {
+        color: var(--skills-slate);
+        line-height: 1.55;
+        margin: 10px 0 0;
+      }
+
+      .install-stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .code-block {
+        background: var(--skills-midnight);
+        border-radius: 18px;
+        color: var(--skills-white);
+        overflow: hidden;
+      }
+
+      .code-block header {
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.72);
+        display: flex;
+        font-size: 12px;
+        font-weight: 800;
+        justify-content: space-between;
+        padding: 10px 14px;
+      }
+
+      .code-block code {
+        color: var(--skills-mint);
+        display: block;
+        font-family: var(--skills-font-code);
+        font-size: 13px;
+        line-height: 1.6;
+        overflow-x: auto;
+        padding: 13px 14px 15px;
+        white-space: pre;
+      }
+
+      .section {
+        margin: 0 auto;
+        max-width: 1160px;
+        padding: 58px 24px;
+      }
+
+      .section-heading {
+        align-items: end;
+        display: flex;
+        gap: 24px;
+        justify-content: space-between;
+        margin-bottom: 20px;
+      }
+
+      .section-heading p {
+        max-width: 500px;
+      }
+
+      .plugin-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .plugin-card,
+      .repo-card {
+        background: var(--skills-white);
+        border: 1px solid var(--skills-line);
+        border-radius: 18px;
+        min-width: 0;
+        padding: 18px;
+      }
+
+      .plugin-card strong,
+      .repo-card strong {
+        display: block;
+        font-size: 16px;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+      }
+
+      .plugin-card code {
+        color: var(--skills-electric-blue);
+        font-family: var(--skills-font-code);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .distribution {
+        background: var(--skills-midnight);
+        color: var(--skills-white);
+        margin-top: 20px;
+      }
+
+      .distribution .section-heading p,
+      .distribution .repo-card p {
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .repo-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .repo-card {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.14);
+      }
+
+      .repo-card a {
+        color: var(--skills-white);
+        text-decoration: none;
+      }
+
+      .footer {
+        background: var(--skills-midnight);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .footer-inner {
+        align-items: center;
+        display: flex;
+        gap: 18px;
+        justify-content: space-between;
+        margin: 0 auto;
+        max-width: 1160px;
+        padding: 28px 24px;
+      }
+
+      .footer img {
+        filter: brightness(0) invert(1);
+        height: 30px;
+        opacity: 0.82;
+        width: auto;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        justify-content: flex-end;
+      }
+
+      .footer-links a {
+        color: var(--skills-white);
+        font-size: 14px;
+        font-weight: 750;
+        text-decoration: none;
+      }
+
+      @media (max-width: 880px) {
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .top-actions,
+        .nav-links {
+          justify-content: flex-start;
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+          padding-top: 48px;
+        }
+
+        .plugin-grid,
+        .repo-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .section-heading,
+        .footer-inner {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .footer-links {
+          justify-content: flex-start;
+        }
+      }
+
+      @media (max-width: 580px) {
+        .brand-text {
+          white-space: normal;
+        }
+
+        .topbar,
+        .hero,
+        .section,
+        .footer-inner {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+
+        h1 {
+          font-size: 44px;
+        }
+
+        .hero-subtitle {
+          font-size: 17px;
+        }
+
+        .plugin-grid,
+        .repo-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .market-entry-header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar">
+        <a
+          class="brand-link"
+          href="https://github.com/Ahoo-Wang/skills"
+          aria-label="Ahoo-Wang's skills repository"
+          data-i18n-aria="brand.repositoryLabel"
+        >
+          <img src="./assets/logo/skills-mark.svg" alt="">
+          <span class="brand-text" data-i18n="brand.name">Ahoo-Wang's skills</span>
+        </a>
+        <div class="top-actions">
+          <nav class="nav-links" aria-label="Primary navigation" data-i18n-aria="nav.label">
+            <a href="#plugins" data-i18n="nav.plugins">Plugins</a>
+            <a href="#distribution" data-i18n="nav.distribution">Distribution</a>
+            <a href="https://github.com/Ahoo-Wang/skills" data-i18n="nav.github">GitHub</a>
+          </nav>
+          <div class="language-switch" role="group" aria-label="Language selector" data-i18n-aria="language.label">
+            <a href="./" hreflang="en" data-lang-option="en" aria-pressed="false">EN</a>
+            <a href="./zh-CN/" hreflang="zh-CN" data-lang-option="zh-CN" aria-pressed="false">中文</a>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="kicker" data-i18n="hero.kicker">Open Source Agent Skills Hub</p>
+            <h1 id="hero-title">
+              <span class="title-prefix" data-i18n="hero.titlePrefix">Ahoo-Wang's</span>
+              <span class="title-accent" data-i18n="hero.titleAccent">skills</span>
+            </h1>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">
+              A repository and plugin marketplace entry for Ahoo-Wang open source agent skills,
+              distributed as split plugins for Codex and Claude Code.
+            </p>
+            <div class="hero-actions" aria-label="Primary actions" data-i18n-aria="hero.actionsLabel">
+              <a class="solid-button" href="https://github.com/Ahoo-Wang/skills" data-i18n="hero.openRepository">Open repository</a>
+              <a class="ghost-button" href="#plugins" data-i18n="hero.browsePlugins">Browse plugins</a>
+            </div>
+            <div class="quick-meta" aria-label="Repository highlights" data-i18n-aria="hero.highlightsLabel">
+              <span data-i18n="hero.meta.sync">Auto synced every 6 hours</span>
+              <span data-i18n="hero.meta.codex">Codex marketplace ready</span>
+              <span data-i18n="hero.meta.claude">Claude Code marketplace ready</span>
+            </div>
+          </div>
+
+          <aside class="market-entry" aria-label="Marketplace install commands" data-i18n-aria="market.ariaLabel">
+            <div class="market-entry-header">
+              <img src="./assets/logo/skills-mark.svg" alt="">
+              <span class="status-pill" data-i18n="market.status">Marketplace entry</span>
+            </div>
+            <div>
+              <h2 data-i18n="market.title">Install the hub, then add the plugin you need.</h2>
+              <p data-i18n="market.description">
+                This repository aggregates upstream skill sources and publishes generated plugin
+                manifests under a single distribution point.
+              </p>
+            </div>
+            <div class="install-stack">
+              <div class="code-block">
+                <header><span>Codex</span><span data-i18n="market.codeLabel">marketplace</span></header>
+                <code>codex plugin marketplace add Ahoo-Wang/skills --ref main
+codex plugin add ahoo-wow-skills@ahoo-skills</code>
+              </div>
+              <div class="code-block">
+                <header><span>Claude Code</span><span data-i18n="market.codeLabel">marketplace</span></header>
+                <code>/plugin marketplace add https://github.com/Ahoo-Wang/skills
+/plugin install ahoo-wow-skills</code>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="section" id="plugins" aria-labelledby="plugins-title">
+          <div class="section-heading">
+            <div>
+              <p class="kicker" data-i18n="plugins.kicker">Split plugins</p>
+              <h2 id="plugins-title" data-i18n="plugins.title">Project-scoped skill packages</h2>
+            </div>
+            <p data-i18n="plugins.description">
+              Install one focused plugin per source project. The generated manifests stay aligned
+              with the upstream skills and this repository's local plugin sources.
+            </p>
+          </div>
+          <div class="plugin-grid">
+            <article class="plugin-card">
+              <strong><code>ahoo-wow-skills</code></strong>
+              <p data-i18n="plugin.wow">Wow, code review, debugging, and development workflow skills.</p>
+            </article>
+            <article class="plugin-card">
+              <strong><code>ahoo-fetcher-skills</code></strong>
+              <p data-i18n="plugin.fetcher">Fetcher client, decorators, React hooks, OpenAPI, storage, event bus, and streaming.</p>
+            </article>
+            <article class="plugin-card">
+              <strong><code>ahoo-cosec-skills</code></strong>
+              <p data-i18n="plugin.cosec">CoSec integration, policy authoring, custom matchers, and troubleshooting.</p>
+            </article>
+            <article class="plugin-card">
+              <strong><code>ahoo-coapi-skills</code></strong>
+              <p data-i18n="plugin.coapi">CoApi Spring HTTP client development guidance.</p>
+            </article>
+            <article class="plugin-card">
+              <strong><code>ahoo-cosid-skills</code></strong>
+              <p data-i18n="plugin.cosid">CosId ID generation, sharding, Spring Boot setup, and strategy guidance.</p>
+            </article>
+            <article class="plugin-card">
+              <strong><code>ahoo-fluent-assert-skills</code></strong>
+              <p data-i18n="plugin.fluentAssert">FluentAssert Kotlin assertion workflow for test authors.</p>
+            </article>
+            <article class="plugin-card">
+              <strong><code>ahoo-cocache-skills</code></strong>
+              <p data-i18n="plugin.cocache">CoCache distributed cache integration and operation guidance.</p>
+            </article>
+            <article class="plugin-card">
+              <strong><code>ahoo-simba-skills</code></strong>
+              <p data-i18n="plugin.simba">Simba distributed mutex, leader election, and test guidance.</p>
+            </article>
+            <article class="plugin-card">
+              <strong><code>ahoo-agent-skills</code></strong>
+              <p data-i18n="plugin.agent">Local agent prompt skills maintained directly by this marketplace repository.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="distribution" id="distribution" aria-labelledby="distribution-title">
+          <div class="section">
+            <div class="section-heading">
+              <div>
+                <p class="kicker" data-i18n="distribution.kicker">Distribution model</p>
+                <h2 id="distribution-title" data-i18n="distribution.title">Upstream owns skills. This repo distributes plugins.</h2>
+              </div>
+              <p data-i18n="distribution.description">
+                Source repositories provide their own skill content and plugin source metadata.
+                The marketplace mirror syncs, validates, generates, and publishes distribution output.
+              </p>
+            </div>
+            <div class="repo-grid">
+              <article class="repo-card">
+                <strong><a href="https://github.com/Ahoo-Wang/Wow">Wow</a></strong>
+                <p data-i18n="repo.wow">DDD, Event Sourcing, CQRS, review, and workflow skills.</p>
+              </article>
+              <article class="repo-card">
+                <strong><a href="https://github.com/Ahoo-Wang/fetcher">Fetcher</a></strong>
+                <p data-i18n="repo.fetcher">Type-safe HTTP client and frontend integration skills.</p>
+              </article>
+              <article class="repo-card">
+                <strong><a href="https://github.com/Ahoo-Wang/CoSec">CoSec</a></strong>
+                <p data-i18n="repo.cosec">Security integration, policy authoring, and matcher skills.</p>
+              </article>
+              <article class="repo-card">
+                <strong><a href="https://github.com/Ahoo-Wang/CoApi">CoApi</a></strong>
+                <p data-i18n="repo.coapi">Spring interface HTTP client guidance.</p>
+              </article>
+              <article class="repo-card">
+                <strong><a href="https://github.com/Ahoo-Wang/CosId">CosId</a></strong>
+                <p data-i18n="repo.cosid">ID generation and sharding guidance.</p>
+              </article>
+              <article class="repo-card">
+                <strong><a href="https://github.com/Ahoo-Wang/FluentAssert">FluentAssert</a></strong>
+                <p data-i18n="repo.fluentAssert">Kotlin fluent assertion guidance.</p>
+              </article>
+              <article class="repo-card">
+                <strong><a href="https://github.com/Ahoo-Wang/CoCache">CoCache</a></strong>
+                <p data-i18n="repo.cocache">Distributed cache guidance.</p>
+              </article>
+              <article class="repo-card">
+                <strong><a href="https://github.com/Ahoo-Wang/Simba">Simba</a></strong>
+                <p data-i18n="repo.simba">Distributed mutex and leader election guidance.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-inner">
+          <img src="./assets/logo/skills-logo-mono.svg" alt="Ahoo-Wang's skills">
+          <div class="footer-links">
+            <a href="https://github.com/Ahoo-Wang/skills" data-i18n="footer.repository">Repository</a>
+            <a href="https://github.com/Ahoo-Wang/skills/tree/main/plugins" data-i18n="footer.plugins">Plugins</a>
+            <a href="https://github.com/Ahoo-Wang/skills/tree/main/sources" data-i18n="footer.sources">Sources</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <script id="i18n-script">
+      const storageKey = "skills.preferredLanguage";
+      const translations = {
+        en: {
+          metaTitle: "Ahoo-Wang's skills | Open Source Agent Skills Hub",
+          metaDescription: "Ahoo-Wang's open source agent skills hub for Codex and Claude Code plugin distribution.",
+          "brand.name": "Ahoo-Wang's skills",
+          "brand.repositoryLabel": "Ahoo-Wang's skills repository",
+          "language.label": "Language selector",
+          "nav.label": "Primary navigation",
+          "nav.plugins": "Plugins",
+          "nav.distribution": "Distribution",
+          "nav.github": "GitHub",
+          "hero.kicker": "Open Source Agent Skills Hub",
+          "hero.titlePrefix": "Ahoo-Wang's",
+          "hero.titleAccent": "skills",
+          "hero.subtitle": "A repository and plugin marketplace entry for Ahoo-Wang open source agent skills, distributed as split plugins for Codex and Claude Code.",
+          "hero.actionsLabel": "Primary actions",
+          "hero.openRepository": "Open repository",
+          "hero.browsePlugins": "Browse plugins",
+          "hero.highlightsLabel": "Repository highlights",
+          "hero.meta.sync": "Auto synced every 6 hours",
+          "hero.meta.codex": "Codex marketplace ready",
+          "hero.meta.claude": "Claude Code marketplace ready",
+          "market.ariaLabel": "Marketplace install commands",
+          "market.status": "Marketplace entry",
+          "market.title": "Install the hub, then add the plugin you need.",
+          "market.description": "This repository aggregates upstream skill sources and publishes generated plugin manifests under a single distribution point.",
+          "market.codeLabel": "marketplace",
+          "plugins.kicker": "Split plugins",
+          "plugins.title": "Project-scoped skill packages",
+          "plugins.description": "Install one focused plugin per source project. The generated manifests stay aligned with the upstream skills and this repository's local plugin sources.",
+          "plugin.wow": "Wow, code review, debugging, and development workflow skills.",
+          "plugin.fetcher": "Fetcher client, decorators, React hooks, OpenAPI, storage, event bus, and streaming.",
+          "plugin.cosec": "CoSec integration, policy authoring, custom matchers, and troubleshooting.",
+          "plugin.coapi": "CoApi Spring HTTP client development guidance.",
+          "plugin.cosid": "CosId ID generation, sharding, Spring Boot setup, and strategy guidance.",
+          "plugin.fluentAssert": "FluentAssert Kotlin assertion workflow for test authors.",
+          "plugin.cocache": "CoCache distributed cache integration and operation guidance.",
+          "plugin.simba": "Simba distributed mutex, leader election, and test guidance.",
+          "plugin.agent": "Local agent prompt skills maintained directly by this marketplace repository.",
+          "distribution.kicker": "Distribution model",
+          "distribution.title": "Upstream owns skills. This repo distributes plugins.",
+          "distribution.description": "Source repositories provide their own skill content and plugin source metadata. The marketplace mirror syncs, validates, generates, and publishes distribution output.",
+          "repo.wow": "DDD, Event Sourcing, CQRS, review, and workflow skills.",
+          "repo.fetcher": "Type-safe HTTP client and frontend integration skills.",
+          "repo.cosec": "Security integration, policy authoring, and matcher skills.",
+          "repo.coapi": "Spring interface HTTP client guidance.",
+          "repo.cosid": "ID generation and sharding guidance.",
+          "repo.fluentAssert": "Kotlin fluent assertion guidance.",
+          "repo.cocache": "Distributed cache guidance.",
+          "repo.simba": "Distributed mutex and leader election guidance.",
+          "footer.repository": "Repository",
+          "footer.plugins": "Plugins",
+          "footer.sources": "Sources",
+        },
+        "zh-CN": {
+          metaTitle: "Ahoo-Wang 的 skills | 开源 Agent Skills Hub",
+          metaDescription: "Ahoo-Wang 开源 Agent Skills 聚合与插件市场分发入口，支持 Codex 与 Claude Code。",
+          "brand.name": "Ahoo-Wang 的 skills",
+          "brand.repositoryLabel": "Ahoo-Wang 的 skills 仓库",
+          "language.label": "语言切换",
+          "nav.label": "主导航",
+          "nav.plugins": "插件",
+          "nav.distribution": "分发模型",
+          "nav.github": "GitHub",
+          "hero.kicker": "开源 Agent Skills Hub",
+          "hero.titlePrefix": "Ahoo-Wang 的",
+          "hero.titleAccent": "skills",
+          "hero.subtitle": "面向 Ahoo-Wang 开源项目的 Agent Skills 聚合仓库与插件市场入口，并按项目拆分为 Codex 与 Claude Code 插件统一分发。",
+          "hero.actionsLabel": "主要操作",
+          "hero.openRepository": "打开仓库",
+          "hero.browsePlugins": "浏览插件",
+          "hero.highlightsLabel": "仓库亮点",
+          "hero.meta.sync": "每 6 小时自动同步",
+          "hero.meta.codex": "Codex 插件市场就绪",
+          "hero.meta.claude": "Claude Code 插件市场就绪",
+          "market.ariaLabel": "插件市场安装命令",
+          "market.status": "插件市场入口",
+          "market.title": "先添加市场，再安装需要的插件。",
+          "market.description": "本仓库聚合上游 skill 源，并在统一分发入口下发布生成后的插件清单。",
+          "market.codeLabel": "插件市场",
+          "plugins.kicker": "拆分插件",
+          "plugins.title": "按项目拆分的 skill 包",
+          "plugins.description": "按源项目安装一个聚焦的插件。生成的清单会与上游 skills 以及本仓库的本地插件源保持一致。",
+          "plugin.wow": "Wow、代码审查、调试与开发流程 skills。",
+          "plugin.fetcher": "Fetcher client、decorator、React hooks、OpenAPI、storage、event bus 与 streaming skills。",
+          "plugin.cosec": "CoSec 集成、策略编写、自定义匹配器与排障 skills。",
+          "plugin.coapi": "CoApi Spring HTTP client 开发指南。",
+          "plugin.cosid": "CosId ID 生成、分片、Spring Boot 接入与策略指南。",
+          "plugin.fluentAssert": "面向 Kotlin 测试作者的 FluentAssert 断言 workflow。",
+          "plugin.cocache": "CoCache 分布式缓存集成与运维指南。",
+          "plugin.simba": "Simba 分布式锁、leader election 与测试指南。",
+          "plugin.agent": "当前 marketplace 仓库直接维护的本地 agent prompt skills。",
+          "distribution.kicker": "分发模型",
+          "distribution.title": "上游维护 skills，当前仓库负责插件分发。",
+          "distribution.description": "源仓库维护 skill 内容与 plugins.json 源元数据；本仓库同步、校验、生成并发布插件市场分发产物。",
+          "repo.wow": "DDD、Event Sourcing、CQRS、review 与 workflow skills。",
+          "repo.fetcher": "类型安全 HTTP client 与前端集成 skills。",
+          "repo.cosec": "安全集成、策略编写与 matcher skills。",
+          "repo.coapi": "Spring interface HTTP client 指南。",
+          "repo.cosid": "ID 生成与分片指南。",
+          "repo.fluentAssert": "Kotlin fluent assertion 指南。",
+          "repo.cocache": "分布式缓存指南。",
+          "repo.simba": "分布式锁与 leader election 指南。",
+          "footer.repository": "仓库",
+          "footer.plugins": "插件",
+          "footer.sources": "源镜像",
+        },
+      };
+
+      function normalizeLanguage(value) {
+        if (!value) {
+          return "en";
+        }
+
+        const normalized = value.toLowerCase();
+        if (normalized.startsWith("zh")) {
+          return "zh-CN";
+        }
+
+        return "en";
+      }
+
+      function getSavedLanguage() {
+        try {
+          const saved = localStorage.getItem(storageKey);
+          return translations[saved] ? saved : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function saveLanguage(language) {
+        try {
+          localStorage.setItem(storageKey, language);
+        } catch {
+          // Storage can be unavailable in restrictive browser modes.
+        }
+      }
+
+      function getPageLanguage() {
+        const pageLanguage = document.documentElement.lang;
+        return translations[pageLanguage] ? pageLanguage : "en";
+      }
+
+      function getLanguageTarget(language) {
+        const link = document.querySelector(`[data-lang-option="${language}"]`);
+        return link ? link.getAttribute("href") : null;
+      }
+
+      function detectLanguage() {
+        const saved = getSavedLanguage();
+        if (saved) {
+          return saved;
+        }
+
+        const pageLanguage = getPageLanguage();
+        if (pageLanguage !== "en") {
+          return pageLanguage;
+        }
+
+        const browserLanguages = navigator.languages && navigator.languages.length
+          ? navigator.languages
+          : [navigator.language];
+
+        for (const language of browserLanguages) {
+          const normalized = normalizeLanguage(language);
+          if (translations[normalized]) {
+            return normalized;
+          }
+        }
+
+        return "en";
+      }
+
+      function setLanguage(language, options = {}) {
+        const activeLanguage = translations[language] ? language : "en";
+        const dictionary = translations[activeLanguage];
+        const description = document.querySelector('meta[name="description"]');
+
+        document.documentElement.lang = activeLanguage;
+        document.title = dictionary.metaTitle;
+        if (description) {
+          description.setAttribute("content", dictionary.metaDescription);
+        }
+
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-i18n");
+          if (dictionary[key]) {
+            element.textContent = dictionary[key];
+          }
+        });
+
+        document.querySelectorAll("[data-i18n-aria]").forEach((element) => {
+          const key = element.getAttribute("data-i18n-aria");
+          if (dictionary[key]) {
+            element.setAttribute("aria-label", dictionary[key]);
+          }
+        });
+
+        document.querySelectorAll("[data-lang-option]").forEach((button) => {
+          const isActive = button.getAttribute("data-lang-option") === activeLanguage;
+          button.classList.toggle("is-active", isActive);
+          button.setAttribute("aria-pressed", String(isActive));
+          if (isActive) {
+            button.setAttribute("aria-current", "page");
+          } else {
+            button.removeAttribute("aria-current");
+          }
+        });
+
+        if (options.persist) {
+          saveLanguage(activeLanguage);
+        }
+      }
+
+      document.querySelectorAll("[data-lang-option]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          const selectedLanguage = button.getAttribute("data-lang-option");
+          const isCurrentLanguage = selectedLanguage === getPageLanguage();
+          setLanguage(selectedLanguage, { persist: true });
+          if (isCurrentLanguage) {
+            event.preventDefault();
+          }
+        });
+      });
+
+      const initialLanguage = detectLanguage();
+      if (initialLanguage !== getPageLanguage()) {
+        const target = getLanguageTarget(initialLanguage);
+        if (target) {
+          window.location.replace(target);
+        } else {
+          setLanguage(initialLanguage);
+        }
+      } else {
+        setLanguage(initialLanguage);
+      }
+    </script>
+  </body>
+</html>

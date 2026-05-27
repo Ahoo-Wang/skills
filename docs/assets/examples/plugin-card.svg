@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" width="720" height="420">
+  <rect width="720" height="420" rx="32" fill="#F5F7FB"/>
+  <rect x="70" y="64" width="580" height="292" rx="28" fill="#FFFFFF" stroke="#DDE6F2"/>
+  <rect x="110" y="106" width="76" height="76" rx="18" fill="#346CFF"/>
+  <text x="133" y="157" font-family="Arial" font-size="42" fill="white">+</text>
+  <text x="214" y="132" font-family="Inter, Arial" font-size="32" font-weight="800" fill="#0B1020">ahoo-wow-skills</text>
+  <text x="214" y="170" font-family="Inter, Arial" font-size="22" fill="#6B7280">by Wow</text>
+  <text x="110" y="230" font-family="Inter, Arial" font-size="25" fill="#0B1020">Source-owned plugin for modular agent skills.</text>
+  <rect x="110" y="276" width="84" height="38" rx="18" fill="#E8F0FF"/><text x="132" y="302" font-family="Inter, Arial" font-size="20" fill="#346CFF">skills</text>
+  <rect x="210" y="276" width="92" height="38" rx="18" fill="#E6FAFF"/><text x="228" y="302" font-family="Inter, Arial" font-size="20" fill="#007EA7">plugin</text>
+  <rect x="318" y="276" width="84" height="38" rx="18" fill="#E7FFF4"/><text x="340" y="302" font-family="Inter, Arial" font-size="20" fill="#087A55">agent</text>
+</svg>
