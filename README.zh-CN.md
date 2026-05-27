@@ -1,14 +1,13 @@
 # Ahoo Skills
 
 <p align="center">
-  <a href="https://ahoo-wang.github.io/skills/">
+  <a href="https://skills.ahoo.me/">
     <img src="./docs/assets/logo/skills-logo-primary.svg" width="280" alt="Ahoo-Wang's skills logo">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://ahoo-wang.github.io/skills/">GitHub Pages</a> ·
-  <a href="./design/assets/guidelines/skills-brand-guidelines.pdf">品牌指南</a> ·
+  <a href="https://skills.ahoo.me/">GitHub Pages</a> ·
   <a href="./.agents/plugins/marketplace.json">Codex Marketplace</a> ·
   <a href="./.claude-plugin/marketplace.json">Claude Code Marketplace</a>
 </p>
