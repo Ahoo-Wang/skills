@@ -29,7 +29,12 @@ assert_contains() {
 assert_not_contains() {
   local file="$1"
   local unexpected="$2"
-  ! grep -Fq "$unexpected" "$file" || fail "Did not expect '$unexpected' in $file"
+  if grep -Fq "$unexpected" "$file"; then
+    fail "Did not expect '$unexpected' in $file"
+  else
+    local status=$?
+    [ "$status" -eq 1 ] || fail "grep failed while checking '$unexpected' in $file"
+  fi
 }
 
 assert_exit_code() {
@@ -147,6 +152,20 @@ EOF
   set -e
   assert_exit_code "$code" 1 "Sync should fail when a configured source repo cannot be cloned"
   assert_contains "$output" "Failed to clone"
+}
+
+test_assert_not_contains_fails_on_grep_errors() {
+  local tmp
+  tmp="$(mktemp -d "$TMP_ROOT/assert-not-contains.XXXXXX")"
+  local output="$tmp/output.log"
+
+  set +e
+  (assert_not_contains "$tmp/missing-file" "unexpected") >"$output" 2>&1
+  local code=$?
+  set -e
+
+  assert_exit_code "$code" 1 "assert_not_contains should fail when grep fails"
+  assert_contains "$output" "grep failed"
 }
 
 test_syncs_source_skills_and_compact_manifest() {
@@ -345,6 +364,7 @@ EOF
 
 main() {
   test_fails_when_source_repo_cannot_be_cloned
+  test_assert_not_contains_fails_on_grep_errors
   test_syncs_source_skills_and_compact_manifest
   test_fails_on_duplicate_skill_names
   test_sync_does_not_stage_changes
