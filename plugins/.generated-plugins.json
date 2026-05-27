@@ -1,0 +1,82 @@
+{
+  "generated_by": "scripts/generate-plugins.sh",
+  "plugins": [
+    {
+      "name": "ahoo-coapi-skills",
+      "source": "CoApi",
+      "skills": [
+        "coapi-developer"
+      ]
+    },
+    {
+      "name": "ahoo-cocache-skills",
+      "source": "CoCache",
+      "skills": [
+        "cocache"
+      ]
+    },
+    {
+      "name": "ahoo-cosec-skills",
+      "source": "CoSec",
+      "skills": [
+        "cosec-custom-matcher",
+        "cosec-integration",
+        "cosec-policy-author",
+        "cosec-troubleshoot"
+      ]
+    },
+    {
+      "name": "ahoo-cosid-skills",
+      "source": "CosId",
+      "skills": [
+        "cosid-manual-integration",
+        "cosid-sharding",
+        "cosid-spring-boot",
+        "cosid-strategy-guide"
+      ]
+    },
+    {
+      "name": "ahoo-fetcher-skills",
+      "source": "fetcher",
+      "skills": [
+        "fetcher-cosec-auth",
+        "fetcher-decorator-service",
+        "fetcher-eventbus",
+        "fetcher-integration",
+        "fetcher-llm-streaming",
+        "fetcher-openai-client",
+        "fetcher-openapi-generator",
+        "fetcher-openapi-types",
+        "fetcher-react-hooks",
+        "fetcher-storage",
+        "fetcher-viewer-components",
+        "fetcher-wow-cqrs"
+      ]
+    },
+    {
+      "name": "ahoo-fluent-assert-skills",
+      "source": "FluentAssert",
+      "skills": [
+        "fluent-assert"
+      ]
+    },
+    {
+      "name": "ahoo-simba-skills",
+      "source": "Simba",
+      "skills": [
+        "simba",
+        "simba-testing"
+      ]
+    },
+    {
+      "name": "ahoo-wow-skills",
+      "source": "Wow",
+      "skills": [
+        "wow",
+        "wow-code-review",
+        "wow-debugging",
+        "wow-development-workflow"
+      ]
+    }
+  ]
+}

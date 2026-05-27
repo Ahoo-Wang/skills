@@ -1,41 +1,49 @@
 {
   "repos": [
     {
+      "name": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
       "skills_path": "skills"
     },
     {
+      "name": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
       "skills_path": "skills"
     },
     {
+      "name": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
       "skills_path": "skills"
     },
     {
+      "name": "CosId",
       "url": "https://github.com/Ahoo-Wang/CosId.git",
       "branch": "main",
       "skills_path": "skills"
     },
     {
+      "name": "FluentAssert",
       "url": "https://github.com/Ahoo-Wang/FluentAssert.git",
       "branch": "main",
       "skills_path": "skills"
     },
     {
+      "name": "fetcher",
       "url": "https://github.com/Ahoo-Wang/fetcher.git",
       "branch": "main",
       "skills_path": "skills"
     },
     {
+      "name": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
       "skills_path": "skills"
     },
     {
+      "name": "Simba",
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
       "skills_path": "skills"

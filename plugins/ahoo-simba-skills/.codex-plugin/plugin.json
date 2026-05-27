@@ -1,0 +1,37 @@
+{
+  "name": "ahoo-simba-skills",
+  "description": "Skills for using and testing Simba, a JVM distributed mutex and leader-election library with JDBC/MySQL, Redis, and Zookeeper backends.",
+  "version": "0.0.3",
+  "author": {
+    "name": "Ahoo Wang",
+    "email": "ahoowang@gmail.com"
+  },
+  "homepage": "https://github.com/Ahoo-Wang/skills",
+  "repository": "https://github.com/Ahoo-Wang/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "simba",
+    "distributed-lock",
+    "distributed-mutex",
+    "leader-election",
+    "jvm",
+    "kotlin",
+    "spring-boot",
+    "redis",
+    "jdbc",
+    "zookeeper"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Ahoo Simba Skills",
+    "shortDescription": "Skills for using and testing Simba, a JVM distributed mutex and leader-election library with JDBC/MySQL, Redis, and Zookeeper backends.",
+    "longDescription": "Skills for using and testing Simba, a JVM distributed mutex and leader-election library with JDBC/MySQL, Redis, and Zookeeper backends.",
+    "developerName": "Ahoo Wang",
+    "category": "Development",
+    "capabilities": [
+      "Skills"
+    ],
+    "websiteURL": "https://github.com/Ahoo-Wang/skills",
+    "defaultPrompt": "Help me use Simba distributed locks, leader election, backend configuration, and tests for JVM applications."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "ahoo-agent-skills",
+  "description": "General Ahoo agent skills that are maintained directly in this repository",
+  "version": "0.0.3",
+  "author": {
+    "name": "Ahoo Wang",
+    "email": "ahoowang@gmail.com"
+  },
+  "homepage": "https://github.com/Ahoo-Wang/skills",
+  "repository": "https://github.com/Ahoo-Wang/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "agent",
+    "prompt"
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "name": "ahoo-skills",
   "version": "0.0.3",
-  "description": "Claude Code Skills aggregation repository for Ahoo-Wang's open source projects",
+  "description": "Codex and Claude Code skills marketplace for Ahoo-Wang open source projects",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
@@ -24,10 +24,16 @@
     "event-sourcing"
   ],
   "files": [
+    ".agents/plugins/marketplace.json",
     ".claude-plugin/",
-    "skills/"
+    "plugins/",
+    "schemas/",
+    "repos.json",
+    "sources/"
   ],
   "scripts": {
-    "sync": "bash scripts/sync-skills.sh"
+    "sync": "bash -c 'bash scripts/sync-sources.sh; code=$?; if [ $code -ne 0 ] && [ $code -ne 2 ]; then exit $code; fi; bash scripts/generate-plugins.sh'",
+    "generate:plugins": "bash scripts/generate-plugins.sh",
+    "test": "bash scripts/test-sync-skills.sh && bash scripts/test-generate-plugins.sh && bash scripts/validate-skills.sh"
   }
 }

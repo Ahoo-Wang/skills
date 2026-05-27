@@ -2,178 +2,228 @@
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "ahoo-skills",
   "version": "0.0.3",
-  "description": "Claude Code Skills for Ahoo-Wang open source projects — DDD, CQRS, Event Sourcing, distributed systems, and more",
+  "description": "Codex and Claude Code skills marketplace for Ahoo-Wang open source projects",
   "owner": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
   },
   "plugins": [
     {
-      "name": "agent-system-prompt",
-      "description": "Design and write system prompts, personas, and behavioral rules for AI agents and chatbots",
-      "source": "./skills/agent-system-prompt",
+      "name": "ahoo-agent-skills",
+      "version": "0.0.3",
+      "description": "General Ahoo agent skills that are maintained directly in this repository",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "agent",
+        "prompt"
+      ],
+      "source": "./plugins/ahoo-agent-skills",
       "category": "development"
     },
     {
-      "name": "coapi-developer",
-      "description": "Build Spring HTTP client interfaces using CoApi annotations (@CoApi, @HttpExchange) with reactive and sync modes",
-      "source": "./skills/coapi-developer",
+      "name": "ahoo-coapi-skills",
+      "version": "0.0.3",
+      "description": "CoApi skills for building and testing Spring HTTP Interface client proxies with reactive WebClient, synchronous RestClient, and Spring Cloud LoadBalancer support.",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "coapi",
+        "spring",
+        "http-interface",
+        "webclient",
+        "restclient",
+        "load-balancer",
+        "reactive",
+        "kotlin"
+      ],
+      "source": "./plugins/ahoo-coapi-skills",
       "category": "development"
     },
     {
-      "name": "cocache",
-      "description": "Configure CoCache distributed two-level caching (Redis + local) with @CoCache, @JoinCacheable, and cache coherence",
-      "source": "./skills/cocache",
+      "name": "ahoo-cocache-skills",
+      "version": "0.0.3",
+      "description": "CoCache skills for implementing two-level distributed coherent caches, cache proxy interfaces, JoinCache composition, and Redis/Spring Boot integration in Java/Kotlin projects.",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "cocache",
+        "coherent-cache",
+        "distributed-cache",
+        "two-level-cache",
+        "spring-boot",
+        "redis",
+        "kotlin",
+        "java",
+        "join-cache",
+        "cache-coherence"
+      ],
+      "source": "./plugins/ahoo-cocache-skills",
       "category": "development"
     },
     {
-      "name": "cosec-custom-matcher",
-      "description": "Create custom ActionMatcher and ConditionMatcher implementations for CoSec security framework",
-      "source": "./skills/cosec-custom-matcher",
+      "name": "ahoo-cosec-skills",
+      "version": "0.0.3",
+      "description": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, authoring authorization policies, extending matchers, and troubleshooting access decisions.",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "cosec",
+        "security",
+        "authorization",
+        "authentication",
+        "rbac",
+        "policy",
+        "multi-tenant",
+        "spring-boot",
+        "reactive",
+        "jwt"
+      ],
+      "source": "./plugins/ahoo-cosec-skills",
       "category": "development"
     },
     {
-      "name": "cosec-integration",
-      "description": "Integrate CoSec security framework into Spring Boot applications with JWT, authorization, and Redis caching",
-      "source": "./skills/cosec-integration",
+      "name": "ahoo-cosid-skills",
+      "version": "0.0.3",
+      "description": "CosId skills for choosing and integrating high-performance distributed ID generators, Spring Boot auto-configuration, machine ID distributors, and ShardingSphere sharding.",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "cosid",
+        "distributed-id",
+        "snowflake",
+        "segment-id",
+        "segment-chain-id",
+        "machine-id",
+        "sharding",
+        "spring-boot",
+        "java"
+      ],
+      "source": "./plugins/ahoo-cosid-skills",
       "category": "development"
     },
     {
-      "name": "cosec-policy-author",
-      "description": "Author, validate, and debug CoSec security policy JSON files with role-based access and rate limiting",
-      "source": "./skills/cosec-policy-author",
+      "name": "ahoo-fetcher-skills",
+      "version": "0.0.3",
+      "description": "Skills for building with the Fetcher TypeScript ecosystem, including HTTP clients, decorators, event buses, SSE/OpenAI streaming, storage, CoSec authentication, Wow CQRS, OpenAPI generation, React hooks, and viewer components.",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "fetcher",
+        "typescript",
+        "http-client",
+        "openapi",
+        "sse",
+        "react",
+        "cqrs",
+        "cosec",
+        "wow"
+      ],
+      "source": "./plugins/ahoo-fetcher-skills",
       "category": "development"
     },
     {
-      "name": "cosec-troubleshoot",
-      "description": "Debug CoSec authorization issues, 403/401 errors, and policy evaluation problems",
-      "source": "./skills/cosec-troubleshoot",
+      "name": "ahoo-fluent-assert-skills",
+      "version": "0.0.3",
+      "description": "Skills for writing Kotlin tests with FluentAssert's AssertJ-backed .assert() extensions for JDK types, nullable values, exceptions, and custom AssertProvider assertions.",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "fluent-assert",
+        "kotlin",
+        "assertj",
+        "testing",
+        "junit5",
+        "assertions"
+      ],
+      "source": "./plugins/ahoo-fluent-assert-skills",
       "category": "development"
     },
     {
-      "name": "cosid-manual-integration",
-      "description": "Manually integrate CosId distributed ID generators without Spring Boot auto-configuration",
-      "source": "./skills/cosid-manual-integration",
+      "name": "ahoo-simba-skills",
+      "version": "0.0.3",
+      "description": "Skills for using and testing Simba, a JVM distributed mutex and leader-election library with JDBC/MySQL, Redis, and Zookeeper backends.",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "simba",
+        "distributed-lock",
+        "distributed-mutex",
+        "leader-election",
+        "jvm",
+        "kotlin",
+        "spring-boot",
+        "redis",
+        "jdbc",
+        "zookeeper"
+      ],
+      "source": "./plugins/ahoo-simba-skills",
       "category": "development"
     },
     {
-      "name": "cosid-sharding",
-      "description": "Use CosId sharding algorithms with ShardingSphere for database/table sharding strategies",
-      "source": "./skills/cosid-sharding",
-      "category": "development"
-    },
-    {
-      "name": "cosid-spring-boot",
-      "description": "Integrate CosId distributed ID generator (Snowflake, Segment) with Spring Boot auto-configuration",
-      "source": "./skills/cosid-spring-boot",
-      "category": "development"
-    },
-    {
-      "name": "cosid-strategy-guide",
-      "description": "Choose the right CosId ID generation strategy — SnowflakeId vs SegmentId vs SegmentChainId",
-      "source": "./skills/cosid-strategy-guide",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-cosec-auth",
-      "description": "Implement enterprise authentication with CoSec + Fetcher — JWT tokens, refresh, device tracking, multi-tenancy",
-      "source": "./skills/fetcher-cosec-auth",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-decorator-service",
-      "description": "Create declarative API services using Fetcher TypeScript decorators (@api, @get, @post, @body, @query)",
-      "source": "./skills/fetcher-decorator-service",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-eventbus",
-      "description": "Build typed event bus systems with serial, parallel, and cross-tab broadcast execution strategies",
-      "source": "./skills/fetcher-eventbus",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-integration",
-      "description": "Integrate the Fetcher HTTP client library with interceptors, result extractors, and named fetcher registry",
-      "source": "./skills/fetcher-integration",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-llm-streaming",
-      "description": "Handle LLM streaming responses with Fetcher's SSE and streaming support",
-      "source": "./skills/fetcher-llm-streaming",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-openai-client",
-      "description": "Build OpenAI-compatible API clients using Fetcher's HTTP client patterns",
-      "source": "./skills/fetcher-openai-client",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-openapi-generator",
-      "description": "Generate TypeScript API clients from OpenAPI specs using Fetcher patterns",
-      "source": "./skills/fetcher-openapi-generator",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-openapi-types",
-      "description": "Generate TypeScript type definitions from OpenAPI schemas for Fetcher-based clients",
-      "source": "./skills/fetcher-openapi-types",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-react-hooks",
-      "description": "Use Fetcher React hooks for declarative data fetching with caching and state management",
-      "source": "./skills/fetcher-react-hooks",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-storage",
-      "description": "Manage client-side storage with Fetcher's storage abstractions and adapters",
-      "source": "./skills/fetcher-storage",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-viewer-components",
-      "description": "Build file viewer UI components with Fetcher's viewer component library",
-      "source": "./skills/fetcher-viewer-components",
-      "category": "development"
-    },
-    {
-      "name": "fetcher-wow-cqrs",
-      "description": "Integrate Fetcher with Wow CQRS framework for frontend command/query patterns",
-      "source": "./skills/fetcher-wow-cqrs",
-      "category": "development"
-    },
-    {
-      "name": "fluent-assert",
-      "description": "Write Kotlin test assertions with FluentAssert (.assert() extension) for clean, null-safe assertions",
-      "source": "./skills/fluent-assert",
-      "category": "development"
-    },
-    {
-      "name": "simba-testing",
-      "description": "Write tests for Simba distributed mutex and leader-election code with TCK-based test specs",
-      "source": "./skills/simba-testing",
-      "category": "development"
-    },
-    {
-      "name": "simba",
-      "description": "Use Simba distributed mutex / leader-election library with JDBC, Redis, or ZooKeeper backends",
-      "source": "./skills/simba",
-      "category": "development"
-    },
-    {
-      "name": "wow-aggregate-enhance",
-      "description": "Enhance Wow aggregates with KDoc comments, unit tests, and design reports through an interactive process",
-      "source": "./skills/wow-aggregate-enhance",
-      "category": "development"
-    },
-    {
-      "name": "wow",
-      "description": "Build reactive DDD + Event Sourcing + CQRS microservices in Kotlin/Java with the Wow framework on Spring Boot",
-      "source": "./skills/wow",
+      "name": "ahoo-wow-skills",
+      "version": "0.0.3",
+      "description": "Agent skills for building, testing, reviewing, and debugging Wow reactive DDD, Event Sourcing, and CQRS microservices.",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "wow",
+        "ddd",
+        "cqrs",
+        "event-sourcing",
+        "saga",
+        "aggregate",
+        "kotlin",
+        "spring-boot",
+        "reactor",
+        "microservices"
+      ],
+      "source": "./plugins/ahoo-wow-skills",
       "category": "development"
     }
   ]

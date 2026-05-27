@@ -1,0 +1,24 @@
+{
+  "name": "ahoo-wow-skills",
+  "description": "Agent skills for building, testing, reviewing, and debugging Wow reactive DDD, Event Sourcing, and CQRS microservices.",
+  "version": "0.0.3",
+  "author": {
+    "name": "Ahoo Wang",
+    "email": "ahoowang@gmail.com"
+  },
+  "homepage": "https://github.com/Ahoo-Wang/skills",
+  "repository": "https://github.com/Ahoo-Wang/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "wow",
+    "ddd",
+    "cqrs",
+    "event-sourcing",
+    "saga",
+    "aggregate",
+    "kotlin",
+    "spring-boot",
+    "reactor",
+    "microservices"
+  ]
+}

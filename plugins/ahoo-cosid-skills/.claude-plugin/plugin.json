@@ -1,0 +1,23 @@
+{
+  "name": "ahoo-cosid-skills",
+  "description": "CosId skills for choosing and integrating high-performance distributed ID generators, Spring Boot auto-configuration, machine ID distributors, and ShardingSphere sharding.",
+  "version": "0.0.3",
+  "author": {
+    "name": "Ahoo Wang",
+    "email": "ahoowang@gmail.com"
+  },
+  "homepage": "https://github.com/Ahoo-Wang/skills",
+  "repository": "https://github.com/Ahoo-Wang/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "cosid",
+    "distributed-id",
+    "snowflake",
+    "segment-id",
+    "segment-chain-id",
+    "machine-id",
+    "sharding",
+    "spring-boot",
+    "java"
+  ]
+}

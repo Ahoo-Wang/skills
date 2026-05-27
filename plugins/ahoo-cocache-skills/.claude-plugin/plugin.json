@@ -1,0 +1,24 @@
+{
+  "name": "ahoo-cocache-skills",
+  "description": "CoCache skills for implementing two-level distributed coherent caches, cache proxy interfaces, JoinCache composition, and Redis/Spring Boot integration in Java/Kotlin projects.",
+  "version": "0.0.3",
+  "author": {
+    "name": "Ahoo Wang",
+    "email": "ahoowang@gmail.com"
+  },
+  "homepage": "https://github.com/Ahoo-Wang/skills",
+  "repository": "https://github.com/Ahoo-Wang/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "cocache",
+    "coherent-cache",
+    "distributed-cache",
+    "two-level-cache",
+    "spring-boot",
+    "redis",
+    "kotlin",
+    "java",
+    "join-cache",
+    "cache-coherence"
+  ]
+}

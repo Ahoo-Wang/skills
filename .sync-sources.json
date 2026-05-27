@@ -1,0 +1,138 @@
+{
+  "generated_by": "scripts/sync-sources.sh",
+  "sources": [
+    {
+      "source": "CoApi",
+      "url": "https://github.com/Ahoo-Wang/CoApi.git",
+      "branch": "main",
+      "commit": "58d18b1b31b98330c2c5c3e4fdc937166240c992",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "skills": [
+        "coapi-developer"
+      ],
+      "plugins": [
+        "ahoo-coapi-skills"
+      ]
+    },
+    {
+      "source": "CoCache",
+      "url": "https://github.com/Ahoo-Wang/CoCache.git",
+      "branch": "main",
+      "commit": "2bbf1cda57720aa1e710c91ee35b865fcddc457a",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "skills": [
+        "cocache"
+      ],
+      "plugins": [
+        "ahoo-cocache-skills"
+      ]
+    },
+    {
+      "source": "CoSec",
+      "url": "https://github.com/Ahoo-Wang/CoSec.git",
+      "branch": "main",
+      "commit": "78a5acb4ce87bcd07a3120f4923c7c02792d5dd3",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "skills": [
+        "cosec-custom-matcher",
+        "cosec-integration",
+        "cosec-policy-author",
+        "cosec-troubleshoot"
+      ],
+      "plugins": [
+        "ahoo-cosec-skills"
+      ]
+    },
+    {
+      "source": "CosId",
+      "url": "https://github.com/Ahoo-Wang/CosId.git",
+      "branch": "main",
+      "commit": "514a9e96b88e09936203162a707e1da300279743",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "skills": [
+        "cosid-manual-integration",
+        "cosid-sharding",
+        "cosid-spring-boot",
+        "cosid-strategy-guide"
+      ],
+      "plugins": [
+        "ahoo-cosid-skills"
+      ]
+    },
+    {
+      "source": "FluentAssert",
+      "url": "https://github.com/Ahoo-Wang/FluentAssert.git",
+      "branch": "main",
+      "commit": "571eda5eab2072dedd18823c1bfa0f7e616d78ef",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "skills": [
+        "fluent-assert"
+      ],
+      "plugins": [
+        "ahoo-fluent-assert-skills"
+      ]
+    },
+    {
+      "source": "Simba",
+      "url": "https://github.com/Ahoo-Wang/Simba.git",
+      "branch": "main",
+      "commit": "d29349cfc766b0353d7d4d82d59c02fc505df4da",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "skills": [
+        "simba",
+        "simba-testing"
+      ],
+      "plugins": [
+        "ahoo-simba-skills"
+      ]
+    },
+    {
+      "source": "Wow",
+      "url": "https://github.com/Ahoo-Wang/Wow.git",
+      "branch": "main",
+      "commit": "6b6806c5f20686e8ba1e79f51c770b76bb79ef02",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "skills": [
+        "wow",
+        "wow-code-review",
+        "wow-debugging",
+        "wow-development-workflow"
+      ],
+      "plugins": [
+        "ahoo-wow-skills"
+      ]
+    },
+    {
+      "source": "fetcher",
+      "url": "https://github.com/Ahoo-Wang/fetcher.git",
+      "branch": "main",
+      "commit": "6662f4f7b647b08e88208cfdc6467173459a8f60",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "skills": [
+        "fetcher-cosec-auth",
+        "fetcher-decorator-service",
+        "fetcher-eventbus",
+        "fetcher-integration",
+        "fetcher-llm-streaming",
+        "fetcher-openai-client",
+        "fetcher-openapi-generator",
+        "fetcher-openapi-types",
+        "fetcher-react-hooks",
+        "fetcher-storage",
+        "fetcher-viewer-components",
+        "fetcher-wow-cqrs"
+      ],
+      "plugins": [
+        "ahoo-fetcher-skills"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "skill_name": "fluent-assert",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write a test for a function that returns a List<String>. Assert the list is not empty, has exactly 3 elements, contains \"foo\" and \"bar\", and each element starts with a lowercase letter.",
+      "expected_output": "Kotlin test using FluentAssert with isNotEmpty, hasSize, contains, allMatch"
+    },
+    {
+      "id": 2,
+      "prompt": "Write a JUnit 5 test that verifies a list does NOT contain \"forbidden\". Assert the list has size 2 and contains exactly \"a\" and \"b\" in that order.",
+      "expected_output": "Kotlin test with doesNotContain, hasSize, containsExactly"
+    },
+    {
+      "id": 3,
+      "prompt": "Write a test that checks a nullable String is null, and another that checks a nullable Int is not null and greater than 0.",
+      "expected_output": "Two tests: nullableString.assert().isNull() and nullableInt.assert().isNotNull().isGreaterThan(0)"
+    },
+    {
+      "id": 4,
+      "prompt": "Write a test that uses assertThrownBy<> to verify a function throws IllegalArgumentException with message \"invalid input\" when passed an empty string.",
+      "expected_output": "assertThrownBy<IllegalArgumentException> { function(\"\") }.hasMessage(\"invalid input\")"
+    },
+    {
+      "id": 5,
+      "prompt": "Write assertions for a Map<String, Int> that verify it has size 2, contains key \"count\", has value 42 for that key, and contains entry (\"count\", 42).",
+      "expected_output": "map.assert().hasSize(2).containsKey(\"count\").containsValue(42).containsEntry(\"count\", 42)"
+    },
+    {
+      "id": 6,
+      "prompt": "Write assertions for an Instant that verify it is in the past (before now), for LocalDate.now() that verifies it is today, and for LocalDate.of(2024, 4, 15) that verifies it is in April.",
+      "expected_output": "instant.assert().isBefore(Instant.now()), LocalDate.now().assert().isToday(), and LocalDate.of(2024, 4, 15).assert().hasMonth(Month.APRIL)"
+    },
+    {
+      "id": 7,
+      "prompt": "Write a test that asserts a custom data class Person(name: String, age: Int) equals expectedPerson using recursive comparison, then verifies the age is greater than 18.",
+      "expected_output": "person.assert().usingRecursiveComparison().isEqualTo(expectedPerson) and person.age.assert().isGreaterThan(18)"
+    }
+  ]
+}
