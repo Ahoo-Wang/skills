@@ -1,10 +1,21 @@
 # FluentAssert - Complete API Reference
 
+## Table of Contents
+
+- [Project Information](#project-information)
+- [Installation](#installation)
+- [Core Extension Functions](#core-extension-functions)
+- [Supported Types](#supported-types)
+- [API Examples](#api-examples)
+- [Comparison with AssertJ](#comparison-with-assertj)
+- [When to Use FluentAssert](#when-to-use-fluentassert)
+- [When to Use AssertJ Directly](#when-to-use-assertj-directly)
+
 ## Project Information
 
 **Name:** FluentAssert
 
-**Version:** 0.2.8
+**Version:** 1.0.0
 
 **Description:** A Kotlin library providing fluent assertions for JDK types
 
@@ -22,7 +33,7 @@
 <dependency>
     <groupId>me.ahoo.test</groupId>
     <artifactId>fluent-assert-core</artifactId>
-    <version>0.2.8</version>
+    <version>1.0.0</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -30,7 +41,7 @@
 ### Gradle (Kotlin DSL)
 
 ```kotlin
-testImplementation("me.ahoo.test:fluent-assert-core:0.2.8")
+testImplementation("me.ahoo.test:fluent-assert-core:1.0.0")
 ```
 
 ## Core Extension Functions
@@ -43,6 +54,8 @@ All extension functions follow the pattern `Type.assert(): AssertJTypeAssert`, w
 
 ```kotlin
 import me.ahoo.test.asserts.assert
+import me.ahoo.test.asserts.assertThrownBy
+import java.time.*
 ```
 
 ## Supported Types
@@ -341,10 +354,10 @@ dateTime.assert()
 #### OffsetDateTime
 
 ```kotlin
-val offsetDateTime = OffsetDateTime.now()
+val offsetDateTime = OffsetDateTime.of(2023, 12, 25, 10, 30, 0, 0, java.time.ZoneOffset.UTC)
 offsetDateTime.assert()
-    .isToday()
-    .hasOffset(ZoneOffset.UTC)
+    .isEqualTo(OffsetDateTime.of(2023, 12, 25, 10, 30, 0, 0, java.time.ZoneOffset.UTC))
+    .isBefore(offsetDateTime.plusDays(1))
 ```
 
 #### OffsetTime
@@ -371,7 +384,7 @@ time.assert()
 val date = LocalDate.of(2023, 12, 25)
 date.assert()
     .hasYear(2023)
-    .hasMonth(12)
+    .hasMonth(Month.DECEMBER)
     .hasDayOfMonth(25)
 ```
 
@@ -381,7 +394,7 @@ date.assert()
 val yearMonth = YearMonth.of(2023, 12)
 yearMonth.assert()
     .hasYear(2023)
-    .hasMonth(12)
+    .hasMonth(Month.DECEMBER)
 ```
 
 #### Instant
@@ -437,7 +450,7 @@ file.assert()
 #### URL
 
 ```kotlin
-val url = URL("https://example.com")
+val url = URL("https://example.com:443")
 url.assert()
     .hasHost("example.com")
     .hasProtocol("https")

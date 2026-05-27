@@ -1,333 +1,77 @@
 ---
 name: fluent-assert
-description: |
-  Use FluentAssert for writing Kotlin test assertions. FluentAssert provides a fluent `.assert()` extension that wraps AssertJ with Kotlin idioms.
-
-  MANDATORY whenever writing Kotlin tests with assertions. This includes:
-  - All JUnit 5, JUnit 4, or other Kotlin test frameworks
-  - Any assertion on JDK types (collections, strings, primitives, dates, exceptions, etc.)
-  - Wow framework saga tests with expectCommandBody blocks
-  - Exception testing with assertThrownBy<>
-
-  CRITICAL: Always use `import me.ahoo.test.asserts.assert` - NOT AssertJ's assertThat() which is verbose and not null-safe in Kotlin.
-
-  The library is available as `me.ahoo.test:fluent-assert-core`.
+description: Use when writing or refactoring Kotlin tests that need assertions, including JUnit tests, Wow/SagaSpec tests, JDK types, nullable values, collections, maps, time values, futures, predicates, custom data classes, or exception assertions with assertThrownBy.
 ---
 
-# FluentAssert - Kotlin Fluent Assertions
+# FluentAssert
 
-## Table of Contents
-- [Quick Reference](#quick-reference)
-- [Supported Types](#supported-types)
-- [Null Safety](#null-safety)
-- [Chaining](#chaining)
-- [Common Mistakes](#common-mistakes)
-- [References](#references)
-- [Integration with Wow/Saga Tests](#integration-with-wowsaga-tests)
-- [When AssertJ Direct is Still Needed](#when-assertj-direct-is-still-needed)
-- [AssertProvider](#assertprovider)
-- [Custom Type Assertions](#custom-type-assertions)
+Use FluentAssert for Kotlin assertions in this repository and in downstream Kotlin test examples. Prefer the Kotlin extension style over direct AssertJ calls.
 
----
-
-## Quick Reference
+## Core Rule
 
 ```kotlin
 import me.ahoo.test.asserts.assert
 
-// Basic pattern: value.assert().assertionMethod()
-42.assert().isGreaterThan(0)
-"hello".assert().startsWith("hel")
-listOf(1, 2, 3).assert().hasSize(3).contains(2)
+actual.assert().isEqualTo(expected)
 ```
 
-**Core Pattern:**
+Avoid `assertThat(actual)` in ordinary test code. FluentAssert keeps nullable receivers natural:
 
-| Approach | Code |
-|----------|------|
-| Avoid | `assertThat(value).isEqualTo(expected)` |
-| Prefer | `value.assert().isEqualTo(expected)` |
-
----
-
-## Supported Types
-
-### Primitives
-```kotlin
-true.assert().isTrue()
-false.assert().isFalse()
-25.assert().isGreaterThan(18).isLessThan(100)
-BigDecimal("123.45").assert().isEqualTo("123.45")
-```
-
-### Strings
-```kotlin
-"FluentAssert".assert()
-    .startsWith("Fluent")
-    .endsWith("Assert")
-    .contains("uentAss")
-    .hasLength(11)
-    .doesNotContain("Java")    // negation
-    .matches("^Fluent.*$")     // regex
-```
-
-### Collections
-```kotlin
-listOf(1, 2, 3).assert()
-    .hasSize(3)
-    .contains(1, 2, 3)
-    .doesNotContain(4, 5)
-    .containsExactly(1, 2, 3)  // exact order
-    .element(0).isEqualTo(1)   // access by index
-
-setOf("a", "b").assert()
-    .hasSize(2)
-    .contains("a")
-    .doesNotContain("c")
-
-mapOf("key" to "value").assert()
-    .hasSize(1)
-    .containsKey("key")
-    .containsValue("value")
-    .containsEntry("key", "value")
-    .allSatisfy { k, v -> k.assert().isNotBlank(); v.assert().isNotBlank() }
-
-Optional.of("value").assert()
-    .isPresent()
-    .contains("value")
-    .isEmpty()                 // for empty Optional
-
-arrayOf(1, 2, 3).assert()
-    .hasSize(3)
-    .contains(2)
-```
-
-### Time/Date
-```kotlin
-Instant.now().assert().isBefore(Instant.now().plusSeconds(1))
-LocalDate.of(2023, 12, 25).assert().hasYear(2023).hasMonth(12)
-LocalDateTime.now().assert().isToday()
-Duration.ofHours(2).assert().hasHours(2).isGreaterThan(Duration.ofHours(1))
-```
-
-### Exception Testing
-```kotlin
-// Assert code throws exception
-assertThrownBy<IllegalArgumentException> {
-    throw IllegalArgumentException("invalid")
-}.hasMessage("invalid")
-
-// Assert on existing exception
-exception.assert()
-    .isInstanceOf(RuntimeException::class.java)
-    .hasMessageContaining("error")
-    .hasCauseInstanceOf(NullPointerException::class.java)
-```
-
-### I/O
-```kotlin
-Paths.get("/tmp/test.txt").assert().exists().isReadable().isRegularFile()
-File("/tmp/test.txt").assert().exists().isFile().canRead().hasName("test.txt")
-URL("https://example.com").assert().hasHost("example.com").hasProtocol("https")
-```
-
-### Concurrency
-```kotlin
-CompletableFuture.completedFuture("result").assert()
-    .isCompleted()
-    .isCompletedWithValue("result")
-    .isCompletedExceptionally()
-```
-
-### Type Checking
-```kotlin
-val obj: Any = "string"
-obj.assert()
-    .isInstanceOf(String::class.java)
-    .isNotInstanceOf(Int::class.java)
-```
-
----
-
-## Null Safety
-
-All extension functions accept nullable types. The `assert()` function is defined on `Type?`:
-
-```kotlin
-val nullableString: String? = null
-nullableString.assert().isNull()
-
-val nullableInt: Int? = 42
-nullableInt.assert().isNotNull().isGreaterThan(0)
-```
-
----
-
-## Chaining
-
-Method chaining works naturally - each assertion returns the AssertJ assertion object:
-
-```kotlin
-listOf(1, 2, 3, 4, 5).assert()
-    .hasSize(5)
-    .contains(3)
-    .allMatch { it > 0 }
-    .isSorted()
-    .doesNotContain { it < 0 }
-```
-
-**Recommended assertion order:**
-1. `hasSize()` or `isNotEmpty()` first - set context
-2. `contains()` / `doesNotContain()` next - main checks
-3. `allMatch()` / `anySatisfy()` last - conditions
-
----
-
-## Common Mistakes
-
-### ❌ Wrong Import
-```kotlin
-// WRONG - verbose, not null-safe in Kotlin
-import org.assertj.core.api.Assertions.assertThat
-assertThat(value).isEqualTo(expected)
-```
-
-### ✅ Correct Import
-```kotlin
-// CORRECT - idiomatic Kotlin
-import me.ahoo.test.asserts.assert
-value.assert().isEqualTo(expected)
-```
-
-### ❌ Incorrect Null Assertion
 ```kotlin
 val name: String? = null
-name.assert().isNotNull()  // FAILS - name is null
-name.assert().isNull()     // CORRECT - asserts null
+name.assert().isNull()
 ```
 
-### ❌ Wrong Assertion Order
-```kotlin
-// Works but less readable
-listOf(1, 2, 3).assert().contains(2).hasSize(3)
+## Common Patterns
 
-// Better - context first, then details
-listOf(1, 2, 3).assert().hasSize(3).contains(2)
-```
+| Need | Pattern |
+|---|---|
+| Primitive/string/object | `value.assert().isEqualTo(expected)` |
+| Collection/list/map | `items.assert().hasSize(2).contains("a")` |
+| Nullable value | `value.assert().isNull()` or `value.assert().isNotNull()` |
+| Exception lambda | `assertThrownBy<IllegalArgumentException> { call() }.hasMessage("bad")` |
+| Existing exception | `throwable.assert().hasMessageContaining("bad")` |
+| Time month checks | `date.assert().hasMonth(Month.APRIL)` |
+| Future success/failure | `future.assert().isCompletedWithValue(value)` / `.isCompletedExceptionally()` |
+| Recursive comparison | `actual.assert().usingRecursiveComparison().isEqualTo(expected)` |
 
-### ❌ Using AssertJ Directly
-```kotlin
-// AVOID - don't mix styles
-assertThat(value).isEqualTo(expected)
-value.assert().isGreaterThan(0)
-```
-
----
-
-## References
-
-For complete API documentation, see:
-
-- [`references/FULL-API.md`](references/FULL-API.md) - Complete API reference with all assertion methods
-
----
-
-## Integration with Wow/Saga Tests
-
-In Wow framework saga tests using `SagaSpec`:
+For exception lambdas, also import:
 
 ```kotlin
-import me.ahoo.test.asserts.assert
-import me.ahoo.wow.test.SagaSpec
-
-class DemoSagaSpec : SagaSpec<DemoSaga>({
-    on {
-        val demoCreated = DemoCreated("data")
-        whenEvent(demoCreated) {
-            expectNoError()
-            expectCommandType(UpdateDemo::class)
-            expectCommandBody<UpdateDemo> {
-                data.assert().isNotNull().isEqualTo("updated")
-            }
-        }
-    }
-})
+import me.ahoo.test.asserts.assertThrownBy
 ```
 
----
+For month assertions, import `java.time.Month`; AssertJ expects `Month`, not an integer.
 
-## When AssertJ Direct is Still Needed
+## Wow/Saga Tests
 
-FluentAssert delegates to AssertJ, so you can always access AssertJ methods:
+Use FluentAssert inside expectation blocks too:
 
 ```kotlin
-// FluentAssert provides the extension
-value.assert().isEqualTo(expected)
-
-// For specific AssertJ methods not exposed via extension:
-assertThat(value).usingRecursiveComparison().isEqualTo(expected)
+expectCommandBody<UpdateDemo> {
+    data.assert().isNotNull().isEqualTo("updated")
+}
 ```
-
----
-
-## Exceptions
-
-All AssertJ exception assertion methods are available via `.assert()`:
-
-```kotlin
-throwable.assert()
-    .hasMessage("message")
-    .hasMessageContaining("part")
-    .hasMessageMatching("regex")
-    .hasNoCause()
-    .hasCauseInstanceOf(Cause::class.java)
-    .isInstanceOf(Exception::class.java)
-    .isNotInstanceOf(Error::class.java)
-```
-
----
 
 ## AssertProvider
 
-For types implementing AssertJ's `AssertProvider<A>` interface, `.assert()` delegates to `assertThat(this)` and returns the provider's custom assertion type:
+For types implementing AssertJ's `AssertProvider<A>`, `.assert()` returns the provider's custom assertion type:
 
 ```kotlin
-import org.assertj.core.api.AssertProvider
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.BigDecimalAssert
-
-class MoneyAssertProvider(private val amount: BigDecimal) : AssertProvider<BigDecimalAssert> {
-    override fun actual(): BigDecimalAssert = assertThat(amount)
-}
-
-val provider = MoneyAssertProvider(BigDecimal("99.99"))
-provider.assert().isPositive().isLessThan(BigDecimal("100"))
+provider.assert().isPositive()
 ```
 
-**Key points:**
-- Receiver is non-nullable: `AssertProvider<A>.assert(): A`
-- Returns the type parameter `A` (the custom assertion class)
-- Delegates to AssertJ's `assertThat(this)`, not `actual()` directly
+Only use direct `assertThat` when implementing the provider's `assertThat()` method or when a project explicitly requires raw AssertJ.
 
----
+## Avoid
 
-## Custom Type Assertions
+- Do not chain `.assert()` after `assertThrownBy`; it already returns `ThrowableAssert<T>`.
+- Do not assert contradictory states on one value, such as `Optional.of("x").assert().isPresent().isEmpty()`.
+- Do not use unavailable AssertJ shortcuts like `OffsetDateTimeAssert.hasOffset(...)`.
+- Do not use numeric `hasMonth(4)` for `LocalDate` or `YearMonth`; use `hasMonth(Month.APRIL)`.
+- Do not switch to `assertThat(value).usingRecursiveComparison()`; keep chaining from `value.assert()`.
 
-For custom data classes, use AssertJ's `hasFieldOrPropertyWithValue` or `assertThat` with `usingRecursiveComparison`:
+## References
 
-```kotlin
-data class Person(val name: String, val age: Int)
-
-// Using hasFieldOrPropertyWithValue
-person.assert()
-    .isNotNull()
-    .hasFieldOrPropertyWithValue("name", "Alice")
-    .hasFieldOrPropertyWithValue("age", 30)
-
-// Using recursive comparison for deep equality
-assertThat(person).usingRecursiveComparison().isEqualTo(expectedPerson)
-
-// For nested assertions in collections
-listOf(person).assert().first()
-    .hasFieldOrPropertyWithValue("name", "Alice")
-```
+- Read [`references/FULL-API.md`](references/FULL-API.md) when you need supported type coverage, installation snippets, or a fuller example.
+- Use [`evals/evals.json`](evals/evals.json) as the regression prompt set when changing this skill.
