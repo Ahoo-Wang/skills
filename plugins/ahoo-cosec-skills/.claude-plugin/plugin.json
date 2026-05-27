@@ -1,0 +1,24 @@
+{
+  "name": "ahoo-cosec-skills",
+  "description": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, authoring authorization policies, extending matchers, and troubleshooting access decisions.",
+  "version": "0.0.3",
+  "author": {
+    "name": "Ahoo Wang",
+    "email": "ahoowang@gmail.com"
+  },
+  "homepage": "https://github.com/Ahoo-Wang/skills",
+  "repository": "https://github.com/Ahoo-Wang/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "cosec",
+    "security",
+    "authorization",
+    "authentication",
+    "rbac",
+    "policy",
+    "multi-tenant",
+    "spring-boot",
+    "reactive",
+    "jwt"
+  ]
+}

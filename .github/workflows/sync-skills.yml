@@ -25,37 +25,30 @@ jobs:
         id: sync
         run: |
           set +e
-          scripts/sync-skills.sh repos.json skills
+          scripts/sync-sources.sh repos.json sources .sync-sources.json
           EXIT_CODE=$?
-          if [ $EXIT_CODE -eq 0 ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          elif [ $EXIT_CODE -eq 2 ]; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
+          set -e
+          if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 2 ]; then
             echo "Error: Sync failed with exit code $EXIT_CODE" >&2
             exit 1
           fi
 
+          scripts/generate-plugins.sh
+
+          if [ -n "$(git status --porcelain -- sources .sync-sources.json plugins .claude-plugin/marketplace.json .agents/plugins/marketplace.json)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Validate skill files
-        if: steps.sync.outputs.changed == 'true'
-        run: |
-          for skill_dir in skills/*/; do
-            skill_file="$skill_dir/SKILL.md"
-            if [ ! -f "$skill_file" ]; then
-              echo "Error: Missing SKILL.md in $skill_dir" >&2
-              exit 1
-            fi
-            if ! head -1 "$skill_file" | grep -q "^---"; then
-              echo "Error: Missing YAML frontmatter in $skill_file" >&2
-              exit 1
-            fi
-          done
-          echo "All skills validated successfully"
+        run: bash scripts/validate-skills.sh
 
       - name: Commit and push changes
         if: steps.sync.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A sources/ .sync-sources.json plugins/ .claude-plugin/marketplace.json .agents/plugins/marketplace.json
           git commit -m "chore: sync skills from source repos [skip ci]"
           git push

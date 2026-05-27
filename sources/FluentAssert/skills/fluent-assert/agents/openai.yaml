@@ -1,0 +1,7 @@
+interface:
+  display_name: "FluentAssert"
+  short_description: "Kotlin fluent assertion guidance"
+  default_prompt: "Use $fluent-assert to write idiomatic Kotlin test assertions."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,116 @@
+{
+  "name": "ahoo-skills",
+  "interface": {
+    "displayName": "Ahoo Skills"
+  },
+  "plugins": [
+    {
+      "name": "ahoo-agent-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ahoo-agent-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "ahoo-coapi-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ahoo-coapi-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "ahoo-cocache-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ahoo-cocache-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "ahoo-cosec-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ahoo-cosec-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "ahoo-cosid-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ahoo-cosid-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "ahoo-fetcher-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ahoo-fetcher-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "ahoo-fluent-assert-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ahoo-fluent-assert-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "ahoo-simba-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ahoo-simba-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "ahoo-wow-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/ahoo-wow-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "plugins": [
+    {
+      "name": "ahoo-fluent-assert-skills",
+      "description": "Skills for writing Kotlin tests with FluentAssert's AssertJ-backed .assert() extensions for JDK types, nullable values, exceptions, and custom AssertProvider assertions.",
+      "skills": {
+        "include": [
+          "*"
+        ],
+        "exclude": [
+          "*-workspace"
+        ]
+      },
+      "keywords": [
+        "fluent-assert",
+        "kotlin",
+        "assertj",
+        "testing",
+        "junit5",
+        "assertions"
+      ],
+      "category": "development",
+      "interface": {
+        "displayName": "Ahoo FluentAssert Skills",
+        "capabilities": [
+          "Skills"
+        ],
+        "defaultPrompt": "Help me use FluentAssert skills for Kotlin test assertions."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      }
+    }
+  ]
+}
