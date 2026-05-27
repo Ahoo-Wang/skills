@@ -23,7 +23,18 @@ assert_path_missing() {
 assert_contains() {
   local file="$1"
   local expected="$2"
-  grep -Fq "$expected" "$file" || fail "Expected '$expected' in $file"
+  grep -Fq -- "$expected" "$file" || fail "Expected '$expected' in $file"
+}
+
+assert_not_contains() {
+  local file="$1"
+  local unexpected="$2"
+  if grep -Fq -- "$unexpected" "$file"; then
+    fail "Did not expect '$unexpected' in $file"
+  else
+    local status=$?
+    [ "$status" -eq 1 ] || fail "grep failed while checking '$unexpected' in $file"
+  fi
 }
 
 assert_exit_code() {
@@ -143,7 +154,39 @@ EOF
   assert_contains "$output" "Failed to clone"
 }
 
-test_syncs_source_skills_and_plugin_metadata() {
+test_assert_not_contains_fails_on_grep_errors() {
+  local tmp
+  tmp="$(mktemp -d "$TMP_ROOT/assert-not-contains.XXXXXX")"
+  local output="$tmp/output.log"
+
+  set +e
+  (assert_not_contains "$tmp/missing-file" "unexpected") >"$output" 2>&1
+  local code=$?
+  set -e
+
+  assert_exit_code "$code" 1 "assert_not_contains should fail when grep fails"
+  assert_contains "$output" "grep failed"
+}
+
+test_grep_assertions_treat_dash_prefixed_patterns_as_literals() {
+  local tmp
+  tmp="$(mktemp -d "$TMP_ROOT/dash-pattern.XXXXXX")"
+  local file="$tmp/content.txt"
+  printf '%s\n' "--literal-pattern" > "$file"
+
+  assert_contains "$file" "--literal-pattern"
+
+  local output="$tmp/output.log"
+  set +e
+  (assert_not_contains "$file" "--literal-pattern") >"$output" 2>&1
+  local code=$?
+  set -e
+
+  assert_exit_code "$code" 1 "assert_not_contains should find dash-prefixed literal patterns"
+  assert_contains "$output" "Did not expect"
+}
+
+test_syncs_source_skills_and_compact_manifest() {
   local tmp
   tmp="$(mktemp -d "$TMP_ROOT/sync-source.XXXXXX")"
 
@@ -173,6 +216,9 @@ EOF
   assert_file_exists "$aggregate/sources/source/plugins.json"
   assert_file_exists "$aggregate/.sync-sources.json"
   assert_contains "$aggregate/.sync-sources.json" '"source": "source"'
+  assert_contains "$aggregate/.sync-sources.json" '"commit":'
+  assert_not_contains "$aggregate/.sync-sources.json" '"skills":'
+  assert_not_contains "$aggregate/.sync-sources.json" '"plugins":'
 }
 
 test_fails_on_duplicate_skill_names() {
@@ -336,7 +382,9 @@ EOF
 
 main() {
   test_fails_when_source_repo_cannot_be_cloned
-  test_syncs_source_skills_and_plugin_metadata
+  test_assert_not_contains_fails_on_grep_errors
+  test_grep_assertions_treat_dash_prefixed_patterns_as_literals
+  test_syncs_source_skills_and_compact_manifest
   test_fails_on_duplicate_skill_names
   test_sync_does_not_stage_changes
   test_fails_when_configured_skills_path_is_missing

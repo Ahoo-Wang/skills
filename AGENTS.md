@@ -72,8 +72,7 @@ at 02:00, 08:00, 14:00, and 20:00 UTC.
 Sync rules:
 - Workspace skills ending in `-workspace` are skipped.
 - Duplicate skill names across source repos fail the sync.
-- `.sync-sources.json` records mirrored repos, skills, commits, and plugin
-  metadata.
+- `.sync-sources.json` records mirrored source repos, paths, and commits.
 - Removed upstream skills are removed from generated distribution output on the
   next sync.
 
