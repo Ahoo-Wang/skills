@@ -29,7 +29,7 @@
       "source": "CosId",
       "url": "https://github.com/Ahoo-Wang/CosId.git",
       "branch": "main",
-      "commit": "6788a02e5d111e69b6bd123a9551aebb05f2cb60",
+      "commit": "66c1ad855f2476c3f0a29f080d83e8d1fa9722bf",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
