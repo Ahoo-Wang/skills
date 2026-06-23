@@ -13,7 +13,7 @@
       "source": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
-      "commit": "b34f513072bf3d8ffbd7cfe851f161fcc7dfb4ae",
+      "commit": "c5e76460aa4eb55245749d12e9c230da6f47409a",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
