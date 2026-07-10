@@ -5,7 +5,7 @@
       "source": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
-      "commit": "0362aaf4f376365a469d88ffdc4460a3b4173686",
+      "commit": "ae40c71d5b853b694df834ff64654cb49f46b36d",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -21,7 +21,7 @@
       "source": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "1767c9e4538cbe5e0b647260eef8dd8a3f1babde",
+      "commit": "080fb2cd47cf679d34520faa1141c9dbdf6c4d75",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
