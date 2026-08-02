@@ -75,7 +75,8 @@
         "wow",
         "wow-code-review",
         "wow-debugging",
-        "wow-development-workflow"
+        "wow-development-workflow",
+        "wow-v6-to-v8-migration"
       ]
     }
   ]

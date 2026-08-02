@@ -1,6 +1,6 @@
 {
   "name": "ahoo-wow-skills",
-  "description": "Agent skills for building, testing, reviewing, and debugging Wow reactive DDD, Event Sourcing, and CQRS microservices.",
+  "description": "Agent skills for building, testing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS microservices.",
   "version": "0.0.3",
   "author": {
     "name": "Ahoo Wang",
@@ -19,19 +19,20 @@
     "kotlin",
     "spring-boot",
     "reactor",
-    "microservices"
+    "microservices",
+    "migration"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Ahoo Wow Skills",
-    "shortDescription": "Agent skills for building, testing, reviewing, and debugging Wow reactive DDD, Event Sourcing, and CQRS microservices.",
-    "longDescription": "Agent skills for building, testing, reviewing, and debugging Wow reactive DDD, Event Sourcing, and CQRS microservices.",
+    "shortDescription": "Agent skills for building, testing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS microservices.",
+    "longDescription": "Agent skills for building, testing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS microservices.",
     "developerName": "Ahoo Wang",
     "category": "Development",
     "capabilities": [
       "Skills"
     ],
     "websiteURL": "https://github.com/Ahoo-Wang/skills",
-    "defaultPrompt": "Help me design, test, review, and debug Wow DDD, Event Sourcing, and CQRS services."
+    "defaultPrompt": "Help me design, test, review, debug, and migrate Wow DDD, Event Sourcing, and CQRS services."
   }
 }

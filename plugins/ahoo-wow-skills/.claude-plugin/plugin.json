@@ -1,6 +1,6 @@
 {
   "name": "ahoo-wow-skills",
-  "description": "Agent skills for building, testing, reviewing, and debugging Wow reactive DDD, Event Sourcing, and CQRS microservices.",
+  "description": "Agent skills for building, testing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS microservices.",
   "version": "0.0.3",
   "author": {
     "name": "Ahoo Wang",
@@ -19,6 +19,7 @@
     "kotlin",
     "spring-boot",
     "reactor",
-    "microservices"
+    "microservices",
+    "migration"
   ]
 }
