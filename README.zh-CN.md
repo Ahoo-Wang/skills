@@ -20,7 +20,7 @@ Skills 通过 GitHub Actions **每 6 小时**自动从源仓库同步，并按�
 
 | 插件 | Skills |
 |------|--------|
-| `ahoo-wow-skills` | Wow、代码审查、调试、开发流程相关 skills |
+| `ahoo-wow-skills` | 面向 Wow 开发、审查、调试和迁移的意图聚焦型 skills |
 | `ahoo-coapi-skills` | CoApi Spring HTTP client skill |
 | `ahoo-cosec-skills` | CoSec 集成、策略、匹配器、排障 skills |
 | `ahoo-cosid-skills` | CosId ID 生成与分片 skills |
@@ -34,7 +34,7 @@ Skills 通过 GitHub Actions **每 6 小时**自动从源仓库同步，并按�
 
 | 仓库 | Skills |
 |------|--------|
-| [Wow](https://github.com/Ahoo-Wang/Wow) | [`wow`](./sources/Wow/skills/wow/SKILL.md)、[`wow-code-review`](./sources/Wow/skills/wow-code-review/SKILL.md)、[`wow-debugging`](./sources/Wow/skills/wow-debugging/SKILL.md)、[`wow-development-workflow`](./sources/Wow/skills/wow-development-workflow/SKILL.md) |
+| [Wow](https://github.com/Ahoo-Wang/Wow) | [`wow-develop`](./sources/Wow/skills/wow-develop/SKILL.md)、[`wow-review`](./sources/Wow/skills/wow-review/SKILL.md)、[`wow-debug`](./sources/Wow/skills/wow-debug/SKILL.md)、[`wow-migrate`](./sources/Wow/skills/wow-migrate/SKILL.md) |
 | [CoApi](https://github.com/Ahoo-Wang/CoApi) | [`coapi-developer`](./sources/CoApi/skills/coapi-developer/SKILL.md) |
 | [CoSec](https://github.com/Ahoo-Wang/CoSec) | [`cosec-custom-matcher`](./sources/CoSec/skills/cosec-custom-matcher/SKILL.md)、[`cosec-integration`](./sources/CoSec/skills/cosec-integration/SKILL.md)、[`cosec-policy-author`](./sources/CoSec/skills/cosec-policy-author/SKILL.md)、[`cosec-troubleshoot`](./sources/CoSec/skills/cosec-troubleshoot/SKILL.md) |
 | [CosId](https://github.com/Ahoo-Wang/CosId) | [`cosid-manual-integration`](./sources/CosId/skills/cosid-manual-integration/SKILL.md)、[`cosid-sharding`](./sources/CosId/skills/cosid-sharding/SKILL.md)、[`cosid-spring-boot`](./sources/CosId/skills/cosid-spring-boot/SKILL.md)、[`cosid-strategy-guide`](./sources/CosId/skills/cosid-strategy-guide/SKILL.md) |
