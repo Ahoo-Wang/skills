@@ -1,7 +1,7 @@
 {
   "name": "ahoo-wow-skills",
-  "description": "Agent skills for building, testing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS microservices.",
-  "version": "0.0.3",
+  "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
+  "version": "0.0.4",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
@@ -17,22 +17,22 @@
     "saga",
     "aggregate",
     "kotlin",
+    "java",
     "spring-boot",
     "reactor",
-    "microservices",
     "migration"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Ahoo Wow Skills",
-    "shortDescription": "Agent skills for building, testing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS microservices.",
-    "longDescription": "Agent skills for building, testing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS microservices.",
+    "shortDescription": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
+    "longDescription": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
     "developerName": "Ahoo Wang",
     "category": "Development",
     "capabilities": [
       "Skills"
     ],
     "websiteURL": "https://github.com/Ahoo-Wang/skills",
-    "defaultPrompt": "Help me design, test, review, debug, and migrate Wow DDD, Event Sourcing, and CQRS services."
+    "defaultPrompt": "Help me develop, review, debug, or migrate this Wow service using current source and verifiable evidence."
   }
 }

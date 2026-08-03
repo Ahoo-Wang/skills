@@ -72,11 +72,10 @@
       "name": "ahoo-wow-skills",
       "source": "Wow",
       "skills": [
-        "wow",
-        "wow-code-review",
-        "wow-debugging",
-        "wow-development-workflow",
-        "wow-v6-to-v8-migration"
+        "wow-debug",
+        "wow-develop",
+        "wow-migrate",
+        "wow-review"
       ]
     }
   ]
