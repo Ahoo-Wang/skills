@@ -20,7 +20,7 @@ Skills are automatically synced from source repositories **every 6 hours** via G
 
 | Plugin | Skills |
 |--------|--------|
-| `ahoo-wow-skills` | Wow, review, debugging, and development workflow skills |
+| `ahoo-wow-skills` | Intent-focused Wow development, review, debugging, and migration skills |
 | `ahoo-coapi-skills` | CoApi Spring HTTP client skill |
 | `ahoo-cosec-skills` | CoSec integration, policy, matcher, and troubleshooting skills |
 | `ahoo-cosid-skills` | CosId ID generation and sharding skills |
@@ -34,7 +34,7 @@ Skills are automatically synced from source repositories **every 6 hours** via G
 
 | Repository | Skills |
 |------------|--------|
-| [Wow](https://github.com/Ahoo-Wang/Wow) | [`wow`](./sources/Wow/skills/wow/SKILL.md), [`wow-code-review`](./sources/Wow/skills/wow-code-review/SKILL.md), [`wow-debugging`](./sources/Wow/skills/wow-debugging/SKILL.md), [`wow-development-workflow`](./sources/Wow/skills/wow-development-workflow/SKILL.md) |
+| [Wow](https://github.com/Ahoo-Wang/Wow) | [`wow-develop`](./sources/Wow/skills/wow-develop/SKILL.md), [`wow-review`](./sources/Wow/skills/wow-review/SKILL.md), [`wow-debug`](./sources/Wow/skills/wow-debug/SKILL.md), [`wow-migrate`](./sources/Wow/skills/wow-migrate/SKILL.md) |
 | [CoApi](https://github.com/Ahoo-Wang/CoApi) | [`coapi-developer`](./sources/CoApi/skills/coapi-developer/SKILL.md) |
 | [CoSec](https://github.com/Ahoo-Wang/CoSec) | [`cosec-custom-matcher`](./sources/CoSec/skills/cosec-custom-matcher/SKILL.md), [`cosec-integration`](./sources/CoSec/skills/cosec-integration/SKILL.md), [`cosec-policy-author`](./sources/CoSec/skills/cosec-policy-author/SKILL.md), [`cosec-troubleshoot`](./sources/CoSec/skills/cosec-troubleshoot/SKILL.md) |
 | [CosId](https://github.com/Ahoo-Wang/CosId) | [`cosid-manual-integration`](./sources/CosId/skills/cosid-manual-integration/SKILL.md), [`cosid-sharding`](./sources/CosId/skills/cosid-sharding/SKILL.md), [`cosid-spring-boot`](./sources/CosId/skills/cosid-spring-boot/SKILL.md), [`cosid-strategy-guide`](./sources/CosId/skills/cosid-strategy-guide/SKILL.md) |
