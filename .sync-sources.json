@@ -21,7 +21,7 @@
       "source": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "73034290b8fccce93af80545e648e4aa595483c5",
+      "commit": "1808b1847debef32c9bb85702e498c4fd7191c1f",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
