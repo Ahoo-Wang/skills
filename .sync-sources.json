@@ -53,7 +53,7 @@
       "source": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "2375576bcf080b94f7b472e8d5e35966fb6d1076",
+      "commit": "01ce2b1e69cf11505d5b709ab50f52c33502aa60",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -61,7 +61,7 @@
       "source": "fetcher",
       "url": "https://github.com/Ahoo-Wang/fetcher.git",
       "branch": "main",
-      "commit": "13c1b4f77834a90f88cc857ea6b4332c3ec4aa23",
+      "commit": "8de449c9c2a241107f25ad927e1182b55297f492",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     }
