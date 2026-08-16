@@ -5,7 +5,7 @@
       "source": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
-      "commit": "cb904483832abee3ed7c8205eeb15f576de30265",
+      "commit": "5fb2920c931989dc185056dfc77fb6dfcc144b49",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -13,7 +13,7 @@
       "source": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
-      "commit": "a4fa57b4609b3f461200c1e6388ef57887a8d30d",
+      "commit": "5ae93b95776798e938c3a32249413d72db1d3891",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -21,7 +21,7 @@
       "source": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "c3b23ece5b3d0a71a163ffe731ae753fccdfe7ee",
+      "commit": "8b70ca7df0623638e917721af0612760440ff85e",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -29,7 +29,7 @@
       "source": "CosId",
       "url": "https://github.com/Ahoo-Wang/CosId.git",
       "branch": "main",
-      "commit": "30da0baebc6d726c24299e3cc4bb98cc4da41a44",
+      "commit": "f22e194cd58ffcad643f8b8ce4f25e6cec677a4b",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -45,7 +45,7 @@
       "source": "Simba",
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
-      "commit": "24cf20505f3c8a53fde1c74e9039e46ee82c7cd9",
+      "commit": "de6fc55b76726b1514c3a0bc9f40eef3ee087cf9",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -53,7 +53,7 @@
       "source": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "ae3aa7b87dc31ea727fd4b33dbc465a807d04865",
+      "commit": "ca297966bf830ec074773c769165ab83a6fe518e",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -61,7 +61,7 @@
       "source": "fetcher",
       "url": "https://github.com/Ahoo-Wang/fetcher.git",
       "branch": "main",
-      "commit": "652178f1544a9910c5257c515686dd9617ba4220",
+      "commit": "ea20e6ceaf62aa12529bd18caea06a4772f7e76e",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     }

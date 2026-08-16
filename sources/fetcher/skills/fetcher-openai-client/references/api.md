@@ -28,7 +28,7 @@ pnpm add @ahoo-wang/fetcher-openai @ahoo-wang/fetcher @ahoo-wang/fetcher-decorat
 ```
 
 **Peer dependencies:** `@ahoo-wang/fetcher`, `@ahoo-wang/fetcher-eventstream`, `@ahoo-wang/fetcher-decorator`.
-`reflect-metadata` must be imported before using decorator-based features.
+`reflect-metadata` is loaded automatically by the decorator package; an explicit import is only needed if other libraries rely on it.
 
 ## Key Imports
 
@@ -39,6 +39,9 @@ import {
   ChatClient,
   ChatRequest,
   ChatResponse,
+  ChatTool,
+  ChatToolFunction,
+  ChatToolChoice,
   Message,
   Choice,
   Usage,
@@ -123,10 +126,12 @@ export const CompletionStreamResultExtractor: ResultExtractor<
 
 ## Types
 
+Aligned with the real OpenAI Chat Completions API (since v3.17.0):
+
 ```typescript
 interface ChatRequest {
   messages: Message[];
-  model?: string;
+  model: string; // required
   stream?: boolean;
   temperature?: number;
   max_tokens?: number;
@@ -134,12 +139,30 @@ interface ChatRequest {
   frequency_penalty?: number;
   presence_penalty?: number;
   n?: number;
-  stop?: string;
-  tools?: string[]; // simple string array, NOT complex objects
-  tool_choice?: { [key: string]: any };
-  response_format?: { [key: string]: any };
+  seed?: number; // deterministic sampling (beta)
+  stop?: string | string[] | null; // up to 4 sequences
+  logit_bias?: Record<string, number> | null; // token ID → bias (-100..100)
+  tools?: ChatTool[]; // function tool objects
+  tool_choice?: ChatToolChoice; // 'none' | 'auto' | { type: 'function', function: { name } }
+  response_format?: Record<string, unknown>;
   user?: string;
 }
+
+interface ChatToolFunction {
+  name: string; // a-z, A-Z, 0-9, underscores/dashes, max 64 chars
+  description?: string;
+  parameters?: Record<string, unknown>; // JSON Schema object
+}
+
+interface ChatTool {
+  type: 'function'; // only 'function' is currently supported
+  function: ChatToolFunction;
+}
+
+type ChatToolChoice =
+  | 'none'
+  | 'auto'
+  | { type: 'function'; function: { name: string } };
 
 interface Message {
   content?: string;
@@ -160,7 +183,7 @@ interface Choice {
   finish_reason?: string;
   index?: number;
   message?: Message;
-  // delta is accessible via index signature in streaming chunks
+  delta?: Message; // streaming chunks only: partial message deltas
   [property: string]: any;
 }
 
