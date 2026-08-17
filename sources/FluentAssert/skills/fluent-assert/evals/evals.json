@@ -35,6 +35,16 @@
       "id": 7,
       "prompt": "Write a test that asserts a custom data class Person(name: String, age: Int) equals expectedPerson using recursive comparison, then verifies the age is greater than 18.",
       "expected_output": "person.assert().usingRecursiveComparison().isEqualTo(expectedPerson) and person.age.assert().isGreaterThan(18)"
+    },
+    {
+      "id": 8,
+      "prompt": "Write a test that verifies an IntArray returned by a function has 3 elements and contains 42.",
+      "expected_output": "Convert before asserting: ints.toList().assert().hasSize(3).contains(42) — primitive arrays only get ObjectAssert"
+    },
+    {
+      "id": 9,
+      "prompt": "Write a test that asserts a CompletionStage<String> completes with the value \"done\".",
+      "expected_output": "stage.assert().isCompletedWithValue(\"done\") — CompletionStage.assert() returns CompletableFutureAssert"
     }
   ]
 }
