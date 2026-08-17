@@ -62,6 +62,9 @@ codex plugin add ahoo-wow-skills@ahoo-skills
 
 Install the specific split plugin you need from the table above.
 
+Upstream skills are synced every 6 hours; each sync commit is a new plugin
+version, so run `/plugin update` in Claude Code to pull the latest skills.
+
 ## How It Works
 
 - `repos.json` — source repository configuration
