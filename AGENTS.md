@@ -103,6 +103,26 @@ Each split plugin also publishes both manifests:
 Codex manifests must keep `skills` set to `./skills/` and include the Codex
 `interface` metadata expected by the plugin validator.
 
+## Versioning
+
+Claude-side artifacts must not declare static versions:
+
+- `.claude-plugin/marketplace.json` (top level and plugin entries) and every
+  plugin's `.claude-plugin/plugin.json` must omit `version`. Claude Code
+  detects updates by git SHA for git-hosted marketplaces, so any sync commit
+  is a new version; a static version would pin users to it.
+- Codex manifests keep `version` as display metadata only; Codex resolves
+  plugins by git ref and ignores it.
+- `package.json` `version` is npm metadata only and does not flow into any
+  marketplace manifest.
+- Local plugins follow the same rules: no `version` in the Claude manifest,
+  keep it in the Codex manifest.
+
+`validate-skills.sh` fails when a static version reappears in any
+Claude-side artifact. Users with a cached install from before this policy
+may need a one-time manual `/plugin marketplace update` for the cache to
+move from the old static-version path to the SHA-based path.
+
 ## Skill Structure
 
 Each mirrored or distributed skill uses this shape:

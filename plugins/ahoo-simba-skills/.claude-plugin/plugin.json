@@ -1,7 +1,6 @@
 {
   "name": "ahoo-simba-skills",
   "description": "Skills for using and testing Simba, a JVM distributed mutex and leader-election library with JDBC/MySQL, Redis, and Zookeeper backends.",
-  "version": "0.0.3",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"

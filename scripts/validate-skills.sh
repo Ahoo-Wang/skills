@@ -80,6 +80,14 @@ fi
 codex_display_name=$(jq -r '.interface.displayName // empty' "$CODEX_MARKETPLACE_FILE")
 [ -n "$codex_display_name" ] || fail "Codex marketplace missing interface.displayName"
 
+# jq -e exits 0 on a match, 1 on false, 4 on an empty stream; all non-zero skip the guard
+if jq -e 'has("version")' "$CLAUDE_MARKETPLACE_FILE" >/dev/null; then
+  fail "Claude marketplace must not declare a static version"
+fi
+if jq -e '.plugins[]? | select(has("version"))' "$CLAUDE_MARKETPLACE_FILE" >/dev/null; then
+  fail "Claude marketplace plugin entries must not declare a static version"
+fi
+
 while IFS=$'\t' read -r plugin_name source_path; do
   [ -n "$plugin_name" ] || continue
   validate_name "$plugin_name"
@@ -94,6 +102,9 @@ while IFS=$'\t' read -r plugin_name source_path; do
   [ -d "$plugin_dir" ] || fail "Marketplace plugin '$plugin_name' source not found: $source_path"
   [ -f "$claude_plugin_manifest" ] || fail "Plugin '$plugin_name' is missing $claude_plugin_manifest"
   [ -f "$codex_plugin_manifest" ] || fail "Plugin '$plugin_name' is missing $codex_plugin_manifest"
+  if jq -e 'has("version")' "$claude_plugin_manifest" >/dev/null; then
+    fail "Claude plugin '$plugin_name' must not declare a static version"
+  fi
 
   claude_manifest_name=$(jq -r '.name' "$claude_plugin_manifest")
   codex_manifest_name=$(jq -r '.name' "$codex_plugin_manifest")

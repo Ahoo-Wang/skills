@@ -1,7 +1,6 @@
 {
   "name": "ahoo-cosid-skills",
   "description": "CosId skills for choosing and integrating high-performance distributed ID generators, Spring Boot auto-configuration, machine ID distributors, and ShardingSphere sharding.",
-  "version": "0.0.4",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"

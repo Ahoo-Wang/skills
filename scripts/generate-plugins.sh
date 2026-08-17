@@ -132,7 +132,6 @@ write_claude_plugin_manifest() {
     '{
       name: $plugin.name,
       description: ($plugin.description // ""),
-      version: ($plugin.version // $defaults.version),
       author: ($plugin.author // $defaults.author),
       homepage: ($plugin.homepage // $defaults.homepage),
       repository: ($plugin.repository // $defaults.repository),
@@ -201,7 +200,6 @@ append_claude_marketplace_entry() {
     --argjson manifest "$(jq -c . "$manifest")" \
     '{
       name: $manifest.name,
-      version: $manifest.version,
       description: $manifest.description,
       author: $manifest.author,
       homepage: $manifest.homepage,
@@ -350,7 +348,6 @@ jq -n \
   '{
     "$schema": $schema,
     name: $defaults.marketplaceName,
-    version: $defaults.version,
     description: $defaults.description,
     owner: $defaults.author,
     plugins: ($plugins | sort_by(.name))

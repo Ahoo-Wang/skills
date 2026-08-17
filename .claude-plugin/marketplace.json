@@ -1,7 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "ahoo-skills",
-  "version": "0.0.3",
   "description": "Codex and Claude Code skills marketplace for Ahoo-Wang open source projects",
   "owner": {
     "name": "Ahoo Wang",
@@ -10,7 +9,6 @@
   "plugins": [
     {
       "name": "ahoo-agent-skills",
-      "version": "0.0.3",
       "description": "General Ahoo agent skills that are maintained directly in this repository",
       "author": {
         "name": "Ahoo Wang",
@@ -28,7 +26,6 @@
     },
     {
       "name": "ahoo-coapi-skills",
-      "version": "0.0.3",
       "description": "CoApi skills for building and testing Spring HTTP Interface client proxies with reactive WebClient, synchronous RestClient, and Spring Cloud LoadBalancer support.",
       "author": {
         "name": "Ahoo Wang",
@@ -52,7 +49,6 @@
     },
     {
       "name": "ahoo-cocache-skills",
-      "version": "0.0.3",
       "description": "CoCache skills for implementing two-level distributed coherent caches, cache proxy interfaces, JoinCache composition, and Redis/Spring Boot integration in Java/Kotlin projects.",
       "author": {
         "name": "Ahoo Wang",
@@ -78,7 +74,6 @@
     },
     {
       "name": "ahoo-cosec-skills",
-      "version": "0.0.3",
       "description": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, authoring authorization policies, extending matchers, and troubleshooting access decisions.",
       "author": {
         "name": "Ahoo Wang",
@@ -104,7 +99,6 @@
     },
     {
       "name": "ahoo-cosid-skills",
-      "version": "0.0.4",
       "description": "CosId skills for choosing and integrating high-performance distributed ID generators, Spring Boot auto-configuration, machine ID distributors, and ShardingSphere sharding.",
       "author": {
         "name": "Ahoo Wang",
@@ -129,7 +123,6 @@
     },
     {
       "name": "ahoo-fetcher-skills",
-      "version": "0.0.3",
       "description": "Skills for building with the Fetcher TypeScript ecosystem, including HTTP clients, decorators, event buses, SSE/OpenAI streaming, storage, CoSec authentication, Wow CQRS, OpenAPI generation, React hooks, and viewer components.",
       "author": {
         "name": "Ahoo Wang",
@@ -154,7 +147,6 @@
     },
     {
       "name": "ahoo-fluent-assert-skills",
-      "version": "0.0.3",
       "description": "Skills for writing Kotlin tests with FluentAssert's AssertJ-backed .assert() extensions for JDK types, nullable values, exceptions, and custom AssertProvider assertions.",
       "author": {
         "name": "Ahoo Wang",
@@ -176,7 +168,6 @@
     },
     {
       "name": "ahoo-simba-skills",
-      "version": "0.0.3",
       "description": "Skills for using and testing Simba, a JVM distributed mutex and leader-election library with JDBC/MySQL, Redis, and Zookeeper backends.",
       "author": {
         "name": "Ahoo Wang",
@@ -202,7 +193,6 @@
     },
     {
       "name": "ahoo-wow-skills",
-      "version": "0.0.4",
       "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
       "author": {
         "name": "Ahoo Wang",
