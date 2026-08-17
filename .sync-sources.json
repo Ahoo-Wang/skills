@@ -5,7 +5,7 @@
       "source": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
-      "commit": "4a0f63fa894ad019cedf9ce4aa23d5a174bb1b39",
+      "commit": "c9eaeb2174946d474eaedbccf98249d6caa1e880",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -29,7 +29,7 @@
       "source": "CosId",
       "url": "https://github.com/Ahoo-Wang/CosId.git",
       "branch": "main",
-      "commit": "4e3738ca200539305f8a358860baec3bbebb98e8",
+      "commit": "6109a48c2de0fb0740cc1464bc0adf0edfc7c89d",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -37,7 +37,7 @@
       "source": "FluentAssert",
       "url": "https://github.com/Ahoo-Wang/FluentAssert.git",
       "branch": "main",
-      "commit": "aa72ca3b9412f420a08f6abaa97830df5c57bb79",
+      "commit": "1af52886e357313a4fe0810d066309553386fad3",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
