@@ -70,6 +70,9 @@ Only use direct `assertThat` when implementing the provider's `assertThat()` met
 - Do not use unavailable AssertJ shortcuts like `OffsetDateTimeAssert.hasOffset(...)`.
 - Do not use numeric `hasMonth(4)` for `LocalDate` or `YearMonth`; use `hasMonth(Month.APRIL)`.
 - Do not switch to `assertThat(value).usingRecursiveComparison()`; keep chaining from `value.assert()`.
+- Do not call `.assert()` on primitive arrays (`IntArray`, `LongArray`, ...) — they fall back to `ObjectAssert` with no collection APIs. Convert first: `ints.toList().assert().hasSize(3).contains(42)`.
+- Do not expect string assertions from non-`String` text receivers. A statically `CharSequence`-typed value resolves to `ObjectAssert`; `StringBuilder` (it implements `Comparable<StringBuilder>`) resolves to `GenericComparableAssert`. Use a `String` (`.toString()`) instead.
+- There is no `CompletionStageAssert`; `stage.assert()` returns `CompletableFutureAssert`.
 
 ## References
 

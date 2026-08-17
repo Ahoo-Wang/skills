@@ -55,8 +55,9 @@ All extension functions follow the pattern `Type.assert(): AssertJTypeAssert`, w
 ```kotlin
 import me.ahoo.test.asserts.assert
 import me.ahoo.test.asserts.assertThrownBy
-import java.time.*
 ```
+
+Import the specific `java.time` / `java.util` types a test uses (e.g. `import java.time.Month`); wildcard imports are only allowed for the packages listed in `config/detekt/detekt.yml` (e.g. `java.util.*`, `org.junit.jupiter.api.Assertions.*`) — others fail the repo's lint.
 
 ## Supported Types
 
@@ -92,6 +93,8 @@ import java.time.*
 | `Optional<T>?` | `OptionalAssert<T>` |
 | `Stream<T>?` | `ListAssert<T>` |
 
+> Primitive arrays (`IntArray`, `LongArray`, `ByteArray`, `CharArray`, ...) are **not** covered by `Array<T>` and fall back to `ObjectAssert`. Convert first: `ints.toList().assert().hasSize(3).contains(42)` or `ints.toTypedArray().assert()`.
+
 ### Time/Date
 
 | Type | Assertion Class |
@@ -124,7 +127,7 @@ import java.time.*
 |------|-----------------|
 | `Future<V>?` | `FutureAssert<V>` |
 | `CompletableFuture<V>?` | `CompletableFutureAssert<V>` |
-| `CompletionStage<V>?` | `CompletionStageAssert<V>` |
+| `CompletionStage<V>?` | `CompletableFutureAssert<V>` |
 
 ### Functional
 
@@ -136,7 +139,16 @@ import java.time.*
 
 | Type | Assertion Class |
 |------|-----------------|
-| `Throwable?` | `ThrowableAssert<Throwable>` |
+| `Throwable?` | `ThrowableAssert<T>` |
+
+### Catch-Alls
+
+| Type | Assertion Class |
+|------|-----------------|
+| `T?` (any object) | `ObjectAssert<T>` |
+| `T : Comparable<T>?` | `GenericComparableAssert<T>` |
+
+Non-`String` text receivers lose string assertions: a statically `CharSequence`-typed value resolves to `ObjectAssert`, and `StringBuilder` (it implements `Comparable<StringBuilder>`) resolves to `GenericComparableAssert<StringBuilder>` — call `.toString()` first for `StringAssert`.
 
 ## API Examples
 
@@ -224,11 +236,16 @@ person.assert()
 
 #### Comparable
 
+Arbitrary `Comparable` types get `GenericComparableAssert` (note: a `String` receiver would resolve to the more specific `StringAssert` instead):
+
 ```kotlin
-val version = "2.0.0"
-version.assert()
-    .isGreaterThan("1.0.0")
-    .isLessThan("3.0.0")
+class Version(val value: Int) : Comparable<Version> {
+    override fun compareTo(other: Version): Int = value.compareTo(other.value)
+}
+
+Version(2).assert()
+    .isGreaterThan(Version(1))
+    .isLessThan(Version(3))
 ```
 
 ### Collections
@@ -488,6 +505,8 @@ future.assert()
 ```
 
 #### CompletionStage
+
+There is no `CompletionStageAssert` — `CompletionStage.assert()` returns `CompletableFutureAssert`:
 
 ```kotlin
 val stage = CompletableFuture.completedFuture("result")
