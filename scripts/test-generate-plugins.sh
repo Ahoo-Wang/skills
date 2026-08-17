@@ -35,6 +35,13 @@ assert_json_value() {
   [ "$actual" = "$expected" ] || fail "Expected $filter in $file to be '$expected', got '$actual'"
 }
 
+assert_exit_code() {
+  local actual="$1"
+  local expected="$2"
+  local context="$3"
+  [ "$actual" -eq "$expected" ] || fail "$context: expected exit code $expected, got $actual"
+}
+
 write_skill() {
   local repo_dir="$1"
   local skill_name="$2"
@@ -94,7 +101,6 @@ write_local_plugin() {
 {
   "name": "$plugin_name",
   "description": "Local plugin skills",
-  "version": "0.0.3",
   "author": {"name": "Ahoo Wang", "email": "ahoowang@gmail.com"},
   "homepage": "https://github.com/Ahoo-Wang/skills",
   "repository": "https://github.com/Ahoo-Wang/skills",
@@ -174,6 +180,11 @@ test_generates_source_plugins_and_keeps_local_plugins() {
   assert_file_exists "$tmp/plugins/ahoo-agent-skills/skills/agent-system-prompt/SKILL.md"
   assert_file_exists "$tmp/plugins/.generated-plugins.json"
   assert_json_value "$tmp/plugins/ahoo-wow-skills/.claude-plugin/plugin.json" ".name" "ahoo-wow-skills"
+  assert_json_value "$tmp/plugins/ahoo-wow-skills/.claude-plugin/plugin.json" "has(\"version\")" "false"
+  assert_json_value "$tmp/plugins/ahoo-agent-skills/.claude-plugin/plugin.json" "has(\"version\")" "false"
+  assert_json_value "$tmp/.claude-plugin/marketplace.json" "has(\"version\")" "false"
+  assert_json_value "$tmp/.claude-plugin/marketplace.json" ".plugins[] | select(.name == \"ahoo-wow-skills\") | has(\"version\")" "false"
+  assert_json_value "$tmp/.claude-plugin/marketplace.json" ".plugins[] | select(.name == \"ahoo-agent-skills\") | has(\"version\")" "false"
   assert_json_value "$tmp/plugins/ahoo-wow-skills/.codex-plugin/plugin.json" ".skills" "./skills/"
   assert_json_value "$tmp/plugins/ahoo-wow-skills/.codex-plugin/plugin.json" ".interface.displayName" "Ahoo Wow Skills"
   assert_json_value "$tmp/plugins/ahoo-wow-skills/.codex-plugin/plugin.json" ".interface.category" "Development"
@@ -231,10 +242,46 @@ EOF
   assert_file_exists "$tmp/plugins/ahoo-agent-skills/.codex-plugin/plugin.json"
 }
 
+test_validate_rejects_static_versions() {
+  local tmp
+  tmp="$(mktemp -d "$TMP_ROOT/validate-version.XXXXXX")"
+  mkdir -p "$tmp/.claude-plugin"
+
+  write_skill "$tmp/sources/Wow" "wow"
+  write_source_plugins_json "$tmp/sources/Wow" "ahoo-wow-skills" "Ahoo Wow Skills"
+
+  (cd "$tmp" && bash "$SCRIPT_UNDER_TEST" sources plugins .claude-plugin/marketplace.json .agents/plugins/marketplace.json plugins/.generated-plugins.json)
+
+  local marketplace="$tmp/.claude-plugin/marketplace.json"
+  local plugin_manifest="$tmp/plugins/ahoo-wow-skills/.claude-plugin/plugin.json"
+  cp "$marketplace" "$tmp/marketplace.clean"
+
+  run_validate_and_assert_fails() {
+    set +e
+    (cd "$tmp" && bash "$VALIDATE_SCRIPT" sources .claude-plugin/marketplace.json plugins .agents/plugins/marketplace.json plugins/.generated-plugins.json) >"$tmp/output.log" 2>&1
+    local code=$?
+    set -e
+    assert_exit_code "$code" 1 "$1"
+    assert_contains "$tmp/output.log" "must not declare a static version"
+  }
+
+  jq '.version = "0.0.3"' "$marketplace" > "$tmp/marketplace.injected" && mv "$tmp/marketplace.injected" "$marketplace"
+  run_validate_and_assert_fails "Validate should reject a marketplace top-level version"
+
+  cp "$tmp/marketplace.clean" "$marketplace"
+  jq '.plugins[0].version = "0.0.3"' "$marketplace" > "$tmp/marketplace.injected" && mv "$tmp/marketplace.injected" "$marketplace"
+  run_validate_and_assert_fails "Validate should reject a marketplace plugin entry version"
+
+  cp "$tmp/marketplace.clean" "$marketplace"
+  jq '.version = "0.0.3"' "$plugin_manifest" > "$tmp/manifest.injected" && mv "$tmp/manifest.injected" "$plugin_manifest"
+  run_validate_and_assert_fails "Validate should reject a Claude plugin manifest version"
+}
+
 main() {
   test_generates_source_plugins_and_keeps_local_plugins
   test_uses_codex_plugin_validator_override
   test_removes_only_stale_generated_plugin_directories
+  test_validate_rejects_static_versions
   echo "generate-plugins tests passed"
 }
 
