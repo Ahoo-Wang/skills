@@ -62,6 +62,9 @@ codex plugin add ahoo-wow-skills@ahoo-skills
 
 按上表安装需要的拆分插件即可。
 
+上游技能每 6 小时同步一次，每次同步提交即为插件新版本，在 Claude Code
+中运行 `/plugin update` 即可获取最新技能。
+
 ## 工作原理
 
 - `repos.json` — 源仓库配置
