@@ -19,7 +19,9 @@
     "multi-tenant",
     "spring-boot",
     "reactive",
-    "jwt"
+    "jwt",
+    "rate-limiting",
+    "audit"
   ],
   "skills": "./skills/",
   "interface": {

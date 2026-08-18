@@ -92,7 +92,9 @@
         "multi-tenant",
         "spring-boot",
         "reactive",
-        "jwt"
+        "jwt",
+        "rate-limiting",
+        "audit"
       ],
       "source": "./plugins/ahoo-cosec-skills",
       "category": "development"
