@@ -3,48 +3,154 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Write a test for a function that returns a List<String>. Assert the list is not empty, has exactly 3 elements, contains \"foo\" and \"bar\", and each element starts with a lowercase letter.",
-      "expected_output": "Kotlin test using FluentAssert with isNotEmpty, hasSize, contains, allMatch"
+      "prompt": "This Kotlin project depends on me.ahoo.test:fluent-assert-core. Write a test for a function that returns a List<String>. Assert the list is not empty, has exactly 3 elements, contains \"foo\" and \"bar\", and each element starts with a lowercase letter.",
+      "expected_output": "Kotlin test using FluentAssert with isNotEmpty, hasSize, contains, allMatch",
+      "files": [],
+      "expectations": [
+        "Imports me.ahoo.test.asserts.assert",
+        "Calls .assert() on the returned List<String>",
+        "Uses isNotEmpty(), hasSize(3), and contains(\"foo\", \"bar\")",
+        "Uses allMatch with a lowercase-first-character predicate and does not switch to assertThat"
+      ]
     },
     {
       "id": 2,
       "prompt": "Write a JUnit 5 test that verifies a list does NOT contain \"forbidden\". Assert the list has size 2 and contains exactly \"a\" and \"b\" in that order.",
-      "expected_output": "Kotlin test with doesNotContain, hasSize, containsExactly"
+      "expected_output": "Kotlin test with doesNotContain, hasSize, containsExactly",
+      "files": [],
+      "expectations": [
+        "Imports me.ahoo.test.asserts.assert",
+        "Calls .assert() on the list",
+        "Uses doesNotContain(\"forbidden\") and hasSize(2)",
+        "Uses containsExactly(\"a\", \"b\") to enforce order"
+      ]
     },
     {
       "id": 3,
       "prompt": "Write a test that checks a nullable String is null, and another that checks a nullable Int is not null and greater than 0.",
-      "expected_output": "Two tests: nullableString.assert().isNull() and nullableInt.assert().isNotNull().isGreaterThan(0)"
+      "expected_output": "Two tests: nullableString.assert().isNull() and nullableInt.assert().isNotNull().isGreaterThan(0)",
+      "files": [],
+      "expectations": [
+        "Calls nullableString.assert().isNull()",
+        "Calls nullableInt.assert().isNotNull().isGreaterThan(0)",
+        "Uses nullable receivers directly without !! or manual null checks"
+      ]
     },
     {
       "id": 4,
       "prompt": "Write a test that uses assertThrownBy<> to verify a function throws IllegalArgumentException with message \"invalid input\" when passed an empty string.",
-      "expected_output": "assertThrownBy<IllegalArgumentException> { function(\"\") }.hasMessage(\"invalid input\")"
+      "expected_output": "assertThrownBy<IllegalArgumentException> { function(\"\") }.hasMessage(\"invalid input\")",
+      "files": [],
+      "expectations": [
+        "Imports me.ahoo.test.asserts.assertThrownBy",
+        "Uses the reified assertThrownBy<IllegalArgumentException> overload",
+        "Calls the function with an empty string inside the lambda",
+        "Chains hasMessage(\"invalid input\") directly without another .assert()"
+      ]
     },
     {
       "id": 5,
       "prompt": "Write assertions for a Map<String, Int> that verify it has size 2, contains key \"count\", has value 42 for that key, and contains entry (\"count\", 42).",
-      "expected_output": "map.assert().hasSize(2).containsKey(\"count\").containsValue(42).containsEntry(\"count\", 42)"
+      "expected_output": "map.assert().hasSize(2).containsKey(\"count\").containsValue(42).containsEntry(\"count\", 42)",
+      "files": [],
+      "expectations": [
+        "Calls .assert() on the Map<String, Int>",
+        "Uses hasSize(2) and containsKey(\"count\")",
+        "Uses containsValue(42)",
+        "Uses containsEntry(\"count\", 42) instead of collection-style contains"
+      ]
     },
     {
       "id": 6,
       "prompt": "Write assertions for an Instant that verify it is in the past (before now), for LocalDate.now() that verifies it is today, and for LocalDate.of(2024, 4, 15) that verifies it is in April.",
-      "expected_output": "instant.assert().isBefore(Instant.now()), LocalDate.now().assert().isToday(), and LocalDate.of(2024, 4, 15).assert().hasMonth(Month.APRIL)"
+      "expected_output": "instant.assert().isBefore(Instant.now()), LocalDate.now().assert().isToday(), and LocalDate.of(2024, 4, 15).assert().hasMonth(Month.APRIL)",
+      "files": [],
+      "expectations": [
+        "Uses instant.assert().isBefore(Instant.now())",
+        "Uses LocalDate.now().assert().isToday()",
+        "Imports java.time.Month and uses hasMonth(Month.APRIL)",
+        "Does not use numeric hasMonth(4)"
+      ]
     },
     {
       "id": 7,
-      "prompt": "Write a test that asserts a custom data class Person(name: String, age: Int) equals expectedPerson using recursive comparison, then verifies the age is greater than 18.",
-      "expected_output": "person.assert().usingRecursiveComparison().isEqualTo(expectedPerson) and person.age.assert().isGreaterThan(18)"
+      "prompt": "Migrate a Kotlin test from direct AssertJ calls to FluentAssert. Assert that a custom data class Person(name: String, age: Int) equals expectedPerson using recursive comparison, then verify the age is greater than 18.",
+      "expected_output": "person.assert().usingRecursiveComparison().isEqualTo(expectedPerson) and person.age.assert().isGreaterThan(18)",
+      "files": [],
+      "expectations": [
+        "Starts recursive comparison from person.assert()",
+        "Chains usingRecursiveComparison().isEqualTo(expectedPerson)",
+        "Uses person.age.assert().isGreaterThan(18)",
+        "Does not switch to direct AssertJ assertThat"
+      ]
     },
     {
       "id": 8,
       "prompt": "Write a test that verifies an IntArray returned by a function has 3 elements and contains 42.",
-      "expected_output": "Convert before asserting: ints.toList().assert().hasSize(3).contains(42) — primitive arrays only get ObjectAssert"
+      "expected_output": "Convert before asserting: ints.toList().assert().hasSize(3).contains(42) — primitive arrays only get ObjectAssert",
+      "files": [],
+      "expectations": [
+        "Converts the IntArray with toList() or toTypedArray() before .assert()",
+        "Uses hasSize(3) and contains(42) on the converted value",
+        "Does not call collection assertion methods on ints.assert() directly"
+      ]
     },
     {
       "id": 9,
       "prompt": "Write a test that asserts a CompletionStage<String> completes with the value \"done\".",
-      "expected_output": "stage.assert().isCompletedWithValue(\"done\") — CompletionStage.assert() returns CompletableFutureAssert"
+      "expected_output": "stage.assert().isCompletedWithValue(\"done\") — CompletionStage.assert() returns CompletableFutureAssert",
+      "files": [],
+      "expectations": [
+        "Calls stage.assert().isCompletedWithValue(\"done\")",
+        "Treats the result as CompletableFutureAssert<String>",
+        "Does not reference a nonexistent CompletionStageAssert"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Write assertions that verify a CharSequence and a StringBuilder both start with \"Fluent\".",
+      "expected_output": "Use charSequence.toString().assert().startsWith(\"Fluent\") and builder.toString().assert().startsWith(\"Fluent\"). CharSequence otherwise returns ObjectAssert; StringBuilder otherwise returns GenericComparableAssert",
+      "files": [],
+      "expectations": [
+        "Converts the CharSequence to String before .assert().startsWith(\"Fluent\")",
+        "Converts the StringBuilder to String before .assert().startsWith(\"Fluent\")",
+        "Does not call String assertion methods on either original receiver"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Write a test that verifies an IntStream contains exactly 1, 2, and 3.",
+      "expected_output": "Use stream.boxed().assert().containsExactly(1, 2, 3); IntStream otherwise returns ObjectAssert",
+      "files": [],
+      "expectations": [
+        "Boxes the IntStream before calling .assert()",
+        "Uses boxed().assert().containsExactly(1, 2, 3)",
+        "Does not call collection assertion methods on the original IntStream"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Write a Kotlin test that declares val values: Iterable<String> = listOf(\"a\", \"b\"), verifies the elements in order, and identifies the assertion type returned by values.assert().",
+      "expected_output": "Keep the receiver statically typed as Iterable<String>, call values.assert().containsExactly(\"a\", \"b\"), and identify the result as IterableAssert<String>",
+      "files": [],
+      "expectations": [
+        "Declares val values: Iterable<String> = listOf(\"a\", \"b\")",
+        "Calls values.assert().containsExactly(\"a\", \"b\")",
+        "Identifies values.assert() as IterableAssert<String>",
+        "Does not infer the receiver as List<String> or identify the result as ListAssert"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Write a Kotlin test that declares a java.time.temporal.Temporal backed by an Instant, asserts equality with the Instant, and identifies the assertion type returned by temporal.assert().",
+      "expected_output": "Declare val temporal: Temporal = Instant.parse(...), call temporal.assert().isEqualTo(expectedInstant), and identify the result as TemporalAssert",
+      "files": [],
+      "expectations": [
+        "Declares the receiver explicitly as Temporal instead of relying on Instant inference",
+        "Calls temporal.assert().isEqualTo(expectedInstant)",
+        "Identifies temporal.assert() as TemporalAssert",
+        "Does not identify the result as InstantAssert"
+      ]
     }
   ]
 }

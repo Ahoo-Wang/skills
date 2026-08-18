@@ -15,13 +15,13 @@ Simba testing has three layers:
 Choose the simplest layer that gives confidence. Most application code only needs unit tests with mocks. Backend implementors need TCK + integration tests.
 
 Before writing a test, decide:
-- **Application behavior**: mock `MutexContendServiceFactory`, capture the contender, and trigger callbacks directly.
+- **Application behavior**: mock `MutexContendServiceFactory`, capture the contender, and pass ownership changes to `notifyOwner`.
 - **Backend implementation**: extend `MutexContendServiceSpec` and run against the real backend.
 - **Scheduler behavior**: verify leadership gating separately from the business logic in `work()`.
 
 ## Unit Tests with MockK
 
-For application code that injects `MutexContendServiceFactory`, mock it:
+For application code that injects `MutexContendServiceFactory`, call the component under test and mock only the factory seam:
 
 ```kotlin
 import io.mockk.every
@@ -33,7 +33,7 @@ import me.ahoo.simba.core.MutexContender
 import me.ahoo.simba.core.MutexOwner
 import me.ahoo.simba.core.MutexState
 
-class MyServiceTest {
+class MyComponentTest {
     private val mockFactory = mockk<MutexContendServiceFactory>()
     private val mockService = mockk<MutexContendService>(relaxed = true)
 
@@ -44,18 +44,17 @@ class MyServiceTest {
 
     @Test
     fun `should start contend service`() {
-        val contender = MyContender()
-        val service = mockFactory.createMutexContendService(contender)
-        service.start()
+        val myComponent = MyComponent(mockFactory)
+        myComponent.start()
 
-        verify { service.start() }
+        verify(exactly = 1) { mockService.start() }
     }
 }
 ```
 
 ### Simulating Leadership Changes
 
-To test code that reacts to `onAcquired`/`onReleased`, capture the contender and invoke callbacks directly:
+To test code that reacts to `onAcquired`/`onReleased`, capture the contender and pass states through its real `notifyOwner` dispatch:
 
 ```kotlin
 @Test
@@ -68,15 +67,15 @@ fun `should react to leadership change`() {
     myComponent.start()
 
     // Simulate acquiring leadership
-    val mutexState = MutexState(MutexOwner.NONE, MutexOwner("test-contender"))
-    contenderSlot.captured.onAcquired(mutexState)
+    val contender = contenderSlot.captured
+    val owner = MutexOwner(contender.contenderId)
+    contender.notifyOwner(MutexState(MutexOwner.NONE, owner))
 
     // Assert your component's behavior
     myComponent.isLeader.assert().isTrue()
 
     // Simulate losing leadership
-    val releasedState = MutexState(MutexOwner("test-contender"), MutexOwner.NONE)
-    contenderSlot.captured.onReleased(releasedState)
+    contender.notifyOwner(MutexState(owner, MutexOwner.NONE))
 
     myComponent.isLeader.assert().isFalse()
 }
@@ -90,18 +89,19 @@ Mock the factory and verify the locker lifecycle:
 import me.ahoo.simba.locker.SimbaLocker
 
 @Test
-fun `locker should acquire and release`() {
+fun `locker should stop running service on close`() {
     val mockService = mockk<MutexContendService>(relaxed = true)
     every { mockFactory.createMutexContendService(any()) } returns mockService
+    every { mockService.running } returns true
 
     val locker = SimbaLocker("test-lock", mockFactory)
-    // acquire() will block, so in unit tests we typically don't call it directly
-    // Instead test the code that uses the locker
     locker.close()
 
     verify { mockService.stop() }
 }
 ```
+
+Stub `running` as true because `close()` calls `stop()` only for an active contend service.
 
 ## TCK — Extending MutexContendServiceSpec
 
@@ -138,26 +138,58 @@ Do not silently add Testcontainers to this repository's tests. If CI isolation i
 Test that scheduled work runs only on the leader:
 
 ```kotlin
+import io.mockk.capture
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import me.ahoo.simba.core.MutexContendService
+import me.ahoo.simba.core.MutexContendServiceFactory
+import me.ahoo.simba.core.MutexContender
+import me.ahoo.simba.core.MutexOwner
+import me.ahoo.simba.core.MutexState
 import me.ahoo.simba.schedule.AbstractScheduler
 import me.ahoo.simba.schedule.ScheduleConfig
+import me.ahoo.test.asserts.assert
+import org.junit.jupiter.api.Test
+import java.time.Duration
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Test
 fun `scheduler should run work only when leader`() {
-    val workLatch = CountDownLatch(1)
+    val contenderSlot = slot<MutexContender>()
+    val mockService = mockk<MutexContendService>(relaxed = true)
+    val mockFactory = mockk<MutexContendServiceFactory>()
+    every { mockFactory.createMutexContendService(capture(contenderSlot)) } returns mockService
+    val leader = AtomicBoolean(false)
+    val leaderWork = CountDownLatch(1)
+    val outsideLeadershipWork = CountDownLatch(1)
     val scheduler = object : AbstractScheduler("test-scheduler", mockFactory) {
         override val config = ScheduleConfig.delay(Duration.ZERO, Duration.ofMillis(100))
         override val worker = "test"
         override fun work() {
-            workLatch.countDown()
+            if (leader.get()) leaderWork.countDown() else outsideLeadershipWork.countDown()
         }
     }
 
     scheduler.start()
-    // Simulate acquiring leadership by triggering the contender
-    // ...
-
-    workLatch.await(5, TimeUnit.SECONDS).assert().isTrue()
-    scheduler.stop()
+    val contender = contenderSlot.captured
+    val owner = MutexOwner(contender.contenderId)
+    try {
+        outsideLeadershipWork.await(200, TimeUnit.MILLISECONDS).assert().isFalse()
+        leader.set(true)
+        contender.notifyOwner(MutexState(MutexOwner.NONE, owner))
+        leaderWork.await(5, TimeUnit.SECONDS).assert().isTrue()
+        contender.notifyOwner(MutexState(owner, MutexOwner.NONE))
+        leader.set(false)
+        outsideLeadershipWork.await(200, TimeUnit.MILLISECONDS).assert().isFalse()
+    } finally {
+        if (leader.getAndSet(false)) {
+            contender.notifyOwner(MutexState(owner, MutexOwner.NONE))
+        }
+        scheduler.stop()
+    }
 }
 ```
 

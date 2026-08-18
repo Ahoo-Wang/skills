@@ -31,7 +31,13 @@ Decision heuristic: If the project has Redis, use Redis. If it has Zookeeper/Cur
 
 ## Gradle Dependencies
 
-The project uses Gradle feature capabilities in `simba-spring-boot-starter` so consumers only pull the backend they need.
+Import the Simba BOM first so every module resolves to the same released version. The Spring examples assume Spring Boot 4.1 dependency management is enabled.
+
+```kotlin
+implementation(platform("me.ahoo.simba:simba-bom:3.1.1"))
+```
+
+Use a Gradle feature capability from `simba-spring-boot-starter` so the application pulls only one backend.
 
 For **Redis**:
 ```kotlin
@@ -49,6 +55,8 @@ implementation("me.ahoo.simba:simba-spring-boot-starter") {
         requireCapability("me.ahoo.simba:jdbc-support")
     }
 }
+implementation("org.springframework.boot:spring-boot-starter-jdbc")
+runtimeOnly("com.mysql:mysql-connector-j")
 ```
 
 For **Zookeeper**:
@@ -60,7 +68,9 @@ implementation("me.ahoo.simba:simba-spring-boot-starter") {
 }
 ```
 
-For non-Spring projects, depend on the backend module directly:
+The Zookeeper setup must also provide and start a `CuratorFramework` bean.
+
+For non-Spring projects, keep the BOM and depend on one backend module directly:
 ```kotlin
 implementation("me.ahoo.simba:simba-spring-redis")
 // or
@@ -68,6 +78,8 @@ implementation("me.ahoo.simba:simba-jdbc")
 // or
 implementation("me.ahoo.simba:simba-zookeeper")
 ```
+
+Configure the backend client manually: a `DataSource` and driver for JDBC, Spring Data Redis infrastructure for Redis, or `CuratorFramework` for Zookeeper.
 
 ## Three Usage Patterns
 
@@ -105,7 +117,9 @@ contendService.stop()
 Key points to explain:
 - `mutex` is the logical lock name. All contenders for the same mutex compete for one lock.
 - `contenderId` defaults to `"{counter}:{pid}@{hostAddress}"` via `ContenderIdGenerator.HOST`. Override to use `ContenderIdGenerator.UUID` or a custom ID.
-- `onAcquired` / `onReleased` are called asynchronously on the `handleExecutor`. Don't block these callbacks.
+- For JDBC, keep `mutex` at most 66 characters and `contenderId` at most 128 characters to fit the schema.
+- For Redis, never include the `@@` wire delimiter in a custom `contenderId`; owner-event parsing requires exactly two fields.
+- `onAcquired` / `onReleased` notifications are serialized. Normal notifications use the configured `handleExecutor`; JDBC/Redis defaults and Spring Boot auto-configuration use `ForkJoinPool.commonPool()`, while a direct executor may run them on the caller thread. When stopping an owned service, `onReleased` may run on the executor or the `stop()` caller, and `stop()` waits for it to complete. Keep callbacks short and do not rely on thread affinity.
 - The service must be started with `start()` and stopped with `stop()` when done.
 
 ### Pattern 2: SimbaLocker (RAII-style blocking lock)
@@ -114,6 +128,7 @@ Use when: the developer needs a simple "acquire lock, do work, release" pattern 
 
 ```kotlin
 import me.ahoo.simba.locker.SimbaLocker
+import java.time.Duration
 
 SimbaLocker("my-lock", mutexContendServiceFactory).use { locker ->
     locker.acquire(Duration.ofSeconds(5))  // throws TimeoutException if lock not acquired
@@ -125,6 +140,7 @@ SimbaLocker("my-lock", mutexContendServiceFactory).use { locker ->
 Or with explicit try/finally:
 ```kotlin
 import me.ahoo.simba.locker.SimbaLocker
+import java.time.Duration
 
 val locker = SimbaLocker("my-lock", mutexContendServiceFactory)
 try {
@@ -149,6 +165,7 @@ Use when: the application needs a periodic task that should run on exactly one i
 import me.ahoo.simba.core.MutexContendServiceFactory
 import me.ahoo.simba.schedule.AbstractScheduler
 import me.ahoo.simba.schedule.ScheduleConfig
+import java.time.Duration
 
 class MyScheduler(mutexContendServiceFactory: MutexContendServiceFactory) :
     AbstractScheduler(mutex = "my-scheduled-task", mutexContendServiceFactory) {
@@ -178,6 +195,9 @@ For Spring Boot, implement `SmartLifecycle` to auto-start/stop:
 import me.ahoo.simba.core.MutexContendServiceFactory
 import me.ahoo.simba.schedule.AbstractScheduler
 import me.ahoo.simba.schedule.ScheduleConfig
+import org.springframework.context.SmartLifecycle
+import org.springframework.stereotype.Service
+import java.time.Duration
 
 @Service
 class MyScheduler(mutexContendServiceFactory: MutexContendServiceFactory) :
@@ -187,6 +207,7 @@ class MyScheduler(mutexContendServiceFactory: MutexContendServiceFactory) :
     override val config = ScheduleConfig.delay(Duration.ZERO, Duration.ofSeconds(30))
     override val worker = "my-scheduler"
     override fun work() { /* ... */ }
+    override fun isRunning(): Boolean = running
 }
 ```
 
@@ -218,7 +239,7 @@ simba:
     enabled: true                  # enable Zookeeper backend (default: true)
 ```
 
-Prefer one backend capability and one enabled backend per application. If multiple backend modules are on the classpath and enabled, Spring can expose multiple `MutexContendServiceFactory` beans; use `@Primary` or `@Qualifier` only when that ambiguity is intentional.
+Enable exactly one backend per application. The auto-configurations define no supported cross-backend precedence: with multiple backend modules, one factory may silently back off or Spring may expose multiple `MutexContendServiceFactory` beans. Disable unused backends instead of relying on evaluation order; use `@Primary` or `@Qualifier` only when multiple factories are intentional.
 
 ### TTL and Transition Tuning
 
@@ -250,8 +271,8 @@ For tests, use the `simba-testing` skill. In short:
 ## Common Pitfalls
 
 1. **Forgetting to stop the service**: Always call `stop()` or `close()` — otherwise the contender keeps polling/subscribing and may hold the lock.
-2. **Blocking callbacks**: `onAcquired`/`onReleased` run on a shared executor. Long-running work in these callbacks will delay other contenders' notifications.
-3. **Multiple backends enabled**: If both Redis and JDBC are on the classpath without explicit disambiguation, Spring will fail to autowire `MutexContendServiceFactory`.
+2. **Blocking callbacks**: Long-running callbacks delay later notifications for that service. Queued callbacks occupy a shared worker with the default executor or block the producer with a direct executor; release callbacks can delay `stop()` regardless of which thread executes them.
+3. **Multiple backends enabled**: The result depends on condition evaluation and inferred bean return types; a backend may silently win or multiple factories may be registered. Enable exactly one backend unless ambiguity is intentional.
 4. **Clock skew with JDBC**: The JDBC backend uses DB server time (`currentDbAt`) to avoid clock skew across application nodes. Ensure all nodes point to the same DB.
-5. **Redis key expiration**: If the Redis key expires (process crash), the transition period gives the old owner a chance to reclaim. After transition, the next contender in the sorted-set queue is notified via Pub/Sub.
+5. **Redis release vs expiration**: Explicit release wakes the oldest queued contender through its personal Pub/Sub channel. Natural key expiration publishes nothing; contenders retry on their existing schedule around hard expiry.
 6. **Zookeeper path conflicts**: The Zookeeper backend creates paths at `/simba/{mutex}`. Don't use the same mutex name for unrelated locks.

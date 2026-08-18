@@ -1,6 +1,6 @@
 ---
 name: fluent-assert
-description: Use when writing or refactoring Kotlin tests that need assertions, including JUnit tests, Wow/SagaSpec tests, JDK types, nullable values, collections, maps, time values, futures, predicates, custom data classes, or exception assertions with assertThrownBy.
+description: Write and refactor Kotlin assertions with FluentAssert's AssertJ-backed `.assert()` extensions and `assertThrownBy`. Use when a project depends on `fluent-assert-core`, the user asks for FluentAssert, or the user asks to migrate direct AssertJ calls to FluentAssert; covers JUnit and Wow/SagaSpec tests, nullable values, supported JDK types, collections, time, futures, predicates, exceptions, recursive comparison, and custom `AssertProvider` types.
 ---
 
 # FluentAssert
@@ -27,12 +27,13 @@ name.assert().isNull()
 | Need | Pattern |
 |---|---|
 | Primitive/string/object | `value.assert().isEqualTo(expected)` |
-| Collection/list/map | `items.assert().hasSize(2).contains("a")` |
+| Collection/list | `items.assert().hasSize(2).contains("a")` |
+| Map | `map.assert().hasSize(2).containsEntry("a", 1)` |
 | Nullable value | `value.assert().isNull()` or `value.assert().isNotNull()` |
 | Exception lambda | `assertThrownBy<IllegalArgumentException> { call() }.hasMessage("bad")` |
 | Existing exception | `throwable.assert().hasMessageContaining("bad")` |
-| Time month checks | `date.assert().hasMonth(Month.APRIL)` |
-| Future success/failure | `future.assert().isCompletedWithValue(value)` / `.isCompletedExceptionally()` |
+| LocalDate/YearMonth month | `date.assert().hasMonth(Month.APRIL)` |
+| CompletableFuture success/failure | `completableFuture.assert().isCompletedWithValue(value)` / `.isCompletedExceptionally()` |
 | Recursive comparison | `actual.assert().usingRecursiveComparison().isEqualTo(expected)` |
 
 For exception lambdas, also import:
@@ -41,7 +42,7 @@ For exception lambdas, also import:
 import me.ahoo.test.asserts.assertThrownBy
 ```
 
-For month assertions, import `java.time.Month`; AssertJ expects `Month`, not an integer.
+For `LocalDate` and `YearMonth` month assertions, import `java.time.Month`; those assertions expect `Month`, not an integer.
 
 ## Wow/Saga Tests
 
@@ -76,5 +77,5 @@ Only use direct `assertThat` when implementing the provider's `assertThat()` met
 
 ## References
 
-- Read [`references/FULL-API.md`](references/FULL-API.md) when you need supported type coverage, installation snippets, or a fuller example.
+- Read [`references/FULL-API.md`](references/FULL-API.md) when you need installation, the exact type-to-assertion mapping, overload-resolution rules, or special API examples.
 - Use [`evals/evals.json`](evals/evals.json) as the regression prompt set when changing this skill.

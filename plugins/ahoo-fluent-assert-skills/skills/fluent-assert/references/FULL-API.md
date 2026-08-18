@@ -1,31 +1,21 @@
-# FluentAssert - Complete API Reference
+# FluentAssert API Reference
 
 ## Table of Contents
 
-- [Project Information](#project-information)
 - [Installation](#installation)
-- [Core Extension Functions](#core-extension-functions)
-- [Supported Types](#supported-types)
-- [API Examples](#api-examples)
-- [Comparison with AssertJ](#comparison-with-assertj)
-- [When to Use FluentAssert](#when-to-use-fluentassert)
-- [When to Use AssertJ Directly](#when-to-use-assertj-directly)
-
-## Project Information
-
-**Name:** FluentAssert
-
-**Version:** 1.1.0
-
-**Description:** A Kotlin library providing fluent assertions for JDK types
-
-**Language:** Kotlin
-
-**Platform:** JVM (Java 17+ required)
-
-**License:** Apache License 2.0
+- [Imports](#imports)
+- [Extension Mapping](#extension-mapping)
+- [Overload Resolution](#overload-resolution)
+- [Special APIs](#special-apis)
+- [Focused Examples](#focused-examples)
 
 ## Installation
+
+### Gradle (Kotlin DSL)
+
+```kotlin
+testImplementation("me.ahoo.test:fluent-assert-core:1.1.0")
+```
 
 ### Maven
 
@@ -38,33 +28,25 @@
 </dependency>
 ```
 
-### Gradle (Kotlin DSL)
+FluentAssert requires Java 17 or later.
 
-```kotlin
-testImplementation("me.ahoo.test:fluent-assert-core:1.1.0")
-```
-
-## Core Extension Functions
-
-All extension functions follow the pattern `Type.assert(): AssertJTypeAssert`, where:
-- `Type` is any supported JDK type (nullable or non-nullable)
-- `AssertJTypeAssert` is the corresponding AssertJ assertion class
-
-### Import
+## Imports
 
 ```kotlin
 import me.ahoo.test.asserts.assert
 import me.ahoo.test.asserts.assertThrownBy
 ```
 
-Import the specific `java.time` / `java.util` types a test uses (e.g. `import java.time.Month`); wildcard imports are only allowed for the packages listed in `config/detekt/detekt.yml` (e.g. `java.util.*`, `org.junit.jupiter.api.Assertions.*`) — others fail the repo's lint.
+Import only the Java types each test uses. In this repository, `java.time.*` fails Detekt; follow the wildcard exceptions in `config/detekt/detekt.yml`.
 
-## Supported Types
+## Extension Mapping
 
-### Primitives
+All value receivers below are nullable. `AssertProvider<A>.assert()` is the only non-nullable receiver.
 
-| Type | Assertion Class |
-|------|-----------------|
+### Core values and containers
+
+| Receiver | Return type |
+|---|---|
 | `Boolean?` | `BooleanAssert` |
 | `Byte?` | `ByteAssert` |
 | `Short?` | `ShortAssert` |
@@ -73,32 +55,22 @@ Import the specific `java.time` / `java.util` types a test uses (e.g. `import ja
 | `Float?` | `FloatAssert` |
 | `Double?` | `DoubleAssert` |
 | `BigDecimal?` | `BigDecimalAssert` |
-
-### Text
-
-| Type | Assertion Class |
-|------|-----------------|
 | `String?` | `StringAssert` |
-
-### Collections
-
-| Type | Assertion Class |
-|------|-----------------|
 | `Iterable<T>?` | `IterableAssert<T>` |
 | `Iterator<T>?` | `IteratorAssert<T>` |
 | `Collection<T>?` | `CollectionAssert<T>` |
 | `Array<T>?` | `ObjectArrayAssert<T>` |
 | `List<T>?` | `ListAssert<T>` |
-| `Map<K, V>?` | `MapAssert<K, V>` |
 | `Optional<T>?` | `OptionalAssert<T>` |
+| `Map<K, V>?` | `MapAssert<K, V>` |
 | `Stream<T>?` | `ListAssert<T>` |
+| `<T : Comparable<T>?> T?` | `GenericComparableAssert<T>` |
+| `<T> T?` | `ObjectAssert<T>` |
 
-> Primitive arrays (`IntArray`, `LongArray`, `ByteArray`, `CharArray`, ...) are **not** covered by `Array<T>` and fall back to `ObjectAssert`. Convert first: `ints.toList().assert().hasSize(3).contains(42)` or `ints.toTypedArray().assert()`.
+### Time
 
-### Time/Date
-
-| Type | Assertion Class |
-|------|-----------------|
+| Receiver | Return type |
+|---|---|
 | `Date?` | `DateAssert` |
 | `ZonedDateTime?` | `ZonedDateTimeAssert` |
 | `LocalDateTime?` | `LocalDateTimeAssert` |
@@ -112,467 +84,109 @@ Import the specific `java.time` / `java.util` types a test uses (e.g. `import ja
 | `Period?` | `PeriodAssert` |
 | `Temporal?` | `TemporalAssert` |
 
-### I/O
+### I/O, concurrency, functions, and exceptions
 
-| Type | Assertion Class |
-|------|-----------------|
+| Receiver | Return type |
+|---|---|
 | `Path?` | `PathAssert` |
 | `File?` | `FileAssert` |
 | `URL?` | `UrlAssert` |
 | `URI?` | `UriAssert` |
-
-### Concurrent
-
-| Type | Assertion Class |
-|------|-----------------|
 | `Future<V>?` | `FutureAssert<V>` |
 | `CompletableFuture<V>?` | `CompletableFutureAssert<V>` |
 | `CompletionStage<V>?` | `CompletableFutureAssert<V>` |
-
-### Functional
-
-| Type | Assertion Class |
-|------|-----------------|
 | `Predicate<T>?` | `PredicateAssert<T>` |
+| `<T : Throwable> T?` | `ThrowableAssert<T>` |
+| `AssertProvider<A>` | `A` |
 
-### Exceptions
+## Overload Resolution
 
-| Type | Assertion Class |
-|------|-----------------|
-| `Throwable?` | `ThrowableAssert<T>` |
+Kotlin selects an extension from the receiver's static type. Keep examples and fixes aligned with that type.
 
-### Catch-Alls
+- Convert primitive arrays before using collection assertions. `IntArray`, `LongArray`, and the other primitive arrays are not `Array<T>` and resolve to `ObjectAssert`; use `ints.toList().assert()` or `ints.toTypedArray().assert()`.
+- Box primitive streams before using stream assertions. Only `Stream<T>` has a dedicated overload; `IntStream`, `LongStream`, and `DoubleStream` resolve to `ObjectAssert`, so use `stream.boxed().assert()`.
+- Convert non-`String` text before using string assertions. A `CharSequence` receiver resolves to `ObjectAssert`, while `StringBuilder` resolves to `GenericComparableAssert<StringBuilder>`; use `text.toString().assert()`.
+- Keep a receiver statically typed as `Iterable<T>` to exercise `IterableAssert`; a `List<T>` receiver resolves to `ListAssert`.
+- Keep a receiver statically typed as `Temporal` to exercise `TemporalAssert`; concrete time types resolve to their dedicated assertion classes.
+- Expect `CompletionStage<V>.assert()` to return `CompletableFutureAssert<V>`; AssertJ has no `CompletionStageAssert`.
+- Expect `String.assert()` to return `StringAssert`, not `GenericComparableAssert`, even though `String` is comparable.
 
-| Type | Assertion Class |
-|------|-----------------|
-| `T?` (any object) | `ObjectAssert<T>` |
-| `T : Comparable<T>?` | `GenericComparableAssert<T>` |
+## Special APIs
 
-Non-`String` text receivers lose string assertions: a statically `CharSequence`-typed value resolves to `ObjectAssert`, and `StringBuilder` (it implements `Comparable<StringBuilder>`) resolves to `GenericComparableAssert<StringBuilder>` — call `.toString()` first for `StringAssert`.
+### Assert thrown exceptions
 
-## API Examples
-
-### Primitives
-
-#### Boolean
-
-```kotlin
-true.assert().isTrue()
-false.assert().isFalse()
-val nullableBool: Boolean? = null
-nullableBool.assert().isNull()
-```
-
-#### Byte
+Prefer the reified overload:
 
 ```kotlin
-val value: Byte = 42
-value.assert().isEqualTo(42).isPositive()
+assertThrownBy<IllegalArgumentException> {
+    parse("")
+}.hasMessage("invalid input")
 ```
 
-#### Short
+Use the class overload when the expected type is available only as a `Class<T>`:
 
 ```kotlin
-val value: Short = 1000
-value.assert().isEqualTo(1000).isGreaterThan(0)
+assertThrownBy(IllegalArgumentException::class.java) {
+    parse("")
+}.hasMessage("invalid input")
 ```
 
-#### Int
+Both overloads return `ThrowableAssert<T>`; continue the assertion chain directly without another `.assert()`.
+
+### Delegate custom assertions
+
+For an AssertJ `AssertProvider<A>`, call `.assert()` to obtain `A`:
 
 ```kotlin
-val age = 25
-age.assert().isEqualTo(25).isBetween(18, 65)
+class StringAssertProvider(private val value: String) : AssertProvider<StringAssert> {
+    override fun assertThat(): StringAssert = value.assert()
+}
+
+StringAssertProvider("ready").assert().isEqualTo("ready")
 ```
 
-#### Long
+## Focused Examples
+
+### Nullable values and collections
 
 ```kotlin
-val timestamp = System.currentTimeMillis()
-timestamp.assert().isPositive().isGreaterThan(0)
+val name: String? = null
+name.assert().isNull()
+
+val items = listOf("a", "b")
+items.assert().hasSize(2).containsExactly("a", "b")
 ```
 
-#### Float
-
-```kotlin
-val pi = 3.14f
-pi.assert().isEqualTo(3.14f).isPositive()
-```
-
-#### Double
-
-```kotlin
-val price = 19.99
-price.assert().isEqualTo(19.99).isPositive()
-```
-
-#### BigDecimal
-
-```kotlin
-val amount = BigDecimal("123.45")
-amount.assert().isEqualTo("123.45").isPositive()
-```
-
-### String
-
-```kotlin
-val name = "FluentAssert"
-name.assert()
-    .startsWith("Fluent")
-    .endsWith("Assert")
-    .contains("uentAss")
-    .hasLength(11)
-```
-
-### Generic Types
-
-#### Object
-
-```kotlin
-val person = Person("John", 30)
-person.assert()
-    .isNotNull()
-    .hasFieldOrPropertyWithValue("name", "John")
-```
-
-#### Comparable
-
-Arbitrary `Comparable` types get `GenericComparableAssert` (note: a `String` receiver would resolve to the more specific `StringAssert` instead):
+### Comparable fallback
 
 ```kotlin
 class Version(val value: Int) : Comparable<Version> {
     override fun compareTo(other: Version): Int = value.compareTo(other.value)
 }
 
-Version(2).assert()
-    .isGreaterThan(Version(1))
-    .isLessThan(Version(3))
+Version(2).assert().isGreaterThan(Version(1))
 ```
 
-### Collections
-
-#### Iterable
+### Static receiver types
 
 ```kotlin
-val numbers = listOf(1, 2, 3, 4, 5)
-numbers.assert()
-    .hasSize(5)
-    .contains(3)
-    .doesNotContain(6)
-    .allMatch { it > 0 }
+val values: Iterable<Int> = listOf(1, 2, 3)
+values.assert().hasSize(3) // IterableAssert<Int>
+
+val temporal: Temporal = Instant.parse("2024-01-01T00:00:00Z")
+temporal.assert().isEqualTo(Instant.parse("2024-01-01T00:00:00Z")) // TemporalAssert
+
+val stage: CompletionStage<String> = CompletableFuture.completedFuture("done")
+stage.assert().isCompletedWithValue("done") // CompletableFutureAssert<String>
 ```
 
-#### Iterator
+### Time, predicates, and recursive comparison
 
 ```kotlin
-val iterator = listOf(1, 2, 3).iterator()
-iterator.assert().hasNext()
-```
+LocalDate.of(2024, 4, 15).assert().hasMonth(Month.APRIL)
 
-#### Collection
-
-```kotlin
-val set = setOf("apple", "banana", "orange")
-set.assert()
-    .hasSize(3)
-    .contains("apple")
-    .doesNotContain("grape")
-```
-
-#### Array
-
-```kotlin
-val array = arrayOf("a", "b", "c")
-array.assert()
-    .hasSize(3)
-    .contains("b")
-    .doesNotContain("d")
-```
-
-#### List
-
-```kotlin
-val items = listOf("apple", "banana", "orange")
-items.assert()
-    .hasSize(3)
-    .contains("apple", "banana")
-    .element(0).isEqualTo("apple")
-```
-
-#### Optional
-
-```kotlin
-val present = Optional.of("value")
-present.assert()
-    .isPresent()
-    .contains("value")
-
-val empty = Optional.empty<String>()
-empty.assert().isEmpty()
-```
-
-#### Map
-
-```kotlin
-val map = mapOf("key1" to "value1", "key2" to "value2")
-map.assert()
-    .hasSize(2)
-    .containsKey("key1")
-    .containsValue("value1")
-    .containsEntry("key1", "value1")
-```
-
-#### Stream
-
-```kotlin
-val stream = listOf(1, 2, 3, 4, 5).stream()
-stream.assert()
-    .hasSize(5)
-    .contains(3)
-    .allMatch { it > 0 }
-```
-
-### Time and Date
-
-#### Date
-
-```kotlin
-val date = Date()
-date.assert()
-    .isToday()
-    .isBefore(Date(System.currentTimeMillis() + 1000))
-```
-
-#### ZonedDateTime
-
-```kotlin
-val zonedDateTime = ZonedDateTime.now()
-zonedDateTime.assert()
-    .isToday()
-    .hasZone(ZoneId.systemDefault())
-```
-
-#### Temporal
-
-```kotlin
-val instant = Instant.now()
-instant.assert()
-    .isBefore(Instant.now().plusSeconds(1))
-```
-
-#### LocalDateTime
-
-```kotlin
-val dateTime = LocalDateTime.now()
-dateTime.assert()
-    .isToday()
-    .isBefore(LocalDateTime.now().plusHours(1))
-```
-
-#### OffsetDateTime
-
-```kotlin
-val offsetDateTime = OffsetDateTime.of(2023, 12, 25, 10, 30, 0, 0, java.time.ZoneOffset.UTC)
-offsetDateTime.assert()
-    .isEqualTo(OffsetDateTime.of(2023, 12, 25, 10, 30, 0, 0, java.time.ZoneOffset.UTC))
-    .isBefore(offsetDateTime.plusDays(1))
-```
-
-#### OffsetTime
-
-```kotlin
-val offsetTime = OffsetTime.now()
-offsetTime.assert()
-    .isBefore(OffsetTime.now().plusHours(1))
-```
-
-#### LocalTime
-
-```kotlin
-val time = LocalTime.of(10, 30)
-time.assert()
-    .isBefore(LocalTime.of(12, 0))
-    .hasHour(10)
-    .hasMinute(30)
-```
-
-#### LocalDate
-
-```kotlin
-val date = LocalDate.of(2023, 12, 25)
-date.assert()
-    .hasYear(2023)
-    .hasMonth(Month.DECEMBER)
-    .hasDayOfMonth(25)
-```
-
-#### YearMonth
-
-```kotlin
-val yearMonth = YearMonth.of(2023, 12)
-yearMonth.assert()
-    .hasYear(2023)
-    .hasMonth(Month.DECEMBER)
-```
-
-#### Instant
-
-```kotlin
-val instant = Instant.now()
-instant.assert()
-    .isBefore(Instant.now().plusSeconds(1))
-```
-
-#### Duration
-
-```kotlin
-val duration = Duration.ofHours(2)
-duration.assert()
-    .hasHours(2)
-    .isGreaterThan(Duration.ofHours(1))
-```
-
-#### Period
-
-```kotlin
-val period = Period.of(1, 2, 3)
-period.assert()
-    .hasYears(1)
-    .hasMonths(2)
-    .hasDays(3)
-```
-
-### File System and I/O
-
-#### Path
-
-```kotlin
-val path = Paths.get("/tmp/test.txt")
-path.assert()
-    .exists()
-    .isReadable()
-    .isRegularFile()
-```
-
-#### File
-
-```kotlin
-val file = File("/tmp/test.txt")
-file.assert()
-    .exists()
-    .isFile()
-    .canRead()
-    .hasName("test.txt")
-```
-
-#### URL
-
-```kotlin
-val url = URL("https://example.com:443")
-url.assert()
-    .hasHost("example.com")
-    .hasProtocol("https")
-    .hasPort(443)
-```
-
-#### URI
-
-```kotlin
-val uri = URI("https://example.com/path?query=value")
-uri.assert()
-    .hasHost("example.com")
-    .hasPath("/path")
-    .hasQuery("query=value")
-```
-
-### Concurrent Programming
-
-#### Future
-
-```kotlin
-val future = executor.submit(Callable { "result" })
-future.assert()
-    .isDone()
-    .isNotCancelled()
-```
-
-#### CompletableFuture
-
-```kotlin
-val future = CompletableFuture.completedFuture("success")
-future.assert()
-    .isCompleted()
-    .isCompletedWithValue("success")
-```
-
-#### CompletionStage
-
-There is no `CompletionStageAssert` — `CompletionStage.assert()` returns `CompletableFutureAssert`:
-
-```kotlin
-val stage = CompletableFuture.completedFuture("result")
-stage.assert()
-    .isCompleted()
-    .isCompletedWithValue("result")
-```
-
-### Functional Programming
-
-#### Predicate
-
-```kotlin
 val isEven = Predicate<Int> { it % 2 == 0 }
-isEven.assert()
-    .accepts(2, 4, 6)
-    .rejects(1, 3, 5)
+isEven.assert().accepts(2, 4).rejects(1, 3)
+
+actual.assert().usingRecursiveComparison().isEqualTo(expected)
 ```
-
-### Exception Testing
-
-#### Throwable
-
-```kotlin
-val exception = RuntimeException("test error")
-exception.assert()
-    .hasMessage("test error")
-    .isInstanceOf(RuntimeException::class.java)
-```
-
-#### assertThrownBy (Class parameter)
-
-```kotlin
-assertThrownBy(IllegalArgumentException::class.java) {
-    throw IllegalArgumentException("invalid argument")
-}.hasMessage("invalid argument")
-```
-
-#### assertThrownBy (Reified)
-
-```kotlin
-assertThrownBy<IllegalArgumentException> {
-    throw IllegalArgumentException("invalid argument")
-}.hasMessage("invalid argument")
-```
-
-## Comparison with AssertJ
-
-| Feature | AssertJ | FluentAssert |
-|---------|---------|-------------|
-| Syntax | `assertThat(value).isEqualTo(expected)` | `value.assert().isEqualTo(expected)` |
-| Null Safety | Manual null checks | Automatic null handling |
-| Kotlin Integration | Java library | Kotlin-first design |
-| Extension Functions | Not applicable | Full Kotlin extension support |
-| Type Inference | Limited | Enhanced Kotlin type system |
-| IDE Support | Good | Excellent (Kotlin-aware) |
-
-## When to Use FluentAssert
-
-- **Kotlin projects** - Better integration with Kotlin idioms
-- **Null-heavy code** - Automatic null safety
-- **Fluent style preference** - More readable assertion chains
-- **Type-safe assertions** - Leverage Kotlin's type system
-
-## When to Use AssertJ Directly
-
-- **Java projects** - No need for Kotlin extensions
-- **Custom assertion logic** - Direct AssertJ gives more control
-- **Performance-critical code** - Minimal overhead
