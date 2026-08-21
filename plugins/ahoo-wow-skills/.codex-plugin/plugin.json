@@ -33,6 +33,6 @@
       "Skills"
     ],
     "websiteURL": "https://github.com/Ahoo-Wang/skills",
-    "defaultPrompt": "Help me develop, review, debug, or migrate this Wow service using current source and verifiable evidence."
+    "defaultPrompt": "Help me develop, review, debug, or migrate this downstream application that uses Wow, using verifiable evidence."
   }
 }
