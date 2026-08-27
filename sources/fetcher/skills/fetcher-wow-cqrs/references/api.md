@@ -554,7 +554,7 @@ wire discriminator. Builders are grouped under `filter` so they do not collide
 with the legacy `Condition` helpers:
 
 ```typescript
-const expression = filter.and(
+const expression = filter.and([
   filter.deletion(DeletionState.ACTIVE),
   filter.eq('state.status', 'PAID'),
   filter.elementMatch('state.items', filter.gt('quantity', 0)),
@@ -566,7 +566,7 @@ const expression = filter.and(
     zoneId: 'Asia/Shanghai',
     timeUnit: TimeUnit.MILLISECONDS,
   }),
-);
+]);
 
 await snapshotClient.count(expression);
 await snapshotClient.list({ filter: expression, limit: 10 });
@@ -587,6 +587,19 @@ Available builders:
 - Presence: `isEmpty`, `isNull`, `isNotNull`, `exists`, `notExists`
 - Scope/search: `deletion`, `elementMatch`, `search(query, options?: SearchFilterOptions)`
 - Relative time: `today`, `beforeToday`, `tomorrow`, `thisWeek`, `nextWeek`, `lastWeek`, `thisMonth`, `lastMonth`, `yesterday`, `nextMonth`, `lastYear`, `thisYear`, `nextYear`, `recentDays`, `earlierDays`
+
+`and`, `or`, `nor`, `ids`, `aggregateIds`, `isIn`, `notIn`, and `containsAll`
+accept one non-empty `readonly` array and throw `TypeError` for an empty array:
+
+```typescript
+const statuses = ['PAID', 'SHIPPED'] as const;
+filter.and([filter.eq('state.status', 'PAID')]);
+filter.ids(['snapshot-1', 'snapshot-2']);
+filter.aggregateIds(['cart-1', 'cart-2']);
+filter.isIn('state.status', statuses);
+filter.notIn('state.status', ['CANCELLED']);
+filter.containsAll('state.tags', ['wow', 'cqrs']);
+```
 
 `eq` and `ne` accept a JSON scalar or an array of JSON scalars. Logical field
 segments may start with `@`.
@@ -681,6 +694,7 @@ to the current innermost element.
 
 - `COUNT`: `alias`
 - `NUMERIC`: `function`, `expression`, `alias`
+- `ANY`: `field`, `alias`
 
 `AggregationFunction` values are `SUM`, `AVG`, `MIN`, and `MAX`.
 `AggregationDateUnit` values are `YEAR`, `QUARTER`, `MONTH`, `WEEK`, `DAY`,
@@ -705,6 +719,7 @@ aggregation.divide(left, right);
 aggregation.terms(field, alias);
 aggregation.histogram(field, { interval, alias });
 aggregation.dateHistogram(field, { unit, alias, timeZone }); // timeZone defaults to UTC
+aggregation.any(field, alias);
 aggregation.count(alias);
 aggregation.sum(expression, alias);
 aggregation.avg(expression, alias);
@@ -712,9 +727,17 @@ aggregation.min(expression, alias);
 aggregation.max(expression, alias);
 ```
 
-Wow validates the complete aggregation's aliases, sort fields, and expression
-depth on the server. The `Row` generic describes aggregation result rows only;
-Fetcher does not perform runtime decoding.
+`ANY` is a metric, not a group. It returns one non-null scalar from the current
+group, or `null` when no value exists. Its field is relative to the innermost
+element. Wow requires the field to support `AGGREGATE_TERMS` and rejects
+collection cardinality. MongoDB uses a `$max` accumulator while Elasticsearch
+uses a one-bucket `terms` aggregation, so the selected value is intentionally
+unspecified. Sorting by an `ANY` alias is an expensive metric sort.
+
+Wow validates the complete aggregation's field capabilities, cardinality,
+aliases, sort fields, and expression depth on the server. Fetcher only validates
+field-path and alias syntax that can be known locally. The `Row` generic describes
+aggregation result rows only; Fetcher does not perform runtime decoding.
 
 ## Query DSL Conditions (Deprecated)
 
