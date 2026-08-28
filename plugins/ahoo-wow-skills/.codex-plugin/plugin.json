@@ -1,7 +1,7 @@
 {
   "name": "ahoo-wow-skills",
   "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"

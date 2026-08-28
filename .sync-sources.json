@@ -5,7 +5,7 @@
       "source": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
-      "commit": "7592dbb80d685a4f9dde853ba0d47ed5c5205967",
+      "commit": "eacc75529419b0934922988684d28867fa619955",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -53,7 +53,7 @@
       "source": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "299b5ff4439048b194b1a2cb9dda13b66af0eea9",
+      "commit": "6fb0236fcfe818951239ba8b42138d546b0c9d6a",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -61,7 +61,7 @@
       "source": "fetcher",
       "url": "https://github.com/Ahoo-Wang/fetcher.git",
       "branch": "main",
-      "commit": "ec62687dc399be28e29a30b10e64c62bf815e8fa",
+      "commit": "15b55114247e77cd2cba587af8fc23842764bf64",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     }
