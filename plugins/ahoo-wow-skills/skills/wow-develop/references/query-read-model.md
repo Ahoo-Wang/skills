@@ -5,9 +5,13 @@ Use this reference for `FilterExpression`, Query DSL, snapshot or event-stream a
 ## Stable decisions
 
 - Keep query construction separate from backend conversion and execution.
-- Use `FilterExpression` and `FilterDsl` as the primary contract. Treat legacy `Condition` APIs only as target-version compatibility adapters; do not introduce new condition rewrite paths.
+- Use `FilterExpression` and `FilterDsl` as the canonical JVM contract. V9.0.x retains deprecated `Condition`/`Operator` types, `ConditionDsl`, legacy query constructors, count client overloads, and REST `condition`/`operator` input only as adapters to `FilterExpression`; they are scheduled for removal in 9.1.0. Do not add new Condition-based APIs.
+- On targets that provide them, use `isEmptyString()` for exact `""` and `isNotEmptyString()` for fields that are present, non-null, and non-empty strings. Require an exact-match, single-valued String field; whitespace, null, missing fields, and empty collections have separate semantics. HTTP may reject `IS_NOT_EMPTY_STRING` when expensive operators are disabled even though an in-process query is valid.
 - Apply tenant, owner, deletion, and authorization filters at the boundary that cannot be bypassed by callers.
 - Treat pagination ordering as a correctness contract; define a deterministic tie-breaker when records can share the primary sort value.
+- Use `PagedQuery` for totals and page jumps; use `CursorQuery` for forward traversal without totals: the first page has no token, later requests preserve filter/sort, and `nextCursor = null` ends traversal.
+- A cursor token is an opaque Backend position: rerun scope, authorization, filters, and masking on every page; never decode, rewrite, or cross Backend boundaries with it.
+- The effective cursor sort must be Schema `EXACT`, `SINGLE`, unmasked, and stably unique (including a tie-breaker); fail invalid sort or token rather than restarting or falling back to offsets.
 - Project only fields supported by downstream mapping and serialization.
 - Verify count and page semantics together when presenting totals.
 - Preserve backend-specific null, collection, date/time, and nested-field semantics through focused converter tests.
@@ -17,7 +21,7 @@ Use this reference for `FilterExpression`, Query DSL, snapshot or event-stream a
 - Wow validates aggregation structure, not field existence, collection shape, or physical type. MongoDB compiles field paths directly; Elasticsearch resolves executable mappings. Do not add a field catalog or duplicate backend compilers in downstream code.
 - A generated aggregation OpenAPI route does not prove that the routed `QueryBackend` can execute the target fields against the selected storage. Prove the Backend, Schema binding, and aggregation contract together.
 - Aggregation reuses root route and ABAC filtering, while masking intentionally ignores aggregation results. HTTP cost guards apply only when the query carries a WebFlux `ServerRequest`; read exact defaults from the target version.
-- Treat the aggregate-bound `SnapshotQueryGateway` or `EventStreamQueryGateway` as the application execution entry. One around chain encloses the bound `ObjectNode` Backend; every result query reads current Schema, reuses a Masker for the same Schema instance, and recompiles after refresh publishes a new instance before optional typed Jackson materialization. If that Schema is unavailable, managed `single`/`list`/`paged` fail closed without subscribing to the Backend; `count` does not read masking Schema. WebFlux applies request-scope rewriting before invoking the Gateway. Use `SnapshotQueryBackendFactory` or `EventStreamQueryBackendFactory` directly only for trusted low-level diagnostics, Backend contract tests, or storage extensions because that path bypasses Gateway governance.
+- Treat the aggregate-bound `SnapshotQueryGateway` or `EventStreamQueryGateway` as the application execution entry. One around chain encloses the bound `ObjectNode` Backend; every result query reads current Schema, reuses a Masker for the same Schema instance, and recompiles after refresh publishes a new instance before optional typed Jackson materialization. If that Schema is unavailable, managed `single`/`list`/`paged`/`cursor` fail closed without subscribing to the Backend; `count` does not read masking Schema. WebFlux applies request-scope rewriting before invoking the Gateway. Use `SnapshotQueryBackendFactory` or `EventStreamQueryBackendFactory` directly only for trusted low-level diagnostics, Backend contract tests, or storage extensions because that path bypasses Gateway governance.
 - Routing happens once when the Gateway is assembled for a `NamedAggregate`; Schema handlers use the same routed Backend Factory. A generic `QueryFilter` has no `@FilterType`; only model-specific filters target the corresponding Gateway.
 
 ## Discover the actual DSL
@@ -28,7 +32,7 @@ rg -n "FilterExpression|filterExpression|singleQuery|listQuery|pagedQuery|aggreg
 rg -n "FilterDsl|AggregationQuery|QueryGateway|QueryBackend|SnapshotQueryGateway|EventStreamQueryGateway|QueryBackendFactory|QueryModelSchema|QuerySchemaSource|QueryFilter|HttpQueryGuardFilter|QueryComponent" wow-api wow-query wow-spring wow-webflux wow-openapi -g '*.kt'
 ```
 
-Inspect the downstream usage plus DSL builders, filter types, snapshot/event query extensions, backend converters, service interfaces, generated OpenAPI, and tests from a separate pinned Wow source checkout or resolved dependency sources. Use the generated OpenAPI path as HTTP source of truth; default local aggregate routes do not prepend the context alias. Never invent an operator or copy a complete method list into a Skill.
+Inspect the downstream usage plus DSL builders, filter types, snapshot/event query extensions, backend converters, service interfaces, generated OpenAPI, and tests from a separate pinned Wow source checkout or resolved dependency sources. Use the generated OpenAPI path and HTTP method as the transport source of truth; default local aggregate routes do not prepend the context alias. Never invent an operator or copy a complete method list into a Skill.
 
 ## Verification boundary
 
