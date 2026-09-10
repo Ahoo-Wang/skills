@@ -1,6 +1,6 @@
 # View Engine API
 
-Package: `@ahoo-wang/fetcher-view-engine`, version `5.0.0`. The filter layer and RecordView are implemented: headless compilation and view engine, definitions/instances with host persistence, and React filter/table/page components. AnalysisView, DashboardView and cards remain separate work.
+Package: `@ahoo-wang/fetcher-view-engine`, version `5.0.0`. The filter layer and RecordView are implemented: headless compilation and view engine, definitions/instances with host persistence, and React filter/table/card/page components. AnalysisView and DashboardView remain separate work.
 
 Library acceptance: after workspace build, `pnpm verify:view-engine` verifies the packed public API, owns an isolated Storybook process, runs local/HTTP host recovery, and checks the 100-row/30-column/100-filter fixture. `VIEW_ENGINE_BROWSERS=chromium,firefox,webkit` selects the readiness matrix; `VIEW_ENGINE_BROWSER_CHANNEL=chrome` optionally selects installed Chrome for Chromium; `VIEW_ENGINE_ARTIFACTS` retains stage logs, screenshots and JSON. Install matching Playwright browsers first. The CI job uses this same entry point; full unit validation uses `VITEST_MAX_WORKERS=4 pnpm test:unit`.
 
@@ -334,8 +334,8 @@ unsubscribe();
 engine.dispose();
 ```
 
-`ViewDefinition` contains `id`, `title`, `sourceId`, `rowKey`, `fields` and optional
-`timeZone`, `allowedOperators`, `filterEditors`, `recordActions: {global?, table?, row?}`. A
+`ViewDefinition` contains `id`, `title`, `sourceId`, `rowKey`, `fields`, required `allowedLayouts` and optional
+`timeZone`, `defaultPresentation`, `allowedOperators`, `filterEditors`, `recordActions: {global?, toolbar?, row?}`. A
 `ViewFieldDefinition` extends `FilterFieldDefinition` with `sortable?: boolean`,
 `cellRenderer?: RendererReference`, `summaryFunctions?: readonly RecordSummaryFunction[]`,
 and `numberFormat?: Intl.NumberFormatOptions & { locale?: string }`.
@@ -350,7 +350,7 @@ separate filter-renderer protocol.
 `{type:'public', source:'system'|'shared'}`. Scope describes classification,
 not permission. Config contains `filters: FilterConfiguration`, `sort: FieldSort[]`,
 `pagination: {mode:'paged'|'cursor', size:number}` and
-`presentation: {layout:'table', table:{columns:RecordColumn[]}}`. The former `config.filter` shape is rejected; compiled Wow filters are runtime-only.
+`presentation: RecordPresentation` (table/card discriminated union). The former `config.filter` shape is rejected; compiled Wow filters are runtime-only.
 
 Columns form an ordered, nonempty array with unique `id`, optional `title`,
 `width`, `visible`, `pinned` and `renderer`. Field columns add `{kind:'field',field}`;
@@ -400,7 +400,7 @@ The optional `definition`, `instance`, `preference`, and `permission` properties
 hold independently replaceable services. Missing methods disable their capability.
 `resolveSource` is the required local runtime bridge, not a REST operation.
 The development-only HttpViewHost composes experimental resource clients;
-LocalStorageViewHost implements the same contracts with a shared storage transaction.
+MemoryViewHost implements the same contracts with a shared storage transaction.
 To override one operation without dropping its siblings, merge the service:
 `{...host, instance: {...host.instance, save: customSave}}`.
 
@@ -685,7 +685,7 @@ without wrapping; the complete value remains accessible through the tooltip.
   fallbacks. Missing `aggregate` produces an all-summary error without preventing
   record queries or local page calculation.
 
-All-record results are reused across paging, sorting and presentation edits.
+In table mode, all-record results are reused across paging, sorting and column presentation edits. Card mode cancels and clears summaries; returning to table recalculates the configured metrics without reloading records.
 Query, refresh and instance selection refresh them; changed filters or summary
 columns invalidate them. Unapplied filter edits leave both results on the applied
 scope. Function changes recompute the page and request the new all-record metrics,
@@ -816,12 +816,12 @@ new object references do not reload them. Change the React key to explicitly
 reinitialize local data. `ViewPageContent` takes an
 already-owned `engine` with the same visual props and leaves lifecycle to the
 caller. `RecordView` renders only the selected record instance's business
-operations, FilterPanel, column controls, table and pagination. The lower-level
-`RecordTable` and `RecordColumnSettings` can also be controlled directly.
+operations, FilterPanel, layout controls, table or cards, and pagination. The lower-level
+`RecordTable`, `RecordCardList`, `RecordColumnSettings` and `RecordCardSettings` can also be controlled directly.
 `ViewInstanceMetadata` holds common metadata; `RecordTablePresentation` defines
 table layout and columns. `RecordViewConfig` directly contains `sort`, `pagination`,
 canonical component `filters` and `presentation`. `ViewInstance` currently remains
-the record kind. These named boundaries do not claim additional view renderers.
+the record kind. RecordPresentation adds the card layout without adding a new view kind.
 The published record table relies on React Compiler to cache derived values, callbacks and JSX; unsubmitted draft edits do not rerender record cells in the compiled build. Uncompiled source tests verify the same functional behavior without promising identical render counts. Its widths,
 effective pinning, filler and summary-label region are computed in a pure internal
 layout module. The engine and auto-refresh control share one domain block policy;
@@ -902,7 +902,7 @@ Escape closes an active popup first, then exits expansion; the toolbar also
 provides Collapse. Expansion is transient and restores body scrolling on exit
 or unmount. In an iframe it expands within that frame.
 
-`ViewExtensions` extends `FilterExtensions` with `cells`, `globalActions`, `tableActions` and
+`ViewExtensions` extends `FilterExtensions` with `cells`, `globalActions`, `toolbarActions` and
 `rowActions`, each a local name-to-React-component map. Custom components may use
 any React UI. Explicit missing names and renderer failures are visible and
 isolated per rendering area.
@@ -910,20 +910,20 @@ isolated per rendering area.
 `RecordViewProps`, `ViewPageContentProps` and `ViewPageProps` also accept two finite region callbacks:
 
 ```ts
-renderTableToolbar?: (context: RecordTableToolbarRenderContext) => ReactNode;
+renderToolbar?: (context: RecordToolbarRenderContext) => ReactNode;
 renderPagination?: (context: RecordPaginationRenderContext) => ReactNode;
 ```
 
-| Context                           | Readonly state                                                                                                                    | Controlled operations                                                                                                             |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `RecordTableToolbarRenderContext` | `definition`, `session`, `defaultContent`, `appliedFilter`, `querying`, `selectedRowKeys`                                         | `clearSelection(): void`, `setColumns(columns): void`, `refresh(): Promise<void>`                                                 |
-| `RecordPaginationRenderContext`   | `definition`, `session`, `defaultContent`, `mode`, `page`, `pageSize`, `pageCount`, `canNext`, `canPrevious`, `canChangePageSize` | `setPage(index): Promise<void>`, `setPageSize(size): Promise<void>`, `nextPage(): Promise<void>`, `previousPage(): Promise<void>` |
+| Context                         | Readonly state                                                                                                                    | Controlled operations                                                                                                                                                                                     |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RecordToolbarRenderContext`    | `definition`, `session`, `defaultContent`, `appliedFilter`, `querying`, `selectedRowKeys`                                         | `clearSelection(): void`, `setColumns(columns: RecordColumn[]): void`, `setLayout(layout: RecordPresentation['layout']): void`, `setCardConfig(card: RecordCardConfig): void`, `refresh(): Promise<void>` |
+| `RecordPaginationRenderContext` | `definition`, `session`, `defaultContent`, `mode`, `page`, `pageSize`, `pageCount`, `canNext`, `canPrevious`, `canChangePageSize` | `setPage(index): Promise<void>`, `setPageSize(size): Promise<void>`, `nextPage(): Promise<void>`, `previousPage(): Promise<void>`                                                                         |
 
 Return `defaultContent` to preserve the built-in region, wrap or add to it to compose, and return `null` to hide it. Render the default node at most once. These are render callbacks, so Hooks cannot be called directly inside them; return a component when local state is needed. Each callback runs below its own recoverable render boundary. Local component state survives ordinary updates within the same instance; switching instances remounts both regions, including when using standalone `RecordView`. Async event failures remain rejected operation promises for the host to handle; React error boundaries do not catch them.
 
 Pagination availability and instance-bound operations reuse engine guards. Loading, query failure, no successful query, the last page and a cursor without `nextCursor` disable progression as applicable. Cursor mode has no random page or previous-page operation. Calling an old callback after instance navigation remains bound to the old instance and rechecks current state. The callbacks do not expose mutable engine storage or bypass query/permission validation.
 
-Stable semantic hooks are `data-slot="record-view"`, `record-global-toolbar`, `record-table-toolbar`, `record-applied-filters` and `record-pagination`. Internal DOM depth and utility classes are not API. The complete global toolbar is not replaceable because it owns refresh and expansion lifecycles; `toolbarStart` and `FilterPanel.renderToolbar` remain available.
+Stable semantic hooks are `data-slot="record-view"`, `record-global-toolbar`, `record-toolbar`, `record-applied-filters` and `record-pagination`. Internal DOM depth and utility classes are not API. The complete global toolbar is not replaceable because it owns refresh and expansion lifecycles; `toolbarStart` and `FilterPanel.renderToolbar` remain available.
 
 Global/table action error boundaries retry when their actual renderer inputs
 change, including `selectedRowKeys` or `querying`. Unrelated unsubmitted draft
@@ -934,16 +934,16 @@ filters, field metadata and JSON options use recursive readonly inputs. Componen
 copy required fields into their own form state and submit through host commands
 or engine methods; direct writes to a snapshot are compile-time errors.
 
-| Renderer props               | Values                                                                                                                                                                                                                                    |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CellRendererProps`          | `value`, full `record`, stable `rowKey`, page `index`, `field`, `column`, `definition`, `instance`, JSON `options`. Resolution: column reference → field reference → built-in.                                                            |
-| `GlobalActionsRendererProps` | `definition`, `instance`, applied `filter` / `sort`, `selectedRowKeys`, `querying`, `options`, `refresh()`. The applied filter is null until compiled. Selection is explicit current-page records, never implicitly all matching records. |
-| `TableActionsRendererProps`  | Alias of `GlobalActionsRendererProps`; same applied scope, explicit page selection and bound refresh, rendered in the table toolbar.                                                                                                      |
-| `RowActionsRendererProps`    | `record`, `rowKey`, `definition`, `instance`, applied `filter` / `sort`, `options`, `refresh()`. Resolution: column reference → definition row action.                                                                                    |
+| Renderer props                | Values                                                                                                                                                                                                                                    |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CellRendererProps`           | `value`, full `record`, stable `rowKey`, page `index`, `field`, `column`, `definition`, `instance`, JSON `options`. Resolution: column reference → field reference → built-in.                                                            |
+| `GlobalActionsRendererProps`  | `definition`, `instance`, applied `filter` / `sort`, `selectedRowKeys`, `querying`, `options`, `refresh()`. The applied filter is null until compiled. Selection is explicit current-page records, never implicitly all matching records. |
+| `ToolbarActionsRendererProps` | Alias of `GlobalActionsRendererProps`; same applied scope, explicit page selection and bound refresh, rendered in the table toolbar.                                                                                                      |
+| `RowActionsRendererProps`     | `record`, `rowKey`, `definition`, `instance`, applied `filter` / `sort`, `options`, `refresh()`. Resolution: column reference → definition row action.                                                                                    |
 
-Definitions select each action area via `recordActions.global`, `.table` and `.row`.
+Definitions select each action area via `recordActions.global`, `.toolbar` and `.row`.
 To move an existing batch component, change its definition reference from `.global`
-to `.table` and registration from `globalActions` to `tableActions`. The library does
+to `.toolbar` and registration from `globalActions` to `toolbarActions`. The library does
 not relocate individual buttons inside a host component.
 
 Business permissions, confirmations and action completion/errors belong to the
@@ -966,7 +966,7 @@ compares archive contents with dist, runs public imports/core behavior, and
 type-checks consumers against the extracted package without private source aliases.
 It does not install, publish or modify dependency/build configuration.
 
-`examples/react/OrderExample.tsx` supplies independent global, row, table/batch,
+`examples/react/sales-order/OrderWorkbench.tsx` supplies independent global, row, table/batch,
 filter and cell extensions. It uses public package imports, readonly inputs,
 instance-bound refresh and explicit operation failure/retry handling. Run it with
 `pnpm exec vite packages/view-engine/examples/react --host 127.0.0.1 --port 4175`
@@ -997,19 +997,14 @@ The published `/react` entry is built with React Compiler using the repository V
 instance, preference and permission service interfaces. They remain type exports
 from the public package. `recordModel.ts` contains record metadata and engine state.
 
-Core exports LocalStorageViewHost, LocalStorageViewHostOptions, ViewCreateContext,
-ViewPermissionSnapshot, ViewStorageLock, ViewServiceError and ViewServiceErrorCode.
+Core exports MemoryViewHost, MemoryViewHostOptions, ViewCreateContext,
+ViewPermissionSnapshot, ViewServiceError and ViewServiceErrorCode.
 HttpViewHost, all HTTP resource clients/transport and VIEW_SERVICE_STATUS are **not**
 public exports. They live under `packages/view-engine/dev/http` and are excluded from
 the published package. Routes, envelopes, status mapping and fake sessions are an
 internal experiment; see the bilingual `packages/view-engine/dev/README*.md`.
 
-LocalStorageViewHostOptions requires serviceKey, scopeKey, definition, instances,
-resolveSource, storage and lock. Storage is structural (`getItem`, `setItem`,
-`removeItem`), so headless consumers need no DOM `Storage` declaration. Optional instancePermissions, canReorder and
-permissionsRevision provide trusted policy. Public content is shared; private views
-and ordering are per-user. Each transaction covers read, authorization, revision
-check and write. reset() clears the entire fixture service/definition.
+MemoryViewHostOptions requires serviceKey, scopeKey, definition, instances and resolveSource. Optional store is a native Map<string, string | null>; passing the same Map shares an in-process service, while omitted stores are private to each host. Optional instancePermissions, canReorder and permissionsRevision provide trusted policy. Its synchronous transaction commits only after all domain validation succeeds. reset() clears that service/definition with an explicit empty state.
 
 ViewHost.instance.create(input, {requestId, signal?}) retains one request ID through
 unknown outcomes and retries; the service commits the instance and its receipt
@@ -1022,7 +1017,7 @@ permission.subscribe notifies ViewEngine; synchronous getters never fetch.
 Applications keep one fixed access scope and replace scopeKey when identity changes.
 Definition/instance IDs are nonblank valid Unicode strings and cannot equal . or .. .
 
-OrderExample accepts persistViews and optional createViewHost(resolveSource).
+OrderWorkbench accepts persistViews and optional createViewHost(resolveSource).
 HTTP options belong only to dev/HttpOrderExample.tsx. Copying examples/react into an
 application requires no development adapter files or private package source imports.
 
@@ -1080,6 +1075,7 @@ const definition: ViewDefinition = {
   title: 'Orders',
   sourceId: 'orders',
   rowKey: 'id',
+  allowedLayouts: ['table', 'card'],
   timeZone: 'Asia/Shanghai', // omit to use the local runtime zone
   fields: [
     {
@@ -1115,7 +1111,7 @@ Selection props use `value` or `values` and an optional `selectedOptions` label 
 
 `FilterTextValues` splits newline/comma/semicolon input and deduplicates without numeric coercion or CSV interpretation. A pending token consumes Enter before Query. Ranges require two complete ordered endpoints and reuse scalar timezone/DST validation; they do not expand a date to the end of the day.
 
-`examples/react/BuiltinFiltersExample.tsx` and **View Engine / 过滤器 / 内置组件** demonstrate Fetcher candidate loading and LocalStorageViewHost JSON recovery. The implementation reuses `@ahoo-wang/fetcher-react/core`; it does not import Ant Design or add candidate operations to ViewHost.
+`examples/react/BuiltinFiltersExample.tsx` and **View Engine / 过滤器 / 内置组件** demonstrate Fetcher candidate loading and IndexedDBViewHost JSON recovery. The implementation reuses `@ahoo-wang/fetcher-react/core`; it does not import Ant Design or add candidate operations to ViewHost.
 
 `getFieldOperators(field)` derives capabilities only from field type and explicit `field.operators`. Field `editor` and definition `filterEditors` are defaults for new nodes; an existing node's `component` is authoritative. Its registration supplies component-specific compatibility checks, so changing a field editor default does not restrict or replace saved components.
 
@@ -1140,12 +1136,81 @@ Tags deduplicate typed values, preserve enum labels and expose overflow through 
 
 Core `formatRecordNumber(value: number, field: Pick<ViewFieldDefinition, 'numberFormat'>): string` is shared with summaries. Currency/percent are numberFormat styles, with no currency-string parsing or unit guessing (0.125 => 12.5%). Summary calculations retain raw values. Tone CSS tokens are --fve-success/--fve-warning/--fve-info and existing --fve-destructive.
 
-`examples/react/BuiltinCellsExample.tsx` consumes only public exports and demonstrates column renderer/options persistence through LocalStorageViewHost. Storybook **View Engine / 单元格 / 内置组件** separates display examples from interaction regressions.
+`examples/react/BuiltinCellsExample.tsx` consumes only public exports and demonstrates column renderer/options persistence through IndexedDBViewHost. Storybook **View Engine / 单元格 / 内置组件** separates display examples from interaction regressions.
 
 ## Recovery and input boundary corrections
 
 An unconfirmed create retains its original requestId, submitted snapshot and original known IDs until validated completion. A rejected retry does not prove an earlier attempt failed. Full engine load preserves in-flight/unconfirmed requests; replaying the original request remains possible even when ordinary writes are blocked. reloadInstance replays unknown creates through instance.create using the same key/body; it never adopts a new list item based on matching content. A response that explicitly identifies the new instance may instead be checked through instance.load or exact ID lookup in instance.list. Existing independently opened copies keep their own edits and newer baselines. Pending requests are engine-lifetime state, not serialized view configuration. Successful save-as and reconciliation complete independently of the following record request; record failures remain in the selected session query state and can be retried with `retryQuery`, without reissuing creation. Selecting the already-active valid instance clears a prior navigation error without querying or replacing its draft.
 
-Instance validation enforces `definition.allowedOperators` together with field-level operator compatibility before publishing host responses; this structural check preserves opaque component props without running custom compilers. Instance lists must provide `defaultInstanceId: null` or the ID of a member; invalid or omitted defaults are rejected before sessions are published. An optional `revision`, when supplied, must be a nonblank string. LocalStorageViewHost preserves explicit null default selection and create does not update that preference. A removed previously specified default can fall back to an available instance. Scoped absent deletion is a successful no-op; it never removes a hidden private instance. Existing visible instances retain permission and revision checks.
+Instance validation enforces `definition.allowedOperators` together with field-level operator compatibility before publishing host responses; this structural check preserves opaque component props without running custom compilers. Instance lists must provide `defaultInstanceId: null` or the ID of a member; invalid or omitted defaults are rejected before sessions are published. An optional `revision`, when supplied, must be a nonblank string. MemoryViewHost preserves explicit null default selection and create does not update that preference. A removed previously specified default can fall back to an available instance. Scoped absent deletion is a successful no-op; it never removes a hidden private instance. Existing visible instances retain permission and revision checks.
 
 Remote onValueChange uses current candidate labels for newly added/reselected IDs; unchanged IDs preserve their existing saved snapshots, excluding unavailable decorations. Paste replaces the selected text or inserts at the caret before tokenization. Datetime range compilation uses the shared strict scalar validation, so false/0 in the date/time properties cannot become an unset filter. DateTimeCell accepts explicit calendar/clock forms (T/t or whitespace, optional Z/z or numeric offset), rejects unsupported text, and never uses the host timezone to interpret a field-zoned local string.
+
+## Record presentation and card layout
+
+`RecordPresentation` is `RecordTablePresentation | RecordCardPresentation`. The active layout requires its own configuration; the other configuration is optional and retained after switching. A card-only instance does not require table columns. No layout switch calls `paged` or `cursor` or changes filters, sorting, pagination or selection.
+
+```ts
+interface RecordTableConfig {
+  columns: RecordColumn[];
+}
+type RecordCardFieldConfig = Pick<
+  Extract<RecordColumn, { kind: 'field' }>,
+  'id' | 'field' | 'title' | 'renderer'
+>;
+interface RecordCardConfig {
+  title: RecordCardFieldConfig;
+  cover?: { field: string };
+  fields: RecordCardFieldConfig[];
+  actions?: { visible?: boolean; renderer?: RendererReference };
+}
+interface RecordPresentationDefaults {
+  table?: RecordTableConfig;
+  card?: RecordCardConfig;
+}
+```
+
+`ViewDefinition.defaultPresentation?: DeepReadonly<RecordPresentationDefaults>` supplies optional local or remote presets. `resolveRecordPresentation(definition: DeepReadonly<ViewDefinition>, layout: RecordPresentation['layout'], existing?: DeepReadonly<RecordPresentationDefaults>): RecordPresentation` validates provided configurations, chooses existing configuration before presets before built-ins, and returns a writable independent copy. Explicit null is invalid. Built-in table columns include every top-level definition field; built-in card title uses rowKey. Only the requested layout is initialized. Persisted instances are validated, never repaired using defaults.
+
+`ViewEngine.setLayout(layout, id?): void` changes layout; `setCardConfig(card: DeepReadonly<RecordCardConfig>, id?): void` edits card configuration without switching. Both preserve the other layout's settings and participate in dirty/save/save-as/restore. `RecordToolbarRenderContext` exposes bound `setLayout` and `setCardConfig` alongside its existing methods.
+
+React exports `RecordCardList`, `RecordCardSettings` and their props. `RecordCardListProps` contains the query/result/selection/extension inputs of RecordTableProps, without table columns, sorting callbacks or summaries. `RecordCardSettingsProps` supplies readonly definition/card, optional disabled, and synchronous `onChange(card: RecordCardConfig): void`; throw from onChange to keep its local draft and show an error. Do not swallow submission errors or provide asynchronous callbacks.
+
+Card title and summary fields reuse cells. An intrinsic row-key title outside definition.fields receives minimal runtime field metadata (its path and a record-key label), so an explicit title renderer still runs; the host definition is not modified. Missing raw title values (null, undefined, empty/whitespace strings) fall back to the row key; 0 and false stay valid. Covers require a string field and http/https or relative image URLs; absent values, invalid URLs and image failures show a placeholder. Missing cover configuration omits the image region. Actions reuse rowActions: absent actions hides the area; an object inherits the definition's row action unless renderer overrides it. visible defaults to true; false preserves its renderer for later re-enabling. Field/rendering failures remain local to their boundary.
+
+Card mode returns no metrics from getRecordSummaryMetrics. It cancels pending aggregate work and ignores late responses. Background record refresh and refreshSummary in card mode do not query aggregate; returning to table recomputes summaries for current data/filter. Only presentation configuration is persisted; computed summaries remain transient.
+
+### Top-level layout switch and custom card content
+
+The global toolbar owns a single layout dropdown labeled with the current layout, at every container width. RecordToolbar retains batch actions and layout settings.
+
+`RecordViewProps.renderCard?: (context: RecordCardRenderContext) => ReactNode` is also forwarded by ViewPage/ViewPageContent and supported directly by RecordCardList. The context provides readonly definition, instance, record, rowKey, index (within the current page), selected and defaultContent, plus instance-bound refresh(): Promise<void>. It exposes no engine internals. Return custom JSX or wrap defaultContent; return a component when Hooks are needed. The callback and any component it returns run inside the existing per-card error boundary. A failed card does not remove sibling cards or library-managed selection controls.
+
+The library retains grid/frame, selection, loading/error/empty states and pagination. Custom content owns the title, cover, fields and action arrangement. Card settings affect the built-in defaultContent; entirely custom content may ignore them. renderCard is runtime-only and is never persisted or selected through a new registry.
+
+```tsx
+<ViewPage
+  {...pageProps}
+  renderCard={({ record, rowKey, selected }) => (
+    <article>
+      <h2>{String(rowKey)}</h2>
+      <p>{String(record.amount)}</p>
+      {selected && <span>Selected</span>}
+    </article>
+  )}
+/>
+```
+
+RecordCardSettings explicitly displays “无封面” when no cover is chosen, and disables the add-field control with “已添加全部字段” when all fields are included. Its apply action updates the current view; saving requires the host's existing persistence capability. The RecordCardList Storybook includes custom-content and persisted-config examples.
+
+The primary card Storybook preview uses ProductCatalogExample: 12 home/travel products with local SVG covers, category/status/favorite filtering, price/stock sorting, details, favorites and individual/batch publishing. Default cards retain built-in configuration; custom cards emphasize price and stock. View configuration can use MemoryViewHost. Catalog writes are in-memory and refresh the same query source in Table and Card. Order action retry regressions remain separate.
+
+`ViewDefinition.allowedLayouts` 为必填的非空、不重复数组：`['table']`、`['card']` 或同时开启。仅允许一种布局时，顶部不显示切换入口；引擎和实例加载均拒绝未允许的活动布局。切换保留各模式配置。卡片使用右上角选择按钮（`aria-pressed`），不占独立行；自定义内容应避让该角标。顶部通用操作使用图标及提示，菜单保留文字。
+
+`RecordView`/`ViewPage` hide built-in card settings when `renderCard` is supplied, including wrappers around `defaultContent`. Provide business configuration through the existing `renderToolbar` and `setCardConfig` when needed. Table column settings remain available.
+
+The shared record toolbar exposes sorting, as active rules in priority order, with drag/keyboard reordering, add/remove controls and a clear action. It uses the same `instance.config.sort` as table headers and remains available for card-only views. Explicit refresh of the same paged query retains existing rows so actions remain mounted; filter, sort, page changes and cursor refresh still reload their results.
+
+### IndexedDB browser persistence
+
+The `/react` entry exports IndexedDBViewHost and IndexedDBViewHostOptions. Required options match MemoryViewHost except for store; optional databaseName defaults to `fve-view-state`. All reads, permission checks, CAS, receipts and writes run in a native IndexedDB readwrite transaction. Success resolves after commit; failure and cancellation roll back. reset() atomically clears the service/definition. The two concrete hosts share only internal view-domain logic; the core entry has no browser globals.
