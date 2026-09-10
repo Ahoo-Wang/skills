@@ -49,6 +49,7 @@
         "fetcher-openapi-types",
         "fetcher-react-hooks",
         "fetcher-storage",
+        "fetcher-view-engine",
         "fetcher-viewer-components",
         "fetcher-wow-cqrs"
       ]
