@@ -61,7 +61,7 @@
       "source": "fetcher",
       "url": "https://github.com/Ahoo-Wang/fetcher.git",
       "branch": "main",
-      "commit": "d04aa5016faf8ee7f08cb5c599bacbd1c6681aca",
+      "commit": "bcc7856254f4e55731fac2c802dd83fa02c05db0",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     }
