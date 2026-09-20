@@ -10,6 +10,7 @@
 - [Code Generation Pipeline](#code-generation-pipeline)
 - [Generated Output Structure](#generated-output-structure)
 - [Configuration (fetcher-generator.config.json)](#configuration-fetcher-generatorconfigjson)
+  - [Read-model optionality](#read-model-optionality)
 - [Wow CQRS Pattern Support](#wow-cqrs-pattern-support)
   - [Aggregate Identification](#aggregate-identification)
   - [Operation Patterns](#operation-patterns)
@@ -172,12 +173,27 @@ the utility type.
 
 All `allOf` schemas generate TypeScript intersection aliases so required,
 optional, and conflicting property types retain every member constraint. Object
-schemas with optional properties and schema-valued `additionalProperties` also
-use an intersection alias: the declared properties retain their modifiers while
-the string index keeps the additional-property type without adding `undefined`.
-Other plain object schemas continue generating interfaces. TypeScript string
-indexes also constrain declared keys; they cannot express the JSON Schema case
-where declared properties have types incompatible with `additionalProperties`.
+schemas with an optional property beside schema-valued `additionalProperties`
+also use an intersection alias: the declared properties retain their modifiers
+while the string index keeps the additional-property type without adding
+`undefined`. A TypeScript index signature constrains the declared keys too, so
+an interface may only carry a named property assignable to it (TS2411), and an
+optional property never is. A required one usually is, so it keeps the
+interface unless the clash can be proven off the schemas: against an index type
+that resolves to a primitive, a property that resolves to a different
+primitive, to an object or to an array - through references as well. Anything
+undecided stays: an enum narrows the primitive it sits beside (`'a' | 'b'`
+against `string`) and a composition may admit it (`null` against
+`Model | null`). The index type must resolve to a primitive for any of this,
+which is what lets a dictionary of its own type generate at all: only an
+interface may reference itself through an index signature, an alias reaching
+itself through `Record` being circular (TS2456). A property may reference the
+model freely, an object member defers. Other plain object schemas continue generating
+interfaces. Neither form expresses the JSON Schema case where a declared
+property's type is incompatible with `additionalProperties`: the alias declares
+and reads correctly but admits no object literal, since TypeScript cannot
+exempt a named property from the index signature, and an unproven clash stays
+in the interface it does not compile in.
 Generated types do not perform runtime JSON validation.
 
 String-only enums with no const or composition constraints, and with `type` omitted or set to `'string'`, remain TypeScript enums (including empty-string members).
@@ -219,12 +235,37 @@ Model files use `types.ts` named by schema path prefix (e.g., schema key `ai.AiM
     "TagName": {
       "ignorePathParameters": ["tenantId", "ownerId"]
     }
+  },
+  "readModel": {
+    "nonNullRequired": false
   }
 }
 ```
 
 - `apiClients` - Map of tag name to API client configuration
 - `ignorePathParameters` - Path parameters to exclude from generated **API client** methods (default: `['tenantId', 'ownerId']`). Command clients always ignore `tenantId`/`ownerId` regardless of this setting.
+- `readModel.nonNullRequired` - Generate non-nullable read-model properties as required (default: `false`)
+
+### Read-model optionality
+
+Property optionality follows the document: anything missing from `required` is generated with a `?`. Exporters routinely omit properties that carry a default value, so responses come out weaker than the server actually is.
+
+`readModel.nonNullRequired` relaxes this for the read side only. `SchemaUsageResolver` (`src/aggregate/schemaUsage.ts`) walks `$ref` closures from the resolved aggregates and from every operation's request body and parameters, then classifies each component schema. The two sides use different edges: the write side follows every reference it can find (treating a schema as a request only ever preserves declared optionality), while the read side follows only edges an instance value flows through — `properties`, `items`, `additionalProperties`, the positive compositions and `x-map-key-schema` — so a schema a state merely mentions under `not` or in an example is not mistaken for part of the response.
+
+| Usage     | Reached from                                                                     | Optionality                                              |
+| --------- | -------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `read`    | aggregate state, domain event bodies                                             | non-nullable, non-`writeOnly` properties become required |
+| `write`   | any request: Wow command bodies, and every operation's request body / parameters | as declared                                              |
+| `shared`  | both                                                                             | as declared, and listed in the generation log            |
+| `unknown` | neither, e.g. a schema only an ordinary response uses                            | as declared                                              |
+
+Nullability is judged from the whole schema, not the first `null` that turns up. Every keyword must agree: `type` must admit null (or carry the 3.0 `nullable` flag; an absent `type` constrains nothing), `const` must be null and `enum` must contain it, `anyOf` needs one branch that admits null, `oneOf` needs **exactly** one (two matching branches fail the keyword), `allOf` needs all of them, and a `not` whose subschema accepts null rejects it. So `{ type: 'string', enum: ['a', null] }` is **not** nullable — the sibling `type` rejects the null member, exactly as `resolveType` drops the literal from the generated union — while `allOf: [{ type: ['string', 'null'] }, { enum: ['x', null] }]` is. References are followed and cycles guarded, with each branch judged independently. `writeOnly` resolves through references the same way.
+
+A property whose schema no value can satisfy (`{ not: {} }`, an empty `enum`, or a composition of those) stays optional: a response must omit it, so requiring it would be a lie in the other direction.
+
+Promotion never changes how a model is represented: `requiresAdditionalPropertiesIntersection` reads the declared `required`, so a declared-optional property beside typed `additionalProperties` keeps its intersection form rather than becoming an interface whose named property clashes with the index signature (TS2411).
+
+The option assumes the service serialises every non-null property (Jackson `NON_NULL` does; `NON_DEFAULT` does not). Verify against a real response before enabling it.
 
 ## Wow CQRS Pattern Support
 
