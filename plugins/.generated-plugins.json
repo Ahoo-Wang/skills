@@ -45,12 +45,9 @@
         "fetcher-integration",
         "fetcher-llm-streaming",
         "fetcher-openai-client",
-        "fetcher-openapi-generator",
         "fetcher-openapi-types",
         "fetcher-react-hooks",
-        "fetcher-storage",
-        "fetcher-viewer-components",
-        "fetcher-wow-cqrs"
+        "fetcher-storage"
       ]
     },
     {
@@ -72,8 +69,10 @@
       "name": "ahoo-wow-skills",
       "source": "Wow",
       "skills": [
+        "wow-client",
         "wow-debug",
         "wow-develop",
+        "wow-generator",
         "wow-migrate",
         "wow-review"
       ]

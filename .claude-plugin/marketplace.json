@@ -125,7 +125,7 @@
     },
     {
       "name": "ahoo-fetcher-skills",
-      "description": "Skills for building with the Fetcher TypeScript ecosystem, including HTTP clients, decorators, event buses, SSE/OpenAI streaming, storage, CoSec authentication, Wow CQRS, OpenAPI generation, React hooks, and viewer components.",
+      "description": "Skills for building with the Fetcher TypeScript ecosystem, including HTTP clients, decorators, event buses, SSE/OpenAI streaming, storage, CoSec authentication, OpenAPI types, and React hooks. Wow CQRS clients and OpenAPI generation moved to the Wow repository's skills.",
       "author": {
         "name": "Ahoo Wang",
         "email": "ahoowang@gmail.com"
@@ -140,9 +140,7 @@
         "openapi",
         "sse",
         "react",
-        "cqrs",
-        "cosec",
-        "wow"
+        "cosec"
       ],
       "source": "./plugins/ahoo-fetcher-skills",
       "category": "development"
@@ -195,7 +193,7 @@
     },
     {
       "name": "ahoo-wow-skills",
-      "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
+      "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI.",
       "author": {
         "name": "Ahoo Wang",
         "email": "ahoowang@gmail.com"
@@ -214,7 +212,11 @@
         "java",
         "spring-boot",
         "reactor",
-        "migration"
+        "migration",
+        "typescript",
+        "openapi",
+        "code-generation",
+        "client"
       ],
       "source": "./plugins/ahoo-wow-skills",
       "category": "development"

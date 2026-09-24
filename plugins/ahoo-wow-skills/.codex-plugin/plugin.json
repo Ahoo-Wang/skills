@@ -1,7 +1,7 @@
 {
   "name": "ahoo-wow-skills",
-  "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
-  "version": "0.0.6",
+  "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI.",
+  "version": "0.1.0",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
@@ -20,19 +20,23 @@
     "java",
     "spring-boot",
     "reactor",
-    "migration"
+    "migration",
+    "typescript",
+    "openapi",
+    "code-generation",
+    "client"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Ahoo Wow Skills",
-    "shortDescription": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
-    "longDescription": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
+    "shortDescription": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI.",
+    "longDescription": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI.",
     "developerName": "Ahoo Wang",
     "category": "Development",
     "capabilities": [
       "Skills"
     ],
     "websiteURL": "https://github.com/Ahoo-Wang/skills",
-    "defaultPrompt": "Help me develop, review, debug, or migrate this downstream application that uses Wow, using verifiable evidence."
+    "defaultPrompt": "Help me develop, review, debug, or migrate this downstream application that uses Wow, or build and generate its TypeScript clients, using verifiable evidence."
   }
 }

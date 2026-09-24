@@ -1,6 +1,6 @@
 {
   "name": "ahoo-fetcher-skills",
-  "description": "Skills for building with the Fetcher TypeScript ecosystem, including HTTP clients, decorators, event buses, SSE/OpenAI streaming, storage, CoSec authentication, Wow CQRS, OpenAPI generation, React hooks, and viewer components.",
+  "description": "Skills for building with the Fetcher TypeScript ecosystem, including HTTP clients, decorators, event buses, SSE/OpenAI streaming, storage, CoSec authentication, OpenAPI types, and React hooks. Wow CQRS clients and OpenAPI generation moved to the Wow repository's skills.",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
@@ -15,8 +15,6 @@
     "openapi",
     "sse",
     "react",
-    "cqrs",
-    "cosec",
-    "wow"
+    "cosec"
   ]
 }

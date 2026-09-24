@@ -1,6 +1,6 @@
 {
   "name": "ahoo-wow-skills",
-  "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services.",
+  "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI.",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
@@ -19,6 +19,10 @@
     "java",
     "spring-boot",
     "reactor",
-    "migration"
+    "migration",
+    "typescript",
+    "openapi",
+    "code-generation",
+    "client"
   ]
 }
