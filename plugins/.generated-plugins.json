@@ -47,7 +47,8 @@
         "fetcher-openai-client",
         "fetcher-openapi-types",
         "fetcher-react-hooks",
-        "fetcher-storage"
+        "fetcher-storage",
+        "fetcher-v6-migration"
       ]
     },
     {
