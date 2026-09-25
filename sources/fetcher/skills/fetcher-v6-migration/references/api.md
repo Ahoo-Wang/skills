@@ -29,9 +29,33 @@ against the v5.1.3 and 6.0 sources of `@ahoo-wang/fetcher-react`.
   `fetcher-decorator`, `fetcher-eventbus`, `fetcher-eventstream`,
   `fetcher-openai`, `fetcher-openapi`, `fetcher-storage` or `fetcher-cosec`;
   the only removals are in `fetcher-react` and the packages that left. These
-  packages do receive bug fixes — see **Fixed** in the 6.0 release notes
-  (`docs/releases/v6.0.0.md`), for example the CoSec 401 refresh-retry no
-  longer re-running the error phase (#1249).
+  packages do receive corrections — see **Changed** (e.g. `@ahoo-wang/fetcher`
+  omits `undefined`/`null` query values, repeats array query parameters,
+  keeps the timeout when a `signal` is passed, sends no default `Content-Type`
+  and rejects a status failure with the `HttpStatusValidationError` itself;
+  `fetcher-decorator` binds an array, `Date` or other non-plain-object argument
+  to its parameter name instead of spreading it, stores a named
+  `@attribute('x')` object whole, and keeps a subclass override that has no
+  endpoint decorator; `fetcher-openapi` requires `Info.title`, `Info.version`
+  and `Response.description` and adds the OpenAPI 3.1 fields;
+  `@ahoo-wang/fetcher-eventstream` drops a final line cut off before its line
+  terminator and, with a terminate detector, errors a stream that ends without
+  the terminating event with `EventStreamIncompleteError` — for
+  `@ahoo-wang/fetcher-openai`, a completion stream that ends before
+  `data: [DONE]`; `fetcher-cosec` adds the `isTrusted` option — by default
+  every request, an absolute URL on another origin included, still carries the
+  token and CoSec headers, so set `isTrusted: sameOriginTrust` — and reads a
+  JWT whose payload is not a JSON object as expired; `destroy()` of
+  `KeyStorage`, `TokenStorage`, `DeviceIdStorage` and `SpaceIdStorage` also
+  closes the event bus the storage created, while a bus passed in `eventBus`
+  stays open; in `fetcher-react`, `RouteGuard` calls `onUnauthorized` in an
+  effect after commit, `useKeyStorage` (and so `useSecurity` and
+  `SecurityProvider`) renders the default during SSR and hydration,
+  `useQueryState` no longer re-runs when only `execute` changes, and
+  `useLatest` updates its ref after commit) and **Fixed** in the 6.0 release
+  notes (`docs/releases/v6.0.0.md`), for example the CoSec 401 refresh-retry no
+  longer re-running the error phase (#1249), or a tab reusing the token another
+  tab refreshed instead of signing out (`KeyStorage.reload()`).
 
 ## Package mapping
 
@@ -112,6 +136,82 @@ grep -rnE '\bfetcher-generator\b' package.json .github scripts Makefile 2>/dev/n
 Pattern 3 deliberately does not match `useFetcherQuery` or `useQuery`, which
 stay in `@ahoo-wang/fetcher-react`. Confirm each hit's import source before
 rewriting: a project may already import these names from `@ahoo-wang/wow-react`.
+
+Behavior checks from **Changed**, for every project that upgrades
+`@ahoo-wang/fetcher`:
+
+```sh
+# 6. Status errors read from `cause`; HttpStatusValidationError is now thrown as is
+grep -rnE 'cause\s+instanceof\s+HttpStatusValidationError' --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' . | grep -v node_modules
+```
+
+Rewrite `error.cause instanceof HttpStatusValidationError` to
+`error instanceof HttpStatusValidationError`, tested before `ExchangeError`, its
+superclass; `error.exchange.error` still returns it. A timeout is still
+`error.cause instanceof FetchTimeoutError`. The fetcher no longer sends
+`Content-Type: application/json` by default: a plain-object or string body
+still gets it, but a server that expects it on bodyless requests or on binary
+bodies needs it set on those requests.
+
+For `@ahoo-wang/fetcher-decorator`: an array passed to `@query('ids')` is now
+sent as `ids=1&ids=2` (it was `0=1&1=2`), an array header as a comma-separated
+list, and a `Date` as ISO 8601; a server that read the old keys needs the new
+form. A named `@attribute('user')` holding an object now stores it under
+`user` instead of merging its keys. A subclass method that overrides an
+inherited endpoint without its own endpoint decorator now runs as written;
+decorate it if it was meant to redefine the request.
+
+For `@ahoo-wang/fetcher-openapi`: objects typed `Info` or `Response` must now
+set `title` and `version`, or `description`; `SecurityScheme.in` no longer
+accepts `'path'`, and a `SecurityRequirement` holds only scheme names (no
+`x-` keys).
+
+For projects that consume event streams with a terminate detector
+(`@ahoo-wang/fetcher-eventstream`) or stream chat completions
+(`@ahoo-wang/fetcher-openai`):
+
+```sh
+# 7. Streams that now reject when they end before their terminating event
+grep -rnE 'requiredJsonEventStream\(|jsonEventStream\(|toJsonServerSentEventStream\(|completions\(' --include='*.ts' --include='*.tsx' . | grep -v node_modules
+```
+
+A stream that ends without its terminating event (for OpenAI, `data: [DONE]`)
+now rejects the `for await` loop with `EventStreamIncompleteError` instead of
+ending as if complete; handle it where mid-stream errors are handled, and do
+not treat the partial answer as final. `ChatResponse.usage` is now optional:
+read it with `?.`.
+
+For projects on `@ahoo-wang/fetcher-cosec` or `@ahoo-wang/fetcher-storage`:
+
+```sh
+# 8. CoSec setups and storage cleanup to review
+grep -rnE 'new CoSecConfigurer\(|new (CoSecRequest|AuthorizationRequest)Interceptor\(|\.eventBus\.destroy\(' --include='*.ts' --include='*.tsx' . | grep -v node_modules
+```
+
+Add `isTrusted: sameOriginTrust` to each CoSec setup unless every absolute URL
+the client requests is yours: by default an absolute URL on any origin still
+receives the access token and the device ID. A JWT whose payload is not a JSON
+object now reads as expired. `destroy()` now closes the event bus the storage
+created itself, so a following `storage.eventBus.destroy()` on that default
+bus is redundant (drop it); keep it for a bus you passed in `eventBus`.
+
+For projects on `@ahoo-wang/fetcher-react`:
+
+```sh
+# 9. React hooks whose timing changed
+grep -rnE 'onUnauthorized=|useLatest\(|use(Cancellable)?QueryState\(|useKeyStorage\(|useSecurity\(|<SecurityProvider' --include='*.ts' --include='*.tsx' . | grep -v node_modules
+```
+
+`RouteGuard`'s `onUnauthorized` now runs once after commit each time the user
+becomes (or starts out) unauthenticated, not on every render; a `navigate()`
+there is now safe, and code that relied on a call per render must not.
+`useKeyStorage`, `useSecurity` and `SecurityProvider` render the default (the
+anonymous user) on the server and during hydration, then the stored value; an
+SSR page that expected the stored value in the first client render sees it one
+render later. `useQueryState` calls the latest `execute` but no longer re-runs
+when only `execute` changes; change the query or toggle `autoExecute` to run
+again. `useLatest(value).current` read during render now holds the last
+committed value, not the one being rendered; read the value itself there.
 
 ## Rewrites
 

@@ -6,7 +6,7 @@ description: >
 
 # fetcher-v6-migration
 
-6.0 only **removes**: the Wow-coupled packages moved to the Wow repository (`typescript/` there) and are released with Wow. `@ahoo-wang/fetcher`, `-decorator`, `-eventbus`, `-eventstream`, `-openai`, `-openapi`, `-storage` and `-cosec` have no breaking API change (bug fixes are listed under **Fixed** in the 6.0 release notes); `@ahoo-wang/fetcher-react` only lost exports.
+6.0 only **removes**: the Wow-coupled packages moved to the Wow repository (`typescript/` there) and are released with Wow. `@ahoo-wang/fetcher`, `-decorator`, `-eventbus`, `-eventstream`, `-openai`, `-openapi`, `-storage` and `-cosec` have no breaking API change (behavior corrections are under **Changed** in the 6.0 release notes — a query sent as `?a=undefined`, a timeout dropped when a `signal` is passed, a `Content-Type: application/json` sent on every request, a status failure hidden behind `ExchangeError.cause`, a decorator array argument spread into `0=…&1=…`, an undecorated subclass override replaced by `@api`, OpenAPI types that left `Info.title`/`version` and `Response.description` optional, an event stream (an OpenAI completion stream included) that ends before its terminating event now erroring with `EventStreamIncompleteError`, a CoSec token sent to absolute URLs on any origin unless `isTrusted: sameOriginTrust` is set, a JWT with a non-object payload now reading as expired, a storage `destroy()` that now also closes the event bus it created, a React `RouteGuard` whose `onUnauthorized` now runs in an effect after commit instead of during render, `useKeyStorage` (and `useSecurity`/`SecurityProvider`) rendering the default during SSR and hydration, `useQueryState` no longer re-running when only `execute` changes, `useLatest` updating its ref after commit — other bug fixes are under **Fixed**); `@ahoo-wang/fetcher-react` otherwise only lost exports.
 
 ## 1. Check what is published — never assume
 
@@ -27,7 +27,7 @@ Run the checklist in `references/api.md` (grep patterns for manifests, imports, 
 | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@ahoo-wang/fetcher-viewer`, or any data-monitor hook                     | **Stay on 5.x** (`^5.1.3`). No 6.x replacement exists.                                                                                                      |
 | `@ahoo-wang/fetcher-wow`, `@ahoo-wang/fetcher-generator`, Wow query hooks | Replacements not on npm yet → **stay on 5.x**, move to 5.1.3 and prepare. Once published → switch to the Wow packages on 5.1.3 first, then upgrade fetcher. |
-| none of the above                                                         | **Upgrade** every `@ahoo-wang/fetcher*` to `^6.0.0` once 6.0.0 is on npm; no code changes.                                                                  |
+| none of the above                                                         | **Upgrade** every `@ahoo-wang/fetcher*` to `^6.0.0` once 6.0.0 is on npm; no code changes beyond the **Changed** checks in `references/api.md`.             |
 
 Removed from `@ahoo-wang/fetcher-react` in 6.0:
 

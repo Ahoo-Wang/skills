@@ -77,7 +77,6 @@ The Wow framework implements CQRS + Event Sourcing + DDD:
 ## Package Imports
 
 ```typescript
-import type { JsonServerSentEvent } from '@ahoo-wang/fetcher-eventstream';
 import { HttpMethod } from '@ahoo-wang/fetcher';
 import {
   // Command
@@ -223,7 +222,7 @@ The `@ahoo-wang/wow-client/legacy` entry also has `listQuery`, `pagedQuery` and 
 
 | Import | Contents |
 |---|---|
-| `@ahoo-wang/wow-client` | Everything except the `/legacy` API: clients, `QueryClientFactory`, `WowMetadataClient`, errors, headers and their builders, `QueryEventStreamResultExtractor` / `CommandResultEventStreamResultExtractor`, and the query DSL. |
+| `@ahoo-wang/wow-client` | Everything except the `/legacy` API: clients, `QueryClientFactory`, `WowMetadataClient`, errors, headers and their builders, the stream endpoint presets `QUERY_STREAM_ENDPOINT` / `COMMAND_STREAM_ENDPOINT`, and the query DSL. |
 | `@ahoo-wang/wow-client/dsl` | The query DSL alone — `filter`, `aggregation`, sort, projection, pagination, `cursorQuery`, the query factories and `Filter*` types, `DeletionState`, `DynamicDocument`, `SnapshotMetadataFields`, `DomainEventStreamMetadataFields` — with no HTTP code: no Fetcher, decorators, `reflect-metadata` or event-stream patches. Use it in code that only builds queries. |
 | `@ahoo-wang/wow-client/legacy` | The deprecated `Condition` API for Wow 8.10 servers (builders, `Operator`, `Condition`-based query types and factories, operator locales). Removed in v10. |
 
@@ -338,7 +337,7 @@ const result: CommandResult = await commandClient.send<AddCartItem>({
 
 ### sendAndWaitStream<C>(commandRequest, attributes?)
 
-Sends a command and receives one `CommandResult` per stage it reaches, as a `Promise<CommandResultEventStream>` (a `ReadableStream<JsonServerSentEvent<CommandResult>>`). The method sets `Accept: text/event-stream` itself. When the server fails midway (for example the wait times out) the stream errors with a `WowError`, so the `for await` throws; a result whose own `errorCode` is not `Ok` is still delivered as a result.
+Sends a command and receives one `CommandResult` per stage it reaches, as a `Promise<CommandResultEventStream>` (a `ReadableStream<CommandResult>`: the results themselves, not server-sent event envelopes). The method sets `Accept: text/event-stream` itself. When the server fails midway (for example the wait times out) the stream errors with a `WowError`, so the `for await` throws; a result whose own `errorCode` is not `Ok` is still delivered as a result.
 
 ```typescript
 const stream = await commandClient.sendAndWaitStream<AddCartItem>({
@@ -349,8 +348,8 @@ const stream = await commandClient.sendAndWaitStream<AddCartItem>({
 });
 
 try {
-  for await (const event of stream) {
-    console.log('Reached:', event.data.stage); // CommandResult
+  for await (const result of stream) {
+    console.log('Reached:', result.stage); // CommandResult
   }
 } catch (error) {
   if (error instanceof WowError) console.warn(error.errorCode, error.errorMsg);
@@ -358,7 +357,7 @@ try {
 }
 ```
 
-A generated or hand-written command client gets the same behaviour by using `CommandResultEventStreamResultExtractor` as its `resultExtractor`.
+A generated or hand-written command client gets the same behaviour by taking the endpoint preset `COMMAND_STREAM_ENDPOINT` (`@api('…', COMMAND_STREAM_ENDPOINT)` or `@post(path, COMMAND_STREAM_ENDPOINT)`), which sets `Accept: text/event-stream` and the result extractor together.
 
 ### CommandStage Values
 
@@ -480,16 +479,16 @@ const list = await snapshotClient.list({
   limit: 10,
 });
 
-// List snapshots as SSE stream
+// List snapshots as a stream: it yields each MaterializedSnapshot<S> itself
 const stream = await snapshotClient.listStream({ filter: filter.matchAll() });
-for await (const event of stream) {
-  console.log(event.data);
+for await (const snapshot of stream) {
+  console.log(snapshot.state);
 }
 
 // List only state objects (returns S[])
 const states = await snapshotClient.listState({ filter: filter.matchAll() });
 
-// List states as SSE stream
+// List states as a stream: it yields each state S itself
 const stateStream = await snapshotClient.listStateStream({
   filter: filter.matchAll(),
 });
@@ -562,7 +561,7 @@ const summaryStream =
 
 ```typescript
 aggregate<
-  Row extends DynamicDocument = DynamicDocument,
+  Row extends object = DynamicDocument,
   AGGREGATION_FIELDS extends string = string,
 >(
   query: AggregationQuery<FIELDS, AGGREGATION_FIELDS>,
@@ -571,13 +570,13 @@ aggregate<
 ): Promise<Row[]>;
 
 aggregateStream<
-  Row extends DynamicDocument = DynamicDocument,
+  Row extends object = DynamicDocument,
   AGGREGATION_FIELDS extends string = string,
 >(
   query: AggregationQuery<FIELDS, AGGREGATION_FIELDS>,
   attributes?: Record<string, unknown>,
   abort?: AbortController | AbortSignal,
-): Promise<ReadableStream<JsonServerSentEvent<Row>>>;
+): Promise<ReadableStream<Row>>;
 ```
 
 `QueryApi` requires both aggregation methods and `cursor`, so custom
@@ -585,7 +584,8 @@ implementations must provide all three. `SnapshotQueryApi` additionally
 requires `cursorState`.
 `SnapshotQueryClient` and `EventStreamQueryClient` submit to
 `snapshot/aggregation` and `event/aggregation`, respectively;
-`aggregateStream` requests an SSE result stream.
+`aggregateStream` requests the rows as server-sent events and yields each row
+itself.
 
 ### Query cancellation
 
@@ -843,7 +843,7 @@ Available builders:
 - Collection: `isIn`, `notIn`, `containsAll`
 - Presence: `isEmpty`, `isEmptyString`, `isNotEmptyString`, `isNull`, `isNotNull`, `exists`, `notExists`
 - Scope/search: `deletion`, `elementMatch`, `search(query, options?: SearchFilterOptions)`
-- Relative time: `today`, `beforeToday`, `tomorrow`, `thisWeek`, `nextWeek`, `lastWeek`, `thisMonth`, `lastMonth`, `yesterday`, `nextMonth`, `lastYear`, `thisYear`, `nextYear`, `recentDays`, `earlierDays`
+- Relative time: `today`, `beforeToday`, `tomorrow`, `thisWeek`, `nextWeek`, `lastWeek`, `thisMonth`, `lastMonth`, `yesterday`, `nextMonth`, `lastYear`, `thisYear`, `nextYear`, `recentDays`, `earlierDays`; relative to the server's now: `beforeNow`, `afterNow` (ISO-8601 `offset`, default `PT0S`, Wow 9.2.0+)
 
 `and`, `or`, `nor`, `ids`, `aggregateIds`, `isIn`, `notIn`, and `containsAll`
 accept one non-empty `readonly` array and throw `TypeError` for an empty array:
@@ -904,6 +904,8 @@ filter.thisYear(field, options?);
 filter.nextYear(field, options?);
 filter.recentDays(field, days, options?);
 filter.earlierDays(field, days, options?);
+filter.beforeNow(field, offset?, options?); // field < server now + offset (Wow 9.2.0+)
+filter.afterNow(field, offset?, options?); // field > server now + offset (Wow 9.2.0+)
 ```
 
 `SearchFilterOptions` has optional `fields` and `mode`; `mode` defaults to
@@ -1356,8 +1358,8 @@ const cart = await snapshotClient.getStateById(
 const stream = await snapshotClient.listStateStream({
   filter: filter.aggregateId(result.aggregateId),
 });
-for await (const event of stream) {
-  console.log('Cart:', event.data);
+for await (const state of stream) {
+  console.log('Cart:', state);
 }
 ```
 

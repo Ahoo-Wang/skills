@@ -30,7 +30,7 @@ pnpm add -D @ahoo-wang/wow-generator
 pnpm add @ahoo-wang/wow-client @ahoo-wang/fetcher @ahoo-wang/fetcher-decorator @ahoo-wang/fetcher-eventstream
 ```
 
-Generated code imports `@ahoo-wang/wow-client`, `@ahoo-wang/fetcher`, and `@ahoo-wang/fetcher-decorator` at runtime, so the application depends on them directly. `@ahoo-wang/fetcher`, `@ahoo-wang/fetcher-decorator`, `@ahoo-wang/fetcher-eventstream`, and `@ahoo-wang/fetcher-openapi` keep their names, stay in the fetcher project, and are peer dependencies of the generator.
+Generated code imports `@ahoo-wang/wow-client`, `@ahoo-wang/fetcher`, and `@ahoo-wang/fetcher-decorator` at runtime, so the application depends on them directly. `@ahoo-wang/fetcher`, `@ahoo-wang/fetcher-decorator`, and `@ahoo-wang/fetcher-eventstream` keep their names, stay in the fetcher project, and are peer dependencies of the generator. The generator reads OpenAPI documents without `@ahoo-wang/fetcher-openapi`; do not install it for the generator.
 
 When migrating from `@ahoo-wang/fetcher-generator`, replace the dev dependency, change scripts from `fetcher-generator generate` to `wow-generator generate`, and regenerate so generated imports point at `@ahoo-wang/wow-client` instead of `@ahoo-wang/fetcher-wow`. The `fetcher-generator` command stays as an alias until v10. Rename `fetcher-generator.config.json` to `wow-generator.config.json`: until v10 the old name is still read, with a deprecation warning, when the new one is absent. The manifest `.fetcher-generator.json` is read once by the next run and replaced by `.wow-generator.json`.
 
@@ -236,7 +236,7 @@ output/
 │   ├── index.ts                    # Context barrel exports
 │   ├── boundedContext.ts           # Context alias constant (e.g., EXAMPLE_BOUNDED_CONTEXT_ALIAS)
 │   ├── types.ts                    # Shared types for this context path
-│   ├── {Tag}ApiClient.ts           # API client per non-CQRS tag
+│   ├── {tag}ApiClient.ts           # API client per non-CQRS tag, camelCase (cartApiClient.ts)
 │   └── {aggregate}/
 │       ├── index.ts
 │       ├── commandClient.ts        # CommandClient + StreamCommandClient + CommandEndpointPaths
@@ -328,7 +328,7 @@ export class CartCommandClient<
 export class CartStreamCommandClient extends CartCommandClient<CommandResultEventStream> {}
 ```
 
-Command types use `CommandBody<T>` wrapper; an empty command body is `Record<string, never>`. `CommandEndpointPaths` enum maps command names to paths. `DEFAULT_COMMAND_CLIENT_OPTIONS` is `{ basePath: EXAMPLE_BOUNDED_CONTEXT_ALIAS }`, so `new CartCommandClient({ fetcher })` sends under the `example` prefix; pass `basePath: ''` to reach the service directly without a gateway. The stream client inherits the constructor.
+Command types use `CommandBody<T>` wrapper, declared as `<Body>Command` except for a body already named `…Command`, whose methods take `CommandBody<Body>` directly; path variables are positional parameters in path order; an empty command body is `Record<string, never>`. `CommandEndpointPaths` enum maps command names to paths. `DEFAULT_COMMAND_CLIENT_OPTIONS` is `{ basePath: EXAMPLE_BOUNDED_CONTEXT_ALIAS }`, so `new CartCommandClient({ fetcher })` sends under the `example` prefix; pass `basePath: ''` to reach the service directly without a gateway. The stream client inherits the constructor.
 
 ### Query Clients
 
