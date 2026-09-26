@@ -199,7 +199,7 @@
     },
     {
       "name": "ahoo-wow-skills",
-      "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI.",
+      "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI, answering business data questions from a running Wow service's read-only queries, and writing Wow View Engine view definitions within the service's query capability descriptor.",
       "author": {
         "name": "Ahoo Wang",
         "email": "ahoowang@gmail.com"
@@ -222,7 +222,11 @@
         "typescript",
         "openapi",
         "code-generation",
-        "client"
+        "client",
+        "data-query",
+        "analytics",
+        "view-definition",
+        "view-engine"
       ],
       "source": "./plugins/ahoo-wow-skills",
       "category": "development"

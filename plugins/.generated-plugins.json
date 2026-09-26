@@ -71,11 +71,13 @@
       "source": "Wow",
       "skills": [
         "wow-client",
+        "wow-data-query",
         "wow-debug",
         "wow-develop",
         "wow-generator",
         "wow-migrate",
-        "wow-review"
+        "wow-review",
+        "wow-view-definition"
       ]
     }
   ]
