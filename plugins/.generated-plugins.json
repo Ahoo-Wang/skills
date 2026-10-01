@@ -77,7 +77,8 @@
         "wow-generator",
         "wow-migrate",
         "wow-review",
-        "wow-view-definition"
+        "wow-view-definition",
+        "wow-view-host"
       ]
     }
   ]
