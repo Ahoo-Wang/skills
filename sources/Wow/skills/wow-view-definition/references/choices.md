@@ -1,6 +1,6 @@
 # Choices
 
-What `defineView` takes and what it leaves to you is in the engine's README, [Defining a view from the descriptor](https://github.com/Ahoo-Wang/Wow/blob/main/typescript/wow-view-engine/README.md#defining-a-view-from-the-descriptor), and the rules behind it in [host-integration.md §3](https://github.com/Ahoo-Wang/Wow/blob/main/typescript/wow-view-engine/docs/design/host-integration.md#3-defineview事实从描述符来宿主只能收窄). Confirm members against the installed typings (`DefineViewSpec`, `FieldSpec`); the package is pre-release. This page is about deciding what to write.
+What `defineView` takes and what it leaves to you is in the engine's README, [Defining a view from the descriptor](https://github.com/Ahoo-Wang/Wow/blob/main/typescript/wow-view-engine/README.md#defining-a-view-from-the-descriptor), and the rules behind it in [host-integration.md §3](https://github.com/Ahoo-Wang/Wow/blob/main/typescript/wow-view-engine/docs/design/host-integration.md#3-defineview事实从描述符来宿主只能收窄). Confirm members against the installed typings (`DefineViewSpec`, `FieldSpec`): the package is published from Wow 9.2.0, and a minor release may change its surface. This page is about deciding what to write.
 
 ## A definition, choice by choice
 
@@ -225,7 +225,7 @@ What is left out is a choice too: the tenant, the buyer's phone, ID card and inc
 | Is it free text? | `cell: 'text'`, `sortable: false`, `analysis: false`; `operators: []` when no one filters by it; a search box (`search: { fields, mode }`) when people look for words in it. |
 | Is it a category? | Word every value (`options`), with a `tone` only where the value is good, bad or waiting (`success`, `danger`, `warning`, `neutral`); hide a value nobody meets with `false`. |
 | Is it an amount or a count? | `summary` only for a total the audience reads (`SUM`), not every function the store has; `more: { numberFormat }` (an `Intl.NumberFormat` options object) for currency or units. |
-| Is it a moment? | Nothing to narrow but `analysis: { dateUnits }` to the units the audience thinks in, as wow-client's `AggregationDateUnit` values; a config's `DATE_HISTOGRAM` names its `unit` as the string (`'DAY'`). |
+| Is it a moment? | Nothing to narrow but `analysis: { dateUnits }` to the units the audience thinks in, as wow-client's `AggregationDateUnit` values; a config's `DATE_HISTOGRAM` names its `unit` as the string (`'DAY'`). A table cell shows it to the minute (the whole time is its tooltip and the record detail); `timePrecision: 'second'` where seconds are what people read it for — an event stream's time. |
 | Does the host's code read it whatever the view shows? | `record.rowFields`: an action's rule or the command's id. A page fetches only what the view shows. |
 | Is it an array? | Its entries in `elements` (keys relative to the entry), `elementTitle` for the entry field that names one. |
 | Does the scenario want a field the descriptor lacks? | Do not write it. Say what is missing and where it would come from (a read-model field, a model declaration, a projection that computes it). |
@@ -292,7 +292,8 @@ export const orderEvents = defineView(orderEventDescriptor, {
       cell: 'copyable',
       analysis: { groups: [] },
     },
-    createTime: text('orderEvents.time'),
+    // Events land seconds apart: the table keeps the seconds.
+    createTime: { label: text('orderEvents.time'), timePrecision: 'second' },
     body: {
       label: text('orderEvents.events'),
       elementTitle: 'bodyType',
