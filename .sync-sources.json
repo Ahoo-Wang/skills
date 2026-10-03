@@ -5,7 +5,7 @@
       "source": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
-      "commit": "d1c37e01ec30ff689e33cb24d7485d1ed9425377",
+      "commit": "fa73b33530343bc187cfc0d056bc0606851c8409",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -45,7 +45,7 @@
       "source": "Simba",
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
-      "commit": "34ea27782774f4f55ef865446121a47f7608f6b0",
+      "commit": "e038f829c0fe46406574800e332ed11de2baad9e",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
