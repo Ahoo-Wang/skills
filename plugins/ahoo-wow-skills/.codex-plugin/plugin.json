@@ -1,7 +1,7 @@
 {
   "name": "ahoo-wow-skills",
-  "description": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI, answering business data questions from a running Wow service's read-only queries, writing Wow View Engine view definitions within the service's query capability descriptor, and integrating the view engine into a host application with its routes, store and declared actions.",
-  "version": "0.1.0",
+  "description": "Agent Skills for downstream applications built on Wow, the reactive DDD, Event Sourcing and CQRS framework: building, reviewing and debugging Wow services, breaking migrations, TypeScript clients generated from OpenAPI or written by hand, answering business data questions from a running service's read-only queries, and writing and hosting Wow View Engine views.",
+  "version": "0.2.0",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
@@ -34,14 +34,14 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Ahoo Wow Skills",
-    "shortDescription": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI, answering business data questions from a running Wow service's read-only queries, writing Wow View Engine view definitions within the service's query capability descriptor, and integrating the view engine into a host application with its routes, store and declared actions.",
-    "longDescription": "Intent-focused Agent Skills for developing, reviewing, debugging, and migrating Wow reactive DDD, Event Sourcing, and CQRS services, plus building TypeScript clients and generating them from OpenAPI, answering business data questions from a running Wow service's read-only queries, writing Wow View Engine view definitions within the service's query capability descriptor, and integrating the view engine into a host application with its routes, store and declared actions.",
+    "shortDescription": "Agent Skills for downstream applications built on Wow, the reactive DDD, Event Sourcing and CQRS framework: building, reviewing and debugging Wow services, breaking migrations, TypeScript clients generated from OpenAPI or written by hand, answering business data questions from a running service's read-only queries, and writing and hosting Wow View Engine views.",
+    "longDescription": "Agent Skills for downstream applications built on Wow, the reactive DDD, Event Sourcing and CQRS framework: building, reviewing and debugging Wow services, breaking migrations, TypeScript clients generated from OpenAPI or written by hand, answering business data questions from a running service's read-only queries, and writing and hosting Wow View Engine views.",
     "developerName": "Ahoo Wang",
     "category": "Development",
     "capabilities": [
       "Skills"
     ],
     "websiteURL": "https://github.com/Ahoo-Wang/skills",
-    "defaultPrompt": "Help me develop, review, debug, or migrate this downstream application that uses Wow, or build and generate its TypeScript clients, using verifiable evidence."
+    "defaultPrompt": "Help me build, review, debug or migrate this downstream Wow application, or write its TypeScript clients, using verifiable evidence."
   }
 }

@@ -72,11 +72,8 @@
       "skills": [
         "wow-client",
         "wow-data-query",
-        "wow-debug",
         "wow-develop",
-        "wow-generator",
         "wow-migrate",
-        "wow-review",
         "wow-view-definition",
         "wow-view-host"
       ]

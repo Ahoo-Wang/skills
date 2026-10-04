@@ -1,6 +1,6 @@
 ---
 name: "wow-view-definition"
-description: "Decide what a Wow View Engine view definition declares for its audience, and write it with defineView over the service's committed query capability descriptor: which fields appear and in what words, what is narrowed, the time a board reads, system record and analysis views, dashboards, event streams, and the words behind every text(key). Self-checked by the engine's admit. Use for @ahoo-wang/wow-view-engine definitions, system views and boards in downstream apps, and for the view definitions and stories inside the Wow repository. Exclude registering resources, ViewHost, routes, stores and declared actions (wow-view-host), runtime client code (wow-client), answering data questions (wow-data-query), and changing the view engine itself."
+description: "Write Wow View Engine view definitions with defineView over the service's committed query capability descriptor: fields and their words, narrowing, system record and analysis views, boards, event streams, self-checked with admit. Use for @ahoo-wang/wow-view-engine definitions and stories, including the Wow repository's Storybook and compensation console. Exclude host wiring and actions (wow-view-host), client code, data answers, and changing the engine."
 ---
 
 # wow-view-definition
@@ -26,7 +26,7 @@ The descriptor holds the **facts**: paths, kinds, values, sensitivity, deprecati
 6. **Time.** `timeField` is the moment a board's one date filter means for this dataset (when it was paid, not when it was last touched); a system view overrides it, `null` to be read whole.
 7. **Records.** Layouts the audience scans (`table`, `card` with the field that names a card), `rowKey` when the identity is not what people look a record up by, and `rowFields` for any field the host's declared actions read beyond the visible columns, including the aggregate id their commands address when `rowKey` is a business key.
 8. **Event streams.** One record is one command's appended events: list `body` with `elementTitle: 'bodyType'`, the event types worded as business events, and payload fields from the descriptor's variants inside `elements`. A condition on an event's payload is one `ELEMENT_MATCH` on `body` holding both its `bodyType` and the payload condition.
-9. **System views, analyses and boards** are the starting points, not every possible view: see `references/views-and-boards.md`.
+9. **System views, analyses and boards** are the starting points, not every possible view: see `references/views-and-boards.md`. Those declared here are read-only code; stored system views that administrators publish on the screen belong to the store (`wow-view-host`).
 
 ## Self-check: admit
 
@@ -36,8 +36,7 @@ A definition is done when the engine admits it. The host's test calls `admit` fr
 
 ## References
 
-Links in the references point at `main` on GitHub; in a Wow checkout the same file is at the path after `blob/main/` (for example `typescript/wow-view-engine/README.md`).
-
+The references hold names, shapes, rules and gotchas; each links the page of https://wow.ahoo.me/guide/typescript/view-engine.html that covers its topic in depth. Repository paths (`compensation/…`, `typescript/…`) are in the Wow repository. A page still on the deprecated `@ahoo-wang/fetcher-viewer` is rebuilt as a definition here and a host (`wow-view-host`), not renamed.
 
 - `references/choices.md`: a `defineView` worked through choice by choice, words and keys, the analysis vocabulary, narrowing, protected, deprecated and event-stream fields. Load it before writing.
 - `references/views-and-boards.md`: system record and analysis views, derived metrics, boards and their time filter, where definitions live, and revising after descriptor drift. Load it for the views.
@@ -48,4 +47,4 @@ Links in the references point at `main` on GitHub; in a Wow checkout the same fi
 - $wow-view-host: register the definition with its source and store, `ViewHost`, routes, and the commands on its records.
 - $wow-client: TypeScript code that sends commands or queries outside the engine.
 - $wow-data-query: answer a business question from a running service's data instead of writing a view.
-- $wow-debug: a query the descriptor admits but the service rejects, or a result that contradicts the data.
+- $wow-develop: a query the descriptor admits but the service rejects, or a result that contradicts the data.
