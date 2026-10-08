@@ -380,7 +380,51 @@ EOF
   assert_file_exists "$aggregate/sources/source/skills/legacy-skill/SKILL.md"
 }
 
+test_upstream_commit_without_content_change_reports_no_changes() {
+  local tmp
+  tmp="$(mktemp -d "$TMP_ROOT/sha-only.XXXXXX")"
+
+  local source="$tmp/source"
+  init_repo "$source"
+  write_skill "$source" "stable-skill"
+  write_plugins_json "$source" "source-plugin" "Source Plugin"
+  commit_all "$source" "add skill"
+
+  local aggregate="$tmp/aggregate"
+  create_aggregate_repo "$aggregate"
+  cat > "$aggregate/repos.json" <<EOF
+{"repos":[{"name":"source","url":"$source","branch":"main","skills_path":"skills"}]}
+EOF
+  commit_all "$aggregate" "init"
+
+  local output="$tmp/output.log"
+  run_sync "$aggregate" "$output" || fail "Initial sync should report changes"
+  commit_all "$aggregate" "first sync"
+  cp "$aggregate/.sync-sources.json" "$tmp/manifest-before.json"
+
+  mkdir -p "$source/src"
+  printf 'code\n' > "$source/src/main.txt"
+  commit_all "$source" "change code outside skills"
+
+  set +e
+  run_sync "$aggregate" "$output"
+  local code=$?
+  set -e
+  assert_exit_code "$code" 2 "Sync should report no changes when only the upstream commit moved"
+  cmp -s "$tmp/manifest-before.json" "$aggregate/.sync-sources.json" || fail "Sync should keep the previous snapshot when content is unchanged"
+  [ -z "$(git -C "$aggregate" status --porcelain)" ] || fail "Sync should leave the worktree clean when content is unchanged"
+
+  printf '\nMore guidance.\n' >> "$source/skills/stable-skill/SKILL.md"
+  commit_all "$source" "change skill"
+
+  run_sync "$aggregate" "$output" || fail "Sync should report changes when skill content changes"
+  local new_commit
+  new_commit="$(git -C "$source" rev-parse HEAD)"
+  assert_contains "$aggregate/.sync-sources.json" "\"commit\": \"$new_commit\""
+}
+
 main() {
+  test_upstream_commit_without_content_change_reports_no_changes
   test_fails_when_source_repo_cannot_be_cloned
   test_assert_not_contains_fails_on_grep_errors
   test_grep_assertions_treat_dash_prefixed_patterns_as_literals

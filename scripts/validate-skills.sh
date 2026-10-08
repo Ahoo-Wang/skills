@@ -7,6 +7,10 @@ PLUGINS_DIR="${3:-plugins}"
 CODEX_MARKETPLACE_FILE="${4:-.agents/plugins/marketplace.json}"
 GENERATED_PLUGINS_FILE="${5:-$PLUGINS_DIR/.generated-plugins.json}"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/plugin-version.sh
+. "$SCRIPT_DIR/lib/plugin-version.sh"
+
 fail() {
   echo "Error: $*" >&2
   exit 1
@@ -71,6 +75,11 @@ jq -er '.plugins | if type == "array" then . else error("plugins must be an arra
 jq -r '.plugins[].name' "$CLAUDE_MARKETPLACE_FILE" | sort > "$CLAUDE_PLUGIN_NAMES_FILE"
 jq -r '.plugins[].name' "$CODEX_MARKETPLACE_FILE" | sort > "$CODEX_PLUGIN_NAMES_FILE"
 
+duplicated_plugins=$(uniq -d "$CLAUDE_PLUGIN_NAMES_FILE")
+[ -z "$duplicated_plugins" ] || fail "Duplicate Claude marketplace plugins: $duplicated_plugins"
+duplicated_plugins=$(uniq -d "$CODEX_PLUGIN_NAMES_FILE")
+[ -z "$duplicated_plugins" ] || fail "Duplicate Codex marketplace plugins: $duplicated_plugins"
+
 if ! cmp -s "$CLAUDE_PLUGIN_NAMES_FILE" "$CODEX_PLUGIN_NAMES_FILE"; then
   echo "Error: Claude and Codex marketplace plugin lists differ" >&2
   comm -3 "$CLAUDE_PLUGIN_NAMES_FILE" "$CODEX_PLUGIN_NAMES_FILE" >&2
@@ -110,6 +119,9 @@ while IFS=$'\t' read -r plugin_name source_path; do
   codex_manifest_name=$(jq -r '.name' "$codex_plugin_manifest")
   [ "$claude_manifest_name" = "$plugin_name" ] || fail "Claude plugin manifest name '$claude_manifest_name' does not match marketplace name '$plugin_name'"
   [ "$codex_manifest_name" = "$plugin_name" ] || fail "Codex plugin manifest name '$codex_manifest_name' does not match marketplace name '$plugin_name'"
+  codex_version=$(jq -r '.version // empty' "$codex_plugin_manifest")
+  expected_codex_version=$(plugin_content_version "$plugin_dir")
+  [ "$codex_version" = "$expected_codex_version" ] || fail "Codex plugin '$plugin_name' version '$codex_version' must be the content-derived '$expected_codex_version'; run npm run generate:plugins"
   [ "$(jq -r '.skills // empty' "$codex_plugin_manifest")" = "./skills/" ] || fail "Codex plugin '$plugin_name' must set skills to ./skills/"
   [ -n "$(jq -r '.interface.displayName // empty' "$codex_plugin_manifest")" ] || fail "Codex plugin '$plugin_name' missing interface.displayName"
   [ -n "$(jq -r '.interface.shortDescription // empty' "$codex_plugin_manifest")" ] || fail "Codex plugin '$plugin_name' missing interface.shortDescription"

@@ -73,6 +73,10 @@ Sync rules:
 - Workspace skills ending in `-workspace` are skipped.
 - Duplicate skill names across source repos fail the sync.
 - `.sync-sources.json` records mirrored source repos, paths, and commits.
+- A sync reports changes only when mirrored content or source configuration
+  changes. When upstream commits move without changing mirrored content, the
+  previous `.sync-sources.json` is kept and nothing is committed, because every
+  commit to this repository is a new plugin version for users.
 - Removed upstream skills are removed from generated distribution output on the
   next sync.
 
@@ -83,6 +87,9 @@ regenerates source-owned plugins under `plugins/<plugin-name>/`.
 
 Generation rules:
 - Generated plugins are tracked in `plugins/.generated-plugins.json`.
+- Each plugin name has exactly one owner. Generation fails before deleting
+  anything when two sources declare the same plugin name, or when a source
+  plugin name clashes with a marketplace-local plugin.
 - Source-owned plugin directories may be deleted and rebuilt during generation.
 - Marketplace-local plugin directories under `plugins/` are preserved.
 - Do not manually edit generated plugin copies to fix upstream skill content;
@@ -105,21 +112,26 @@ Codex manifests must keep `skills` set to `./skills/` and include the Codex
 
 ## Versioning
 
-Claude-side artifacts must not declare static versions:
+No version in this repository is maintained by hand:
 
 - `.claude-plugin/marketplace.json` (top level and plugin entries) and every
   plugin's `.claude-plugin/plugin.json` must omit `version`. Claude Code
-  detects updates by git SHA for git-hosted marketplaces, so any sync commit
-  is a new version; a static version would pin users to it.
-- Codex manifests keep `version` as display metadata only; Codex resolves
-  plugins by git ref and ignores it.
-- `package.json` `version` is npm metadata only and does not flow into any
-  marketplace manifest.
-- Local plugins follow the same rules: no `version` in the Claude manifest,
-  keep it in the Codex manifest.
+  detects updates by git SHA for git-hosted marketplaces, so any commit is a
+  new version; a static version would pin users to it.
+- Every plugin's `.codex-plugin/plugin.json` `version` is content-derived:
+  `1.0.0+<12-hex SHA-256 of the plugin's files>`, with the Codex manifest
+  hashed without its own `version`. `generate-plugins.sh` stamps it for
+  generated and local plugins alike (`scripts/lib/plugin-version.sh`). Codex
+  force-reinstalls on an explicit `codex plugin marketplace upgrade`, but its
+  automatic cache refresh only reinstalls when the version changes, so a static
+  version would leave users on stale content. The fixed `1.0.0` core keeps the
+  value semver-valid and above legacy `0.x` cache entries.
+- Upstream `plugins.json` `version` fields are ignored.
+- `package.json` is `private` and has no `version`; it is not published.
 
 `validate-skills.sh` fails when a static version reappears in any
-Claude-side artifact. Users with a cached install from before this policy
+Claude-side artifact, or when a Codex `version` differs from the
+content-derived value; rerun `npm run generate:plugins` to fix it. Users with a cached install from before this policy
 may need a one-time manual `/plugin marketplace update` for the cache to
 move from the old static-version path to the SHA-based path.
 

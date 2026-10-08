@@ -277,11 +277,107 @@ test_validate_rejects_static_versions() {
   run_validate_and_assert_fails "Validate should reject a Claude plugin manifest version"
 }
 
+run_generate() {
+  local repo_dir="$1"
+  (cd "$repo_dir" && bash "$SCRIPT_UNDER_TEST" sources plugins .claude-plugin/marketplace.json .agents/plugins/marketplace.json plugins/.generated-plugins.json)
+}
+
+run_validate() {
+  local repo_dir="$1"
+  (cd "$repo_dir" && bash "$VALIDATE_SCRIPT" sources .claude-plugin/marketplace.json plugins .agents/plugins/marketplace.json plugins/.generated-plugins.json)
+}
+
+codex_version() {
+  jq -r '.version' "$1/.codex-plugin/plugin.json"
+}
+
+test_codex_versions_follow_plugin_content() {
+  local tmp
+  tmp="$(mktemp -d "$TMP_ROOT/codex-version.XXXXXX")"
+  mkdir -p "$tmp/.claude-plugin"
+
+  write_skill "$tmp/sources/Wow" "wow"
+  write_source_plugins_json "$tmp/sources/Wow" "ahoo-wow-skills" "Ahoo Wow Skills"
+  jq '.plugins[0].version = "9.9.9"' "$tmp/sources/Wow/plugins.json" > "$tmp/plugins.json" && mv "$tmp/plugins.json" "$tmp/sources/Wow/plugins.json"
+  write_skill "$tmp/sources/Fetcher" "fetcher"
+  write_source_plugins_json "$tmp/sources/Fetcher" "ahoo-fetcher-skills" "Ahoo Fetcher Skills"
+  write_local_plugin "$tmp" "ahoo-agent-skills" "agent-system-prompt"
+
+  run_generate "$tmp" >/dev/null
+  local wow_v1 fetcher_v1 local_v1
+  wow_v1="$(codex_version "$tmp/plugins/ahoo-wow-skills")"
+  fetcher_v1="$(codex_version "$tmp/plugins/ahoo-fetcher-skills")"
+  local_v1="$(codex_version "$tmp/plugins/ahoo-agent-skills")"
+  [[ "$wow_v1" =~ ^1\.0\.0\+[0-9a-f]{12}$ ]] || fail "Codex version should be content-derived, got '$wow_v1'"
+  [[ "$local_v1" =~ ^1\.0\.0\+[0-9a-f]{12}$ ]] || fail "Local Codex version should be content-derived, got '$local_v1'"
+  [ "$wow_v1" != "$fetcher_v1" ] || fail "Different plugin contents should have different versions"
+  run_validate "$tmp" >/dev/null
+
+  run_generate "$tmp" >/dev/null
+  [ "$(codex_version "$tmp/plugins/ahoo-wow-skills")" = "$wow_v1" ] || fail "Regenerating unchanged content should keep the Codex version"
+  [ "$(codex_version "$tmp/plugins/ahoo-agent-skills")" = "$local_v1" ] || fail "Regenerating should keep the local Codex version"
+
+  printf '\nMore guidance.\n' >> "$tmp/sources/Wow/skills/wow/SKILL.md"
+  run_generate "$tmp" >/dev/null
+  [ "$(codex_version "$tmp/plugins/ahoo-wow-skills")" != "$wow_v1" ] || fail "Changed plugin content should change its Codex version"
+  [ "$(codex_version "$tmp/plugins/ahoo-fetcher-skills")" = "$fetcher_v1" ] || fail "Unchanged plugins should keep their Codex version"
+  [ "$(codex_version "$tmp/plugins/ahoo-agent-skills")" = "$local_v1" ] || fail "Unchanged local plugin should keep its Codex version"
+
+  jq '.version = "0.0.3"' "$tmp/plugins/ahoo-wow-skills/.codex-plugin/plugin.json" > "$tmp/manifest.json"
+  mv "$tmp/manifest.json" "$tmp/plugins/ahoo-wow-skills/.codex-plugin/plugin.json"
+  set +e
+  run_validate "$tmp" >"$tmp/output.log" 2>&1
+  local code=$?
+  set -e
+  assert_exit_code "$code" 1 "Validate should reject a hand-edited Codex version"
+  assert_contains "$tmp/output.log" "must be the content-derived"
+}
+
+test_rejects_plugin_declared_by_multiple_sources() {
+  local tmp
+  tmp="$(mktemp -d "$TMP_ROOT/duplicate-plugin.XXXXXX")"
+  mkdir -p "$tmp/.claude-plugin"
+
+  write_skill "$tmp/sources/Wow" "wow"
+  write_source_plugins_json "$tmp/sources/Wow" "ahoo-shared-skills" "Ahoo Shared Skills"
+  write_skill "$tmp/sources/Fetcher" "fetcher"
+  write_source_plugins_json "$tmp/sources/Fetcher" "ahoo-shared-skills" "Ahoo Shared Skills"
+
+  set +e
+  run_generate "$tmp" >"$tmp/output.log" 2>&1
+  local code=$?
+  set -e
+  assert_exit_code "$code" 1 "Generation should fail when two sources declare the same plugin"
+  assert_contains "$tmp/output.log" "declared by multiple sources"
+  assert_path_missing "$tmp/plugins/ahoo-shared-skills"
+}
+
+test_rejects_source_plugin_clashing_with_local_plugin() {
+  local tmp
+  tmp="$(mktemp -d "$TMP_ROOT/local-clash.XXXXXX")"
+  mkdir -p "$tmp/.claude-plugin"
+
+  write_skill "$tmp/sources/Wow" "wow"
+  write_source_plugins_json "$tmp/sources/Wow" "ahoo-agent-skills" "Ahoo Agent Skills"
+  write_local_plugin "$tmp" "ahoo-agent-skills" "agent-system-prompt"
+
+  set +e
+  run_generate "$tmp" >"$tmp/output.log" 2>&1
+  local code=$?
+  set -e
+  assert_exit_code "$code" 1 "Generation should fail when a source plugin clashes with a local plugin"
+  assert_contains "$tmp/output.log" "clashes with marketplace-local plugin"
+  assert_file_exists "$tmp/plugins/ahoo-agent-skills/skills/agent-system-prompt/SKILL.md"
+}
+
 main() {
   test_generates_source_plugins_and_keeps_local_plugins
   test_uses_codex_plugin_validator_override
   test_removes_only_stale_generated_plugin_directories
   test_validate_rejects_static_versions
+  test_codex_versions_follow_plugin_content
+  test_rejects_plugin_declared_by_multiple_sources
+  test_rejects_source_plugin_clashing_with_local_plugin
   echo "generate-plugins tests passed"
 }
 
