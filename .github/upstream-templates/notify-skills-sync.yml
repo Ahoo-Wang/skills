@@ -1,0 +1,33 @@
+# Template for upstream source repositories listed in repos.json.
+# Copy to .github/workflows/notify-skills-sync.yml in the upstream repo.
+#
+# It asks Ahoo-Wang/skills to sync as soon as the upstream skills/ directory
+# changes on main, instead of waiting for the scheduled fallback sync.
+#
+# Requires the SKILLS_SYNC_TOKEN secret in the upstream repo: a fine-grained
+# token with "Contents: Read and write" on Ahoo-Wang/skills only, which is the
+# permission GitHub requires to send a repository_dispatch event.
+name: Notify Skills Marketplace
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch skills-updated to Ahoo-Wang/skills
+        env:
+          GH_TOKEN: ${{ secrets.SKILLS_SYNC_TOKEN }}
+        run: |
+          gh api repos/Ahoo-Wang/skills/dispatches \
+            -f event_type=skills-updated \
+            -f "client_payload[source]=${GITHUB_REPOSITORY}" \
+            -f "client_payload[sha]=${GITHUB_SHA}"

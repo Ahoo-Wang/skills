@@ -14,7 +14,7 @@
 
 A central aggregation repository for [Agent Skills](https://agentskills.io/) from [Ahoo-Wang](https://github.com/Ahoo-Wang)'s open source projects.
 
-Skills are automatically synced from source repositories **every 6 hours** via GitHub Actions and published as split plugins by source project.
+Skills are automatically synced from source repositories via GitHub Actions **when upstream skills change**, with a 6-hourly fallback, and published as split plugins by source project.
 
 ## Available Plugins
 
@@ -72,7 +72,7 @@ version, so run `/plugin update` in Claude Code to pull the latest skills.
 - `sources/<source>/plugins.json` — source-owned split plugin metadata mirrored from upstream `skills/plugins.json`
 - `.claude-plugin/marketplace.json` — generated Claude Code marketplace
 - `.agents/plugins/marketplace.json` — generated Codex marketplace
-- `.github/workflows/sync-skills.yml` — sync workflow (runs every 6 hours)
+- `.github/workflows/sync-skills.yml` — sync workflow (triggered by upstream changes, 6-hourly fallback)
 - Each source repo is shallow-cloned and mirrored into `sources/<source>/`
 - `.sync-sources.json` tracks synced source repositories, paths, and commits
 - `scripts/generate-plugins.sh` rebuilds source-owned `plugins/<plugin-name>/` from `sources/` and keeps local plugins in `plugins/`

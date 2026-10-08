@@ -14,7 +14,7 @@
 
 [Ahoo-Wang](https://github.com/Ahoo-Wang) 开源项目的 [Agent Skills](https://agentskills.io/) 聚合仓库。
 
-Skills 通过 GitHub Actions **每 6 小时**自动从源仓库同步，并按源项目发布为拆分插件。
+Skills 在**上游技能变化时**通过 GitHub Actions 自动从源仓库同步（另有每 6 小时一次的兜底同步），并按源项目发布为拆分插件。
 
 ## 可用插件
 
@@ -72,7 +72,7 @@ codex plugin add ahoo-wow-skills@ahoo-skills
 - `sources/<source>/plugins.json` — 从上游 `skills/plugins.json` 镜像来的插件源元数据
 - `.claude-plugin/marketplace.json` — 生成的 Claude Code marketplace
 - `.agents/plugins/marketplace.json` — 生成的 Codex marketplace
-- `.github/workflows/sync-skills.yml` — 同步工作流（每 6 小时运行）
+- `.github/workflows/sync-skills.yml` — 同步工作流（上游变化时触发，每 6 小时兜底）
 - 对每个源仓库 shallow clone 后镜像到 `sources/<source>/`
 - `.sync-sources.json` 记录同步源仓库、路径与 commit
 - `scripts/generate-plugins.sh` 根据 `sources/` 重建上游插件，并保留 `plugins/` 下本地插件
