@@ -1,15 +1,17 @@
 # shellcheck shell=bash
-# Content-derived Codex plugin versions.
+# Content-derived plugin versions, shared by the Claude and Codex manifests.
 #
-# Codex compares installed plugin versions during automatic cache refresh, so a
-# static version keeps users on stale content. The version is derived from the
-# plugin's distributed files instead of being maintained by hand:
+# Both Claude Code and Codex decide whether to reinstall a plugin by comparing
+# versions, so a static version keeps users on stale content. The version is
+# derived from the plugin's distributed files instead of being maintained by hand:
 #
 #   1.0.0+<first 12 hex chars of a SHA-256 over the plugin contents>
 #
-# The fixed 1.0.0 core keeps the version semver-valid and orders it above the
-# legacy 0.x versions that existing Codex caches may still hold. The Codex
-# manifest is hashed without its own `version` field so the value is stable.
+# It changes exactly when that plugin's files change, so a commit that touches
+# other plugins or repository docs is not an update for this plugin. The fixed
+# 1.0.0 core keeps the version semver-valid and orders it above the legacy 0.x
+# versions that existing Codex caches may still hold. Both manifests are hashed
+# without their own `version` field so the value is stable.
 
 PLUGIN_VERSION_PREFIX="1.0.0+"
 
@@ -32,7 +34,7 @@ plugin_content_hash() {
         printf '%s\0' "$path"
         if [ -L "$path" ]; then
           printf 'link:%s' "$(readlink "$path")" | sha256_stdin
-        elif [ "$path" = "./.codex-plugin/plugin.json" ]; then
+        elif [ "$path" = "./.codex-plugin/plugin.json" ] || [ "$path" = "./.claude-plugin/plugin.json" ]; then
           jq -S 'del(.version)' "$path" | sha256_stdin
         else
           sha256_stdin < "$path"
@@ -45,13 +47,12 @@ plugin_content_version() {
   printf '%s%s\n' "$PLUGIN_VERSION_PREFIX" "$(plugin_content_hash "$1")"
 }
 
-# Rewrites the Codex manifest of a plugin with its content-derived version.
-stamp_codex_plugin_version() {
-  local plugin_dir="$1"
-  local manifest="$plugin_dir/.codex-plugin/plugin.json"
-  local version tmp
+# Writes `version` as the third key of a manifest (after name and description).
+write_manifest_version() {
+  local manifest="$1"
+  local version="$2"
+  local tmp
 
-  version="$(plugin_content_version "$plugin_dir")"
   tmp="$(mktemp)"
   jq --arg version "$version" \
     'to_entries
@@ -61,4 +62,14 @@ stamp_codex_plugin_version() {
     "$manifest" > "$tmp"
   cat "$tmp" > "$manifest"
   rm -f "$tmp"
+}
+
+# Stamps the content-derived version into both manifests of a plugin.
+stamp_plugin_versions() {
+  local plugin_dir="$1"
+  local version
+
+  version="$(plugin_content_version "$plugin_dir")"
+  write_manifest_version "$plugin_dir/.claude-plugin/plugin.json" "$version"
+  write_manifest_version "$plugin_dir/.codex-plugin/plugin.json" "$version"
 }

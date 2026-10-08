@@ -91,10 +91,10 @@ codex_display_name=$(jq -r '.interface.displayName // empty' "$CODEX_MARKETPLACE
 
 # jq -e exits 0 on a match, 1 on false, 4 on an empty stream; all non-zero skip the guard
 if jq -e 'has("version")' "$CLAUDE_MARKETPLACE_FILE" >/dev/null; then
-  fail "Claude marketplace must not declare a static version"
+  fail "Claude marketplace must not declare a version; versions live in each plugin's plugin.json"
 fi
 if jq -e '.plugins[]? | select(has("version"))' "$CLAUDE_MARKETPLACE_FILE" >/dev/null; then
-  fail "Claude marketplace plugin entries must not declare a static version"
+  fail "Claude marketplace plugin entries must not declare a version; versions live in each plugin's plugin.json"
 fi
 
 while IFS=$'\t' read -r plugin_name source_path; do
@@ -111,17 +111,16 @@ while IFS=$'\t' read -r plugin_name source_path; do
   [ -d "$plugin_dir" ] || fail "Marketplace plugin '$plugin_name' source not found: $source_path"
   [ -f "$claude_plugin_manifest" ] || fail "Plugin '$plugin_name' is missing $claude_plugin_manifest"
   [ -f "$codex_plugin_manifest" ] || fail "Plugin '$plugin_name' is missing $codex_plugin_manifest"
-  if jq -e 'has("version")' "$claude_plugin_manifest" >/dev/null; then
-    fail "Claude plugin '$plugin_name' must not declare a static version"
-  fi
 
   claude_manifest_name=$(jq -r '.name' "$claude_plugin_manifest")
   codex_manifest_name=$(jq -r '.name' "$codex_plugin_manifest")
   [ "$claude_manifest_name" = "$plugin_name" ] || fail "Claude plugin manifest name '$claude_manifest_name' does not match marketplace name '$plugin_name'"
   [ "$codex_manifest_name" = "$plugin_name" ] || fail "Codex plugin manifest name '$codex_manifest_name' does not match marketplace name '$plugin_name'"
+  expected_version=$(plugin_content_version "$plugin_dir")
+  claude_version=$(jq -r '.version // empty' "$claude_plugin_manifest")
   codex_version=$(jq -r '.version // empty' "$codex_plugin_manifest")
-  expected_codex_version=$(plugin_content_version "$plugin_dir")
-  [ "$codex_version" = "$expected_codex_version" ] || fail "Codex plugin '$plugin_name' version '$codex_version' must be the content-derived '$expected_codex_version'; run npm run generate:plugins"
+  [ "$claude_version" = "$expected_version" ] || fail "Claude plugin '$plugin_name' version '$claude_version' must be the content-derived '$expected_version'; run npm run generate:plugins"
+  [ "$codex_version" = "$expected_version" ] || fail "Codex plugin '$plugin_name' version '$codex_version' must be the content-derived '$expected_version'; run npm run generate:plugins"
   [ "$(jq -r '.skills // empty' "$codex_plugin_manifest")" = "./skills/" ] || fail "Codex plugin '$plugin_name' must set skills to ./skills/"
   [ -n "$(jq -r '.interface.displayName // empty' "$codex_plugin_manifest")" ] || fail "Codex plugin '$plugin_name' missing interface.displayName"
   [ -n "$(jq -r '.interface.shortDescription // empty' "$codex_plugin_manifest")" ] || fail "Codex plugin '$plugin_name' missing interface.shortDescription"

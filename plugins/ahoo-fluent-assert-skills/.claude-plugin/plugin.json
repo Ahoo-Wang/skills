@@ -1,6 +1,7 @@
 {
   "name": "ahoo-fluent-assert-skills",
   "description": "Skills for writing Kotlin tests with FluentAssert's AssertJ-backed .assert() extensions for JDK types, nullable values, exceptions, and custom AssertProvider assertions.",
+  "version": "1.0.0+708782dc0b72",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"

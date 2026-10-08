@@ -125,28 +125,30 @@ Codex manifests must keep `skills` set to `./skills/` and include the Codex
 
 ## Versioning
 
-No version in this repository is maintained by hand:
+No version in this repository is maintained by hand. Each plugin has one
+content-derived version, shared by both of its manifests:
 
-- `.claude-plugin/marketplace.json` (top level and plugin entries) and every
-  plugin's `.claude-plugin/plugin.json` must omit `version`. Claude Code
-  detects updates by git SHA for git-hosted marketplaces, so any commit is a
-  new version; a static version would pin users to it.
-- Every plugin's `.codex-plugin/plugin.json` `version` is content-derived:
-  `1.0.0+<12-hex SHA-256 of the plugin's files>`, with the Codex manifest
-  hashed without its own `version`. `generate-plugins.sh` stamps it for
-  generated and local plugins alike (`scripts/lib/plugin-version.sh`). Codex
-  force-reinstalls on an explicit `codex plugin marketplace upgrade`, but its
-  automatic cache refresh only reinstalls when the version changes, so a static
-  version would leave users on stale content. The fixed `1.0.0` core keeps the
-  value semver-valid and above legacy `0.x` cache entries.
+- `plugins/<plugin>/.claude-plugin/plugin.json` and
+  `plugins/<plugin>/.codex-plugin/plugin.json` carry the same `version`:
+  `1.0.0+<12-hex SHA-256 of the plugin's files>`, with both manifests hashed
+  without their own `version`. `generate-plugins.sh` stamps it for generated
+  and local plugins alike (`scripts/lib/plugin-version.sh`).
+- The version changes exactly when that plugin's files change. Claude Code and
+  Codex both reinstall only when the version changes, so users get an update
+  for real content changes and never for commits that touch other plugins or
+  repository docs. Because it is recomputed on every generation, it never pins
+  users to stale content the way a hand-written version would.
+- The fixed `1.0.0` core keeps the value semver-valid and above legacy `0.x`
+  Codex cache entries.
+- `.claude-plugin/marketplace.json` (top level and plugin entries) must omit
+  `version`; Claude Code reads the plugin manifest first, and declaring it in
+  both places is reported as a mismatch.
 - Upstream `plugins.json` `version` fields are ignored.
 - `package.json` is `private` and has no `version`; it is not published.
 
-`validate-skills.sh` fails when a static version reappears in any
-Claude-side artifact, or when a Codex `version` differs from the
-content-derived value; rerun `npm run generate:plugins` to fix it. Users with a cached install from before this policy
-may need a one-time manual `/plugin marketplace update` for the cache to
-move from the old static-version path to the SHA-based path.
+`validate-skills.sh` fails when the Claude marketplace declares a version, or
+when either manifest's `version` differs from the content-derived value; rerun
+`npm run generate:plugins` to fix it.
 
 ## Skill Structure
 
