@@ -1,7 +1,7 @@
 {
   "name": "ahoo-fetcher-skills",
   "description": "Skills for building with the Fetcher TypeScript ecosystem: the core HTTP client, decorator services, typed event buses, persisted storage, SSE/LLM streaming, OpenAI chat completions, OpenAPI types, React hooks and CoSec authentication, plus upgrading from Fetcher 5.x to 6.0. Wow CQRS clients and OpenAPI client generation live in the Wow repository's skills.",
-  "version": "1.0.0+48f8913e9b72",
+  "version": "1.0.0+8441749b5cbf",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"

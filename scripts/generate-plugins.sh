@@ -362,7 +362,7 @@ for source_dir in "$SOURCES_DIR"/*/; do
       echo "Adding $skill_name to $plugin_name"
       rsync -a --delete "$source_dir/skills/$skill_name/" "$plugin_dir/skills/$skill_name/"
     done < "$skill_list_file"
-    stamp_codex_plugin_version "$plugin_dir"
+    stamp_plugin_versions "$plugin_dir"
 
     append_claude_marketplace_entry "$plugin_name" "$plugin_dir"
     append_codex_marketplace_entry "$plugin_name" "$plugin_dir" "$metadata_file" "$i"
@@ -388,7 +388,7 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
   is_generated_plugin "$plugin_name" && continue
   [ -f "$plugin_dir/.claude-plugin/plugin.json" ] || { echo "Error: Local plugin $plugin_name missing .claude-plugin/plugin.json" >&2; exit 1; }
   [ -f "$plugin_dir/.codex-plugin/plugin.json" ] || { echo "Error: Local plugin $plugin_name missing .codex-plugin/plugin.json" >&2; exit 1; }
-  stamp_codex_plugin_version "$plugin_dir"
+  stamp_plugin_versions "$plugin_dir"
   append_claude_marketplace_entry "$plugin_name" "$plugin_dir"
   append_codex_marketplace_entry "$plugin_name" "$plugin_dir"
 done

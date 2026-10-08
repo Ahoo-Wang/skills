@@ -180,8 +180,10 @@ test_generates_source_plugins_and_keeps_local_plugins() {
   assert_file_exists "$tmp/plugins/ahoo-agent-skills/skills/agent-system-prompt/SKILL.md"
   assert_file_exists "$tmp/plugins/.generated-plugins.json"
   assert_json_value "$tmp/plugins/ahoo-wow-skills/.claude-plugin/plugin.json" ".name" "ahoo-wow-skills"
-  assert_json_value "$tmp/plugins/ahoo-wow-skills/.claude-plugin/plugin.json" "has(\"version\")" "false"
-  assert_json_value "$tmp/plugins/ahoo-agent-skills/.claude-plugin/plugin.json" "has(\"version\")" "false"
+  for plugin in ahoo-wow-skills ahoo-agent-skills; do
+    [ "$(jq -r .version "$tmp/plugins/$plugin/.claude-plugin/plugin.json")" = "$(jq -r .version "$tmp/plugins/$plugin/.codex-plugin/plugin.json")" ] ||
+      fail "Claude and Codex manifests of $plugin should share one version"
+  done
   assert_json_value "$tmp/.claude-plugin/marketplace.json" "has(\"version\")" "false"
   assert_json_value "$tmp/.claude-plugin/marketplace.json" ".plugins[] | select(.name == \"ahoo-wow-skills\") | has(\"version\")" "false"
   assert_json_value "$tmp/.claude-plugin/marketplace.json" ".plugins[] | select(.name == \"ahoo-agent-skills\") | has(\"version\")" "false"
@@ -262,19 +264,19 @@ test_validate_rejects_static_versions() {
     local code=$?
     set -e
     assert_exit_code "$code" 1 "$1"
-    assert_contains "$tmp/output.log" "must not declare a static version"
+    assert_contains "$tmp/output.log" "$2"
   }
 
   jq '.version = "0.0.3"' "$marketplace" > "$tmp/marketplace.injected" && mv "$tmp/marketplace.injected" "$marketplace"
-  run_validate_and_assert_fails "Validate should reject a marketplace top-level version"
+  run_validate_and_assert_fails "Validate should reject a marketplace top-level version" "must not declare a version"
 
   cp "$tmp/marketplace.clean" "$marketplace"
   jq '.plugins[0].version = "0.0.3"' "$marketplace" > "$tmp/marketplace.injected" && mv "$tmp/marketplace.injected" "$marketplace"
-  run_validate_and_assert_fails "Validate should reject a marketplace plugin entry version"
+  run_validate_and_assert_fails "Validate should reject a marketplace plugin entry version" "must not declare a version"
 
   cp "$tmp/marketplace.clean" "$marketplace"
   jq '.version = "0.0.3"' "$plugin_manifest" > "$tmp/manifest.injected" && mv "$tmp/manifest.injected" "$plugin_manifest"
-  run_validate_and_assert_fails "Validate should reject a Claude plugin manifest version"
+  run_validate_and_assert_fails "Validate should reject a static Claude plugin manifest version" "must be the content-derived"
 }
 
 run_generate() {
@@ -322,6 +324,9 @@ test_codex_versions_follow_plugin_content() {
   [ "$(codex_version "$tmp/plugins/ahoo-wow-skills")" != "$wow_v1" ] || fail "Changed plugin content should change its Codex version"
   [ "$(codex_version "$tmp/plugins/ahoo-fetcher-skills")" = "$fetcher_v1" ] || fail "Unchanged plugins should keep their Codex version"
   [ "$(codex_version "$tmp/plugins/ahoo-agent-skills")" = "$local_v1" ] || fail "Unchanged local plugin should keep its Codex version"
+
+  [ "$(jq -r .version "$tmp/plugins/ahoo-wow-skills/.claude-plugin/plugin.json")" = "$(codex_version "$tmp/plugins/ahoo-wow-skills")" ] ||
+    fail "Claude manifest should follow the Codex version after a content change"
 
   jq '.version = "0.0.3"' "$tmp/plugins/ahoo-wow-skills/.codex-plugin/plugin.json" > "$tmp/manifest.json"
   mv "$tmp/manifest.json" "$tmp/plugins/ahoo-wow-skills/.codex-plugin/plugin.json"
