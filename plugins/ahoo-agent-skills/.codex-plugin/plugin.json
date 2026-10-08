@@ -1,7 +1,7 @@
 {
   "name": "ahoo-agent-skills",
   "description": "General Ahoo agent skills that are maintained directly in this repository",
-  "version": "0.0.3",
+  "version": "1.0.0+b0529be1042f",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"

@@ -8,6 +8,10 @@ CODEX_MARKETPLACE_FILE="${4:-.agents/plugins/marketplace.json}"
 GENERATED_PLUGINS_FILE="${5:-$PLUGINS_DIR/.generated-plugins.json}"
 PACKAGE_FILE="${PACKAGE_FILE:-package.json}"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/plugin-version.sh
+. "$SCRIPT_DIR/lib/plugin-version.sh"
+
 command -v jq >/dev/null 2>&1 || { echo "Error: jq is required but not installed" >&2; exit 1; }
 command -v rsync >/dev/null 2>&1 || { echo "Error: rsync is required but not installed" >&2; exit 1; }
 
@@ -31,7 +35,6 @@ if [ -f "$PACKAGE_FILE" ]; then
   jq '{
     marketplaceName: (.name // "ahoo-skills"),
     marketplaceDisplayName: (.displayName // "Ahoo Skills"),
-    version: (.version // "0.0.0"),
     description: (.description // ""),
     author: (.author // {name: "Ahoo Wang"}),
     homepage: (.homepage // "https://github.com/Ahoo-Wang/skills"),
@@ -48,7 +51,6 @@ else
   jq -n '{
     marketplaceName: "ahoo-skills",
     marketplaceDisplayName: "Ahoo Skills",
-    version: "0.0.0",
     description: "",
     author: {name: "Ahoo Wang"},
     homepage: "https://github.com/Ahoo-Wang/skills",
@@ -166,7 +168,6 @@ write_codex_plugin_manifest() {
     {
       name: $plugin.name,
       description: ($plugin.description // ""),
-      version: ($plugin.version // $defaults.version),
       author: $author,
       homepage: $homepage,
       repository: ($plugin.repository // $defaults.repository),
@@ -278,7 +279,56 @@ is_generated_plugin() {
   grep -Fxq "$plugin_name" "$GENERATED_PLUGIN_NAMES_FILE"
 }
 
+# Plugin names are the install identity, so each must have exactly one owner.
+# Check every source-declared name before deleting anything: a duplicate across
+# sources, or a clash with a marketplace-local plugin, would otherwise silently
+# overwrite one plugin with another.
+check_plugin_name_ownership() {
+  local previous_generated_file="$TMP_DIR/previous-generated-plugin-names.txt"
+  local local_plugins_file="$TMP_DIR/local-plugin-names.txt"
+  local declared_file="$TMP_DIR/declared-plugin-names.tsv"
+  local source_dir source_name metadata_file plugin_name plugin_dir duplicated clashing
+
+  : > "$previous_generated_file"
+  : > "$local_plugins_file"
+  : > "$declared_file"
+
+  if [ -f "$GENERATED_PLUGINS_FILE" ]; then
+    jq -r '.plugins[]?.name' "$GENERATED_PLUGINS_FILE" | LC_ALL=C sort -u > "$previous_generated_file"
+  fi
+  for plugin_dir in "$PLUGINS_DIR"/*/; do
+    [ -d "$plugin_dir" ] || continue
+    plugin_name=$(basename "$plugin_dir")
+    grep -Fxq "$plugin_name" "$previous_generated_file" || printf '%s\n' "$plugin_name" >> "$local_plugins_file"
+  done
+
+  for source_dir in "$SOURCES_DIR"/*/; do
+    [ -d "$source_dir" ] || continue
+    source_name=$(basename "$source_dir")
+    metadata_file="$source_dir/plugins.json"
+    [ -f "$metadata_file" ] || continue
+    jq -r --arg source "$source_name" '.plugins[]?.name | [., $source] | @tsv' "$metadata_file" >> "$declared_file"
+  done
+
+  duplicated=$(cut -f1 "$declared_file" | LC_ALL=C sort | uniq -d)
+  if [ -n "$duplicated" ]; then
+    while IFS= read -r plugin_name; do
+      echo "Error: Plugin '$plugin_name' is declared by multiple sources: $(awk -F'\t' -v n="$plugin_name" '$1 == n {print $2}' "$declared_file" | paste -sd, -)" >&2
+    done <<< "$duplicated"
+    exit 1
+  fi
+
+  clashing=$(cut -f1 "$declared_file" | LC_ALL=C sort -u | LC_ALL=C comm -12 - <(LC_ALL=C sort -u "$local_plugins_file"))
+  if [ -n "$clashing" ]; then
+    while IFS= read -r plugin_name; do
+      echo "Error: Source plugin '$plugin_name' clashes with marketplace-local plugin $PLUGINS_DIR/$plugin_name" >&2
+    done <<< "$clashing"
+    exit 1
+  fi
+}
+
 mkdir -p "$PLUGINS_DIR" "$(dirname "$CLAUDE_MARKETPLACE_FILE")" "$(dirname "$CODEX_MARKETPLACE_FILE")"
+check_plugin_name_ownership
 remove_previous_generated_plugins
 
 for source_dir in "$SOURCES_DIR"/*/; do
@@ -312,6 +362,7 @@ for source_dir in "$SOURCES_DIR"/*/; do
       echo "Adding $skill_name to $plugin_name"
       rsync -a --delete "$source_dir/skills/$skill_name/" "$plugin_dir/skills/$skill_name/"
     done < "$skill_list_file"
+    stamp_codex_plugin_version "$plugin_dir"
 
     append_claude_marketplace_entry "$plugin_name" "$plugin_dir"
     append_codex_marketplace_entry "$plugin_name" "$plugin_dir" "$metadata_file" "$i"
@@ -337,6 +388,7 @@ for plugin_dir in "$PLUGINS_DIR"/*/; do
   is_generated_plugin "$plugin_name" && continue
   [ -f "$plugin_dir/.claude-plugin/plugin.json" ] || { echo "Error: Local plugin $plugin_name missing .claude-plugin/plugin.json" >&2; exit 1; }
   [ -f "$plugin_dir/.codex-plugin/plugin.json" ] || { echo "Error: Local plugin $plugin_name missing .codex-plugin/plugin.json" >&2; exit 1; }
+  stamp_codex_plugin_version "$plugin_dir"
   append_claude_marketplace_entry "$plugin_name" "$plugin_dir"
   append_codex_marketplace_entry "$plugin_name" "$plugin_dir"
 done

@@ -146,24 +146,42 @@ rm -rf "$SOURCES_DIR"
 mkdir -p "$(dirname "$SOURCES_DIR")"
 mv "$SYNCED_SOURCES_DIR" "$SOURCES_DIR"
 
+NEW_MANIFEST_FILE="$SYNC_DIR/sync-sources.json"
 jq -s \
   '{generated_by: "scripts/sync-sources.sh", sources: sort_by(.source)}' \
-  "$MANIFEST_ENTRIES_FILE" > "$MANIFEST_FILE"
+  "$MANIFEST_ENTRIES_FILE" > "$NEW_MANIFEST_FILE"
+
+# Upstream commit SHAs alone are provenance, not distributed content. When the
+# mirrored content and source configuration are unchanged, keep the previous
+# snapshot so a SHA-only upstream push does not produce a new release commit.
+manifest_without_commits() {
+  jq -S 'del(.sources[]?.commit)' "$1"
+}
 
 if git rev-parse --is-inside-work-tree &>/dev/null; then
-  UNTRACKED_CHANGES=$(git ls-files --others --exclude-standard -- "$SOURCES_DIR/" "$MANIFEST_FILE")
-  if git diff --quiet -- "$SOURCES_DIR/" "$MANIFEST_FILE" && [ -z "$UNTRACKED_CHANGES" ]; then
+  UNTRACKED_CHANGES=$(git ls-files --others --exclude-standard -- "$SOURCES_DIR/")
+  CONTENT_CHANGED=0
+  if ! git diff --quiet -- "$SOURCES_DIR/" || [ -n "$UNTRACKED_CHANGES" ]; then
+    CONTENT_CHANGED=1
+  elif [ ! -f "$MANIFEST_FILE" ] ||
+    [ "$(manifest_without_commits "$MANIFEST_FILE" 2>/dev/null || true)" != "$(manifest_without_commits "$NEW_MANIFEST_FILE")" ]; then
+    CONTENT_CHANGED=1
+  fi
+
+  if [ "$CONTENT_CHANGED" -eq 0 ]; then
     echo "No changes detected"
     exit 2
-  else
-    echo "Changes detected:"
-    git diff --stat -- "$SOURCES_DIR/" "$MANIFEST_FILE"
-    if [ -n "$UNTRACKED_CHANGES" ]; then
-      echo "$UNTRACKED_CHANGES" | sed 's/^/ new file: /'
-    fi
-    exit 0
   fi
+
+  mv "$NEW_MANIFEST_FILE" "$MANIFEST_FILE"
+  echo "Changes detected:"
+  git diff --stat -- "$SOURCES_DIR/" "$MANIFEST_FILE"
+  if [ -n "$UNTRACKED_CHANGES" ]; then
+    echo "$UNTRACKED_CHANGES" | sed 's/^/ new file: /'
+  fi
+  exit 0
 else
+  mv "$NEW_MANIFEST_FILE" "$MANIFEST_FILE"
   echo "Sync complete (not a git repo, skipping change detection)"
   exit 0
 fi
