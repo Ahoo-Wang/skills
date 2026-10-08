@@ -67,11 +67,17 @@ Source repositories are listed in `repos.json`:
 `scripts/sync-sources.sh` shallow-clones each source repo and mirrors
 `<skills_path>/skills/` plus `<skills_path>/plugins.json` into
 `sources/<source>/`. The GitHub Actions workflow
-`.github/workflows/sync-skills.yml` runs this sync:
-- when an upstream repo sends a `skills-updated` `repository_dispatch` event
-  (see `.github/upstream-templates/notify-skills-sync.yml`);
-- as a fallback every 6 hours at 02:17, 08:17, 14:17, and 20:17 UTC;
-- on manual `workflow_dispatch`.
+`.github/workflows/sync-skills.yml` runs this sync every 6 hours at 02:17,
+08:17, 14:17, and 20:17 UTC. To ship an upstream change sooner, trigger it
+manually:
+
+```bash
+gh workflow run sync-skills.yml --repo Ahoo-Wang/skills
+```
+
+Upstream repos do not notify this repository: a cross-repository trigger needs
+a credential for this repo stored in every upstream, which is not worth it for
+skill content that tolerates a few hours of delay.
 
 Only one sync runs at a time (`concurrency: sync-skills`); if `main` moves
 during a sync, the workflow rebases once before pushing.
@@ -175,9 +181,6 @@ Add or change an upstream skill:
 Add a new upstream source repo:
 - Add the source to `repos.json`.
 - Ensure the upstream repo has `skills/plugins.json`.
-- Copy `.github/upstream-templates/notify-skills-sync.yml` into the upstream
-  repo's `.github/workflows/` and add its `SKILLS_SYNC_TOKEN` secret, so
-  upstream skill changes trigger a sync immediately.
 - Run `npm run sync`.
 
 Add a marketplace-local plugin:

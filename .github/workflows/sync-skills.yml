@@ -3,14 +3,12 @@
 name: Sync Skills
 
 on:
-  # Upstream source repos send this event when their skills/ change, so syncs
-  # run when content changes instead of waiting for the next schedule.
-  repository_dispatch:
-    types: [skills-updated]
   schedule:
-    # Fallback every 6 hours at :17 (02:17, 08:17, 14:17, 20:17 UTC); the top of
-    # the hour is GitHub's busiest slot and scheduled runs there are delayed for hours.
+    # Every 6 hours at :17 (02:17, 08:17, 14:17, 20:17 UTC); the top of the
+    # hour is GitHub's busiest slot and scheduled runs there are delayed for hours.
     - cron: '17 2,8,14,20 * * *'
+  # Run manually when an upstream change should ship before the next schedule:
+  #   gh workflow run sync-skills.yml --repo Ahoo-Wang/skills
   workflow_dispatch:
 
 permissions:
