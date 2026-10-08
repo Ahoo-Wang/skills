@@ -3,13 +3,24 @@
 name: Sync Skills
 
 on:
+  # Upstream source repos send this event when their skills/ change, so syncs
+  # run when content changes instead of waiting for the next schedule.
+  repository_dispatch:
+    types: [skills-updated]
   schedule:
-    # Run every 6 hours (02:00, 08:00, 14:00, 20:00 UTC)
-    - cron: '0 2,8,14,20 * * *'
+    # Fallback every 6 hours at :17 (02:17, 08:17, 14:17, 20:17 UTC); the top of
+    # the hour is GitHub's busiest slot and scheduled runs there are delayed for hours.
+    - cron: '17 2,8,14,20 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
+
+# One sync at a time. A run that starts while another is in flight waits, and
+# GitHub keeps only the newest pending run, which syncs the latest upstreams.
+concurrency:
+  group: sync-skills
+  cancel-in-progress: false
 
 jobs:
   sync:
@@ -51,4 +62,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A sources/ .sync-sources.json plugins/ .claude-plugin/marketplace.json .agents/plugins/marketplace.json
           git commit -m "chore: sync skills from source repos [skip ci]"
-          git push
+          # main may have moved during the sync (for example a merged PR).
+          # Rebase once and retry; a conflict fails the run and the next sync
+          # regenerates from the new main.
+          if ! git push; then
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push
+          fi
