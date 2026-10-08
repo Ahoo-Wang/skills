@@ -20,12 +20,12 @@ Skills are automatically synced from source repositories **every 6 hours** via G
 
 | Plugin | Skills |
 |--------|--------|
-| `ahoo-wow-skills` | Intent-focused Wow development, review, debugging, and migration skills |
+| `ahoo-wow-skills` | Wow service development, review, debugging, and migration, plus TypeScript clients, data queries, and View Engine views |
 | `ahoo-coapi-skills` | CoApi Spring HTTP client skill |
 | `ahoo-cosec-skills` | CoSec integration, policy, matcher, and troubleshooting skills |
 | `ahoo-cosid-skills` | CosId ID generation and sharding skills |
 | `ahoo-fluent-assert-skills` | FluentAssert Kotlin assertion skill |
-| `ahoo-fetcher-skills` | Fetcher client, decorator, React, OpenAPI, storage, event bus, and streaming skills |
+| `ahoo-fetcher-skills` | Fetcher client, decorator, React, OpenAPI types, storage, event bus, LLM streaming, OpenAI, CoSec auth, and 6.0 migration skills |
 | `ahoo-cocache-skills` | CoCache distributed cache skill |
 | `ahoo-simba-skills` | Simba mutex, leader election, and testing skills |
 | `ahoo-agent-skills` | General agent prompt skills maintained directly here |
@@ -34,12 +34,12 @@ Skills are automatically synced from source repositories **every 6 hours** via G
 
 | Repository | Skills |
 |------------|--------|
-| [Wow](https://github.com/Ahoo-Wang/Wow) | [`wow-develop`](./sources/Wow/skills/wow-develop/SKILL.md), [`wow-review`](./sources/Wow/skills/wow-review/SKILL.md), [`wow-debug`](./sources/Wow/skills/wow-debug/SKILL.md), [`wow-migrate`](./sources/Wow/skills/wow-migrate/SKILL.md) |
+| [Wow](https://github.com/Ahoo-Wang/Wow) | [`wow-client`](./sources/Wow/skills/wow-client/SKILL.md), [`wow-data-query`](./sources/Wow/skills/wow-data-query/SKILL.md), [`wow-develop`](./sources/Wow/skills/wow-develop/SKILL.md), [`wow-migrate`](./sources/Wow/skills/wow-migrate/SKILL.md), [`wow-view-definition`](./sources/Wow/skills/wow-view-definition/SKILL.md), [`wow-view-host`](./sources/Wow/skills/wow-view-host/SKILL.md) |
 | [CoApi](https://github.com/Ahoo-Wang/CoApi) | [`coapi-developer`](./sources/CoApi/skills/coapi-developer/SKILL.md) |
 | [CoSec](https://github.com/Ahoo-Wang/CoSec) | [`cosec-custom-matcher`](./sources/CoSec/skills/cosec-custom-matcher/SKILL.md), [`cosec-integration`](./sources/CoSec/skills/cosec-integration/SKILL.md), [`cosec-policy-author`](./sources/CoSec/skills/cosec-policy-author/SKILL.md), [`cosec-troubleshoot`](./sources/CoSec/skills/cosec-troubleshoot/SKILL.md) |
 | [CosId](https://github.com/Ahoo-Wang/CosId) | [`cosid-manual-integration`](./sources/CosId/skills/cosid-manual-integration/SKILL.md), [`cosid-sharding`](./sources/CosId/skills/cosid-sharding/SKILL.md), [`cosid-spring-boot`](./sources/CosId/skills/cosid-spring-boot/SKILL.md), [`cosid-strategy-guide`](./sources/CosId/skills/cosid-strategy-guide/SKILL.md) |
 | [FluentAssert](https://github.com/Ahoo-Wang/FluentAssert) | [`fluent-assert`](./sources/FluentAssert/skills/fluent-assert/SKILL.md) |
-| [Fetcher](https://github.com/Ahoo-Wang/fetcher) | [`fetcher-cosec-auth`](./sources/fetcher/skills/fetcher-cosec-auth/SKILL.md), [`fetcher-decorator-service`](./sources/fetcher/skills/fetcher-decorator-service/SKILL.md), [`fetcher-eventbus`](./sources/fetcher/skills/fetcher-eventbus/SKILL.md), [`fetcher-integration`](./sources/fetcher/skills/fetcher-integration/SKILL.md), [`fetcher-llm-streaming`](./sources/fetcher/skills/fetcher-llm-streaming/SKILL.md), [`fetcher-openai-client`](./sources/fetcher/skills/fetcher-openai-client/SKILL.md), [`fetcher-openapi-generator`](./sources/fetcher/skills/fetcher-openapi-generator/SKILL.md), [`fetcher-openapi-types`](./sources/fetcher/skills/fetcher-openapi-types/SKILL.md), [`fetcher-react-hooks`](./sources/fetcher/skills/fetcher-react-hooks/SKILL.md), [`fetcher-storage`](./sources/fetcher/skills/fetcher-storage/SKILL.md), [`fetcher-viewer-components`](./sources/fetcher/skills/fetcher-viewer-components/SKILL.md), [`fetcher-wow-cqrs`](./sources/fetcher/skills/fetcher-wow-cqrs/SKILL.md) |
+| [Fetcher](https://github.com/Ahoo-Wang/fetcher) | [`fetcher-cosec-auth`](./sources/fetcher/skills/fetcher-cosec-auth/SKILL.md), [`fetcher-decorator-service`](./sources/fetcher/skills/fetcher-decorator-service/SKILL.md), [`fetcher-eventbus`](./sources/fetcher/skills/fetcher-eventbus/SKILL.md), [`fetcher-integration`](./sources/fetcher/skills/fetcher-integration/SKILL.md), [`fetcher-llm-streaming`](./sources/fetcher/skills/fetcher-llm-streaming/SKILL.md), [`fetcher-openai-client`](./sources/fetcher/skills/fetcher-openai-client/SKILL.md), [`fetcher-openapi-types`](./sources/fetcher/skills/fetcher-openapi-types/SKILL.md), [`fetcher-react-hooks`](./sources/fetcher/skills/fetcher-react-hooks/SKILL.md), [`fetcher-storage`](./sources/fetcher/skills/fetcher-storage/SKILL.md), [`fetcher-v6-migration`](./sources/fetcher/skills/fetcher-v6-migration/SKILL.md) |
 | [CoCache](https://github.com/Ahoo-Wang/CoCache) | [`cocache`](./sources/CoCache/skills/cocache/SKILL.md) |
 | [Simba](https://github.com/Ahoo-Wang/Simba) | [`simba`](./sources/Simba/skills/simba/SKILL.md), [`simba-testing`](./sources/Simba/skills/simba-testing/SKILL.md) |
 | Local plugin | [`agent-system-prompt`](./plugins/ahoo-agent-skills/skills/agent-system-prompt/SKILL.md) |
@@ -80,7 +80,7 @@ skill content changes, and each such commit is a new plugin version, so run
 - `scripts/validate-skills.sh` checks source mirrors, generated plugin copies, local plugins, and marketplace consistency
 - `.github/workflows/ci.yml` validates pull requests with `npm test` and `git diff --check`
 
-To add a new source repo, edit `repos.json` and push.
+To add a new source repo, make sure it publishes `skills/plugins.json`, then add it to `repos.json` and push.
 
 ## Skill Structure
 
