@@ -1,7 +1,7 @@
 {
   "name": "ahoo-coapi-skills",
   "description": "CoApi skills for building and testing Spring HTTP Interface client proxies with reactive WebClient, synchronous RestClient, and Spring Cloud LoadBalancer support.",
-  "version": "1.0.0+cf8f190afa5c",
+  "version": "1.0.0+e93c833fd2e4",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"

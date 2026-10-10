@@ -1,6 +1,6 @@
 ---
 name: simba
-description: Guide for using the Simba distributed mutex and leader-election library in JVM projects. Use when creating distributed locks, implementing leader-only work, configuring Simba backends (JDBC/MySQL, Redis, Zookeeper), writing MutexContender or AbstractScheduler subclasses, using SimbaLocker, integrating Simba with Spring Boot, choosing backends, or tuning TTL/transition settings. For test-focused work, use the simba-testing skill as well.
+description: Guide for using the Simba distributed mutex and leader-election library in JVM projects. Use when creating distributed locks, implementing leader-only work, configuring Simba backends (JDBC/MySQL, Redis, Zookeeper), writing MutexContender implementations, SimbaScheduler / @SimbaScheduled leader-only jobs or AbstractScheduler subclasses, using SimbaLocker, integrating Simba with Spring Boot, choosing backends, or tuning TTL/transition settings. For test-focused work, use the simba-testing skill as well.
 ---
 
 # Simba — Distributed Mutex Library
@@ -11,7 +11,7 @@ Simba provides distributed mutex (leader election) for JVM applications with thr
 
 Start by identifying four things:
 1. Which backend the project already runs: Redis, JDBC/MySQL, or Zookeeper.
-2. Which usage pattern fits the job: `MutexContender`, `SimbaLocker`, or `AbstractScheduler`.
+2. Which usage pattern fits the job: `MutexContender`, `SimbaLocker`, or `SimbaScheduler` (`AbstractScheduler` for the subclassing style).
 3. Who owns lifecycle: explicit `start()`/`stop()`, Kotlin `.use {}`, Java try-with-resources, or Spring `SmartLifecycle`.
 4. Whether the task is usage/configuration work or test work. For test-heavy tasks, also use `simba-testing`.
 
@@ -34,7 +34,7 @@ Decision heuristic: If the project has Redis, use Redis. If it has Zookeeper/Cur
 Import the Simba BOM first so every module resolves to the same released version. The Spring examples assume Spring Boot 4.1 dependency management is enabled.
 
 ```kotlin
-implementation(platform("me.ahoo.simba:simba-bom:4.0.0"))
+implementation(platform("me.ahoo.simba:simba-bom:4.3.0"))
 ```
 
 Use a Gradle feature capability from `simba-spring-boot-starter` so the application pulls only one backend.
@@ -157,9 +157,28 @@ Key points:
 - `close()` releases the lock. Always use try-with-resources / `.use {}` to guarantee release.
 - Internally creates a `MutexContendService`; the thread parks until `onAcquired` fires.
 
-### Pattern 3: AbstractScheduler (leader-only periodic task)
+### Pattern 3: SimbaScheduler (leader-only periodic task)
 
 Use when: the application needs a periodic task that should run on exactly one instance at a time.
+
+```kotlin
+import me.ahoo.simba.schedule.ScheduleConfig
+import me.ahoo.simba.schedule.SimbaScheduler
+
+val scheduler = SimbaScheduler(
+    mutex = "my-scheduled-task",
+    contendServiceFactory = mutexContendServiceFactory,
+    config = ScheduleConfig.delay(Duration.ZERO, Duration.ofMinutes(1))
+) { context ->
+    // Runs only while this node leads; pass context.fencingToken to protected resources.
+    doWork(context.fencingToken)
+}
+scheduler.start()
+// on shutdown
+scheduler.close()
+```
+
+The subclassing style below (`AbstractScheduler`) has the same semantics.
 
 ```kotlin
 import me.ahoo.simba.core.MutexContendServiceFactory
@@ -190,26 +209,19 @@ scheduler.start()
 scheduler.stop()
 ```
 
-For Spring Boot, implement `SmartLifecycle` to auto-start/stop:
+For Spring Boot, annotate a bean method; the starter starts it after refresh and stops it on shutdown:
 ```kotlin
-import me.ahoo.simba.core.MutexContendServiceFactory
-import me.ahoo.simba.schedule.AbstractScheduler
-import me.ahoo.simba.schedule.ScheduleConfig
-import org.springframework.context.SmartLifecycle
+import me.ahoo.simba.schedule.ScheduleContext
+import me.ahoo.simba.spring.boot.starter.scheduling.SimbaScheduled
 import org.springframework.stereotype.Service
-import java.time.Duration
 
 @Service
-class MyScheduler(mutexContendServiceFactory: MutexContendServiceFactory) :
-    AbstractScheduler(mutex = "my-task", mutexContendServiceFactory),
-    SmartLifecycle {
-
-    override val config = ScheduleConfig.delay(Duration.ZERO, Duration.ofSeconds(30))
-    override val worker = "my-scheduler"
-    override fun work() { /* ... */ }
-    override fun isRunning(): Boolean = running
+class MyJobs {
+    @SimbaScheduled(mutex = "my-task", fixedDelay = "30s")
+    fun work(context: ScheduleContext) { /* ... */ }
 }
 ```
+`SimbaScheduler` beans are started and stopped by the starter as well; do not implement `SmartLifecycle` by hand.
 
 Key points:
 - `ScheduleConfig.delay(initial, period)` = fixed-delay (waits `period` after each execution ends).
