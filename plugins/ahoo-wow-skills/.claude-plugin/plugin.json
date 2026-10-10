@@ -1,7 +1,7 @@
 {
   "name": "ahoo-wow-skills",
   "description": "Agent Skills for downstream applications built on Wow, the reactive DDD, Event Sourcing and CQRS framework: building, reviewing and debugging Wow services, breaking migrations, TypeScript clients generated from OpenAPI or written by hand, answering business data questions from a running service's read-only queries, and writing and hosting Wow View Engine views.",
-  "version": "1.0.0+34d98252d39d",
+  "version": "1.0.0+a48bd663ce68",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"

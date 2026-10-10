@@ -34,7 +34,7 @@ Decision heuristic: If the project has Redis, use Redis. If it has Zookeeper/Cur
 Import the Simba BOM first so every module resolves to the same released version. The Spring examples assume Spring Boot 4.1 dependency management is enabled.
 
 ```kotlin
-implementation(platform("me.ahoo.simba:simba-bom:3.1.3"))
+implementation(platform("me.ahoo.simba:simba-bom:4.0.0"))
 ```
 
 Use a Gradle feature capability from `simba-spring-boot-starter` so the application pulls only one backend.
@@ -119,7 +119,7 @@ Key points to explain:
 - `contenderId` defaults to `"{counter}:{pid}@{hostAddress}"` via `ContenderIdGenerator.HOST`. Override to use `ContenderIdGenerator.UUID` or a custom ID.
 - For JDBC, keep `mutex` at most 66 characters and `contenderId` at most 128 characters to fit the schema.
 - For Redis, never include the `@@` wire delimiter in a custom `contenderId`; owner-event parsing requires exactly two fields.
-- `onAcquired` / `onReleased` notifications are serialized. Normal notifications use the configured `handleExecutor`; JDBC/Redis defaults and Spring Boot auto-configuration use `ForkJoinPool.commonPool()`, while a direct executor may run them on the caller thread. When stopping an owned service, `onReleased` may run on the executor or the `stop()` caller, and `stop()` waits for it to complete. Keep callbacks short and do not rely on thread affinity.
+- `onAcquired` / `onReleased` notifications are serialized. Normal notifications use the configured `handleExecutor`; JDBC/Redis factory defaults use `ForkJoinPool.commonPool()`, while Spring Boot auto-configuration uses the dedicated `simbaHandleExecutor` bean (replace it by defining a bean with that name), while a direct executor may run them on the caller thread. When stopping an owned service, `onReleased` may run on the executor or the `stop()` caller, and `stop()` waits for it to complete. Keep callbacks short and do not rely on thread affinity.
 - The service must be started with `start()` and stopped with `stop()` when done.
 
 ### Pattern 2: SimbaLocker (RAII-style blocking lock)
@@ -239,7 +239,7 @@ simba:
     enabled: true                  # enable Zookeeper backend (default: true)
 ```
 
-Enable exactly one backend per application. The auto-configurations define no supported cross-backend precedence: with multiple backend modules, one factory may silently back off or Spring may expose multiple `MutexContendServiceFactory` beans. Disable unused backends instead of relying on evaluation order; use `@Primary` or `@Qualifier` only when multiple factories are intentional.
+Use one backend per application. With a single backend module nothing else is needed; with several active modules set `simba.backend: jdbc|redis|zookeeper` (or disable the others with `simba.<backend>.enabled: false`), otherwise startup fails listing the active backends.
 
 ### TTL and Transition Tuning
 
@@ -272,7 +272,7 @@ For tests, use the `simba-testing` skill. In short:
 
 1. **Forgetting to stop the service**: Always call `stop()` or `close()` — otherwise the contender keeps polling/subscribing and may hold the lock.
 2. **Blocking callbacks**: Long-running callbacks delay later notifications for that service. Queued callbacks occupy a shared worker with the default executor or block the producer with a direct executor; release callbacks can delay `stop()` regardless of which thread executes them.
-3. **Multiple backends enabled**: The result depends on condition evaluation and inferred bean return types; a backend may silently win or multiple factories may be registered. Enable exactly one backend unless ambiguity is intentional.
-4. **Clock skew with JDBC**: The JDBC backend uses DB server time (`currentDbAt`) to avoid clock skew across application nodes. Ensure all nodes point to the same DB.
-5. **Redis release vs expiration**: Explicit release wakes the oldest queued contender through its personal Pub/Sub channel. Natural key expiration publishes nothing; contenders retry on their existing schedule around hard expiry.
+3. **Multiple backends active**: Startup fails until `simba.backend` names one of them or the others are disabled.
+4. **Clock skew with JDBC**: The JDBC backend uses DB server time (`MutexOwner.observedAt` from `current_timestamp(3)`) to avoid clock skew across application nodes. Ensure all nodes point to the same DB.
+5. **Redis release vs expiration**: Explicit release broadcasts `released` on the mutex channel, so every live contender contends immediately. Natural key expiration publishes nothing; contenders retry on their existing schedule around hard expiry.
 6. **Zookeeper path conflicts**: The Zookeeper backend creates paths at `/simba/{mutex}`. Don't use the same mutex name for unrelated locks.
