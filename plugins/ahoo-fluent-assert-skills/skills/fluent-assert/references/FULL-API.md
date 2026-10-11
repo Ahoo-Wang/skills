@@ -14,7 +14,7 @@
 ### Gradle (Kotlin DSL)
 
 ```kotlin
-testImplementation("me.ahoo.test:fluent-assert-core:1.1.0")
+testImplementation("me.ahoo.test:fluent-assert-core:1.2.1")
 ```
 
 ### Maven
@@ -23,12 +23,12 @@ testImplementation("me.ahoo.test:fluent-assert-core:1.1.0")
 <dependency>
     <groupId>me.ahoo.test</groupId>
     <artifactId>fluent-assert-core</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.1</version>
     <scope>test</scope>
 </dependency>
 ```
 
-FluentAssert requires Java 17 or later.
+FluentAssert requires JDK 17+ and a Kotlin 2.1+ compiler.
 
 ## Imports
 
@@ -54,12 +54,16 @@ All value receivers below are nullable. `AssertProvider<A>.assert()` is the only
 | `Long?` | `LongAssert` |
 | `Float?` | `FloatAssert` |
 | `Double?` | `DoubleAssert` |
+| `Char?` | `CharacterAssert` |
 | `BigDecimal?` | `BigDecimalAssert` |
+| `BigInteger?` | `BigIntegerAssert` |
 | `String?` | `StringAssert` |
+| `StringBuilder?` / `StringBuffer?` | `CharSequenceAssert` |
 | `Iterable<T>?` | `IterableAssert<T>` |
 | `Iterator<T>?` | `IteratorAssert<T>` |
 | `Collection<T>?` | `CollectionAssert<T>` |
 | `Array<T>?` | `ObjectArrayAssert<T>` |
+| `BooleanArray?` / `ByteArray?` / `ShortArray?` / `IntArray?` / `LongArray?` / `FloatArray?` / `DoubleArray?` / `CharArray?` | `BooleanArrayAssert` / `ByteArrayAssert` / `ShortArrayAssert` / `IntArrayAssert` / `LongArrayAssert` / `FloatArrayAssert` / `DoubleArrayAssert` / `CharArrayAssert` |
 | `List<T>?` | `ListAssert<T>` |
 | `Optional<T>?` | `OptionalAssert<T>` |
 | `Map<K, V>?` | `MapAssert<K, V>` |
@@ -93,6 +97,7 @@ All value receivers below are nullable. `AssertProvider<A>.assert()` is the only
 | `URL?` | `UrlAssert` |
 | `URI?` | `UriAssert` |
 | `Future<V>?` | `FutureAssert<V>` |
+| `ScheduledFuture<V>?` | `FutureAssert<V>` |
 | `CompletableFuture<V>?` | `CompletableFutureAssert<V>` |
 | `CompletionStage<V>?` | `CompletableFutureAssert<V>` |
 | `Predicate<T>?` | `PredicateAssert<T>` |
@@ -103,12 +108,13 @@ All value receivers below are nullable. `AssertProvider<A>.assert()` is the only
 
 Kotlin selects an extension from the receiver's static type. Keep examples and fixes aligned with that type.
 
-- Convert primitive arrays before using collection assertions. `IntArray`, `LongArray`, and the other primitive arrays are not `Array<T>` and resolve to `ObjectAssert`; use `ints.toList().assert()` or `ints.toTypedArray().assert()`.
+- Call `.assert()` directly on primitive arrays. `IntArray`, `LongArray`, and the other primitive arrays resolve to their AssertJ `XxxArrayAssert` (for example `ints.assert().hasSize(3).contains(42)`); no conversion is needed.
 - Box primitive streams before using stream assertions. Only `Stream<T>` has a dedicated overload; `IntStream`, `LongStream`, and `DoubleStream` resolve to `ObjectAssert`, so use `stream.boxed().assert()`.
-- Convert non-`String` text before using string assertions. A `CharSequence` receiver resolves to `ObjectAssert`, while `StringBuilder` resolves to `GenericComparableAssert<StringBuilder>`; use `text.toString().assert()`.
+- Convert statically `CharSequence`-typed text before using string assertions: it resolves to `ObjectAssert`, so use `text.toString().assert()`. `StringBuilder` and `StringBuffer` resolve to `CharSequenceAssert` and need no conversion.
 - Keep a receiver statically typed as `Iterable<T>` to exercise `IterableAssert`; a `List<T>` receiver resolves to `ListAssert`.
 - Keep a receiver statically typed as `Temporal` to exercise `TemporalAssert`; concrete time types resolve to their dedicated assertion classes.
 - Expect `CompletionStage<V>.assert()` to return `CompletableFutureAssert<V>`; AssertJ has no `CompletionStageAssert`.
+- Disambiguate custom types that implement `Comparable` and another supported interface (`Iterable`, `Map`, `Future`, `Throwable`, ...). `value.assert()` is an overload-resolution ambiguity compile error; declare the receiver with the intended static type, e.g. `val items: Iterable<Item> = value; items.assert()`. `ScheduledFuture` has a dedicated overload and is not affected.
 - Expect `String.assert()` to return `StringAssert`, not `GenericComparableAssert`, even though `String` is comparable.
 
 ## Special APIs
