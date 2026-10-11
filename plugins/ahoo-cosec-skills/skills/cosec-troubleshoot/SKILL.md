@@ -5,6 +5,8 @@ description: Diagnose CoSec authentication and authorization failures, including
 
 # CoSec Troubleshooting
 
+The human-facing guide is https://cosec.ahoo.me/guide/troubleshooting; this skill adds the agent workflow.
+
 Find the first incorrect transition from request parsing to authentication, policy loading, matching, and response mapping. Gather evidence before proposing a policy or code change.
 
 ## Start with observable facts
@@ -30,7 +32,7 @@ logging:
 | 401 | Authorization denied while the parsed principal is anonymous; invalid/expired tokens also fall back to anonymous and preserve the token reason |
 | 403 | An authenticated principal was denied, or a regex matcher timed out and failed closed |
 | 429 | A local or Redis rate limiter threw `TooManyRequestsException` |
-| 500 | Unexpected authorization error; inspect the server exception |
+| 500 | Unexpected authorization error, including Redis being unavailable for policy/permission reads (those caches fail closed); inspect the server exception |
 
 The authorization result alone does not choose 401 versus 403; the filter maps a denied anonymous principal to 401 and a denied authenticated principal to 403.
 
@@ -38,20 +40,20 @@ The authorization result alone does not choose 401 versus 403; the filter maps a
 
 `SimpleAuthorization` evaluates:
 
-1. Root principal ID (`cosec` by default, overridden by JVM system property `cosec.root`) → allow.
+1. Root principal ID (`cosec` by default, overridden by JVM system property `cosec.root`) → allow, unless `cosec.authorization.root-enabled=false` or a custom `RootPrincipalMatcher` bean decides otherwise.
 2. Blacklist → explicit deny.
 3. Global policies.
 4. Principal-attached policies.
 5. Role permissions for `request.appId` + `request.spaceId`.
 6. No match → implicit deny.
 
-Each policy tier evaluates matched policy-level conditions once, pools all statements, checks every deny before any allow, and stops at the first tier with a result. A deny only overrides allows in the same tier; a global allow prevents later principal or role denies from running.
+Each policy tier evaluates matched policy-level conditions once, pools all statements, and checks every deny before any allow. Tiers are combined deny-first (CoSec 6+): an explicit deny in any tier wins over an allow from any other tier, so a principal or role deny overrides a global allow. Only if no tier denies does a matched allow grant access.
 
 ## Symptom guide
 
 ### Unexpected 401
 
-- Check whether the request actually carried a bearer token and whether parsing produced an authenticated principal.
+- Check whether the request actually carried a bearer token and whether parsing produced an authenticated principal. Tokens are read from the `Authorization` header or `authorization` cookie; the `authorization` query parameter is ignored unless `cosec.authorization.allow-query-token=true` (default `false` since CoSec 6).
 - Match `cosec.jwt.algorithm` and secret to the issuer; only HMAC256/384/512 are supported.
 - Check expiration and the response reason (`Token Expired` versus `Token Invalid`).
 - If revocation is enabled, verify the cache capability supplied a real Redis-backed `TokenStore`; otherwise the starter warns that logout is ineffective.
@@ -68,7 +70,7 @@ Each policy tier evaluates matched policy-level conditions once, pools all state
 ### Request allowed unexpectedly
 
 - Check root bypass first.
-- Find the first matched tier. A broad global allow short-circuits stricter principal and role rules.
+- Find which tier matched an allow (the debug log and audit event name the policy statement or role permission). If you expected a deny, check that the deny's action and condition both match: a matched deny in any tier would have won.
 - Verify the deny action and condition both match; array order cannot make an allow beat a same-tier deny.
 - Confirm the intended policy was loaded rather than skipped or shadowed by a duplicate ID.
 
@@ -92,7 +94,7 @@ Each policy tier evaluates matched policy-level conditions once, pools all state
 - `rateLimiter` and `groupedRateLimiter` are in-memory and per JVM.
 - `redisRateLimiter` and `redisGroupedRateLimiter` are cluster-wide and require cache support plus `StringRedisTemplate`.
 - Redis limiter outages fail open by default. Set the matcher's `strictFailure: true` only when availability loss should return 429.
-- Check `cosec.limiter.key-prefix`, `windowSeconds`, grouping `part`, and whether multiple policies intentionally share an identical quota configuration.
+- Check `cosec.limiter.key-prefix`, `windowSeconds`, and grouping `part`. Redis limiters with identical `permitsPerSecond`, `windowSeconds`, and `strictFailure` share one Redis counter even across policies, so an unrelated statement can consume the same quota.
 
 ## Reproduce narrowly
 

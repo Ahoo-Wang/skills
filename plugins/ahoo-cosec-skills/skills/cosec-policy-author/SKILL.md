@@ -37,17 +37,17 @@ Produce the smallest policy that expresses the requested access rule. Establish 
 }
 ```
 
-Use the full field set above so both runtime deserialization and the bundled JSON Schema accept the policy. Runtime requires `id`, `name`, `type`, and `tenantId`, while the current schema requires `category`, `name`, `description`, `tenantId`, `type`, and `statements` but omits `id`. A statement requires `action`; `effect` defaults to `allow` and `condition` defaults to match-all. Local files normally live under `src/main/resources/cosec-policy/` and match `*-policy.json`.
+Runtime deserialization and the bundled JSON Schema both require `id`, `name`, `type`, and `tenantId`; include `category`, `description`, and `statements` anyway for readability. A statement requires `action`; `effect` defaults to `allow` and `condition` defaults to match-all. Local files normally live under `src/main/resources/cosec-policy/` and match `*-policy.json`.
 
 ## Evaluation semantics
 
-Authorization evaluates in tiers: root bypass, blacklist, global policies, principal-attached policies, then role permissions. The first tier that produces a result stops evaluation.
+Authorization evaluates in tiers: root bypass, blacklist, global policies, principal-attached policies, then role permissions. The policy and permission tiers are combined deny-first (CoSec 6+): an explicit deny in any tier ends evaluation, and an allow is returned only after every tier has had the chance to deny.
 
 Within a policy tier, CoSec first evaluates every matched policy-level condition, pools their statements, checks all `deny` statements, then all `allow` statements. Therefore:
 
 - a matching deny overrides every allow in the same tier, regardless of file or array order;
 - a false policy-level condition skips that policy; it does not deny the request;
-- an allow in an earlier tier prevents later tiers from running, so a principal or role deny cannot override a global allow;
+- a deny in any tier overrides an allow from any other tier, so a principal or role deny overrides a global allow;
 - if no statement in any tier matches, the result is implicit deny.
 
 Order deny statements before allow statements for readability, not behavior.
@@ -81,9 +81,9 @@ Order deny statements before allow statements for readability, not behavior.
 | `authenticated` | none | Require a non-anonymous principal |
 | `inRole` | `value` | Match a principal role |
 | `inTenant` | `value`: `default`, `user`, or `platform` | Match tenant type, not tenant ID |
-| `eq`, `contains`, `startsWith`, `endsWith` | `part`, `value` | Compare an extracted string |
+| `eq`, `contains`, `startsWith`, `endsWith` | `part`, `value`; optional `ignoreCase` | Compare an extracted string; only `eq.value` accepts a `#{...}` SpEL template |
 | `in` | `part`, array `value` | Match one of several values |
-| `regular` | `part`, `pattern` | Regex match with a time budget |
+| `regular` | `part`, `pattern`; optional `timeout` (ms, default 1000) | Case-insensitive whole-value regex match with a time budget |
 | `path` | `part`, `pattern`, optional `options` | Spring path-pattern match on an extracted value |
 | `bool` | optional sibling arrays `and`, `or` | Combine conditions |
 | `spel` | `expression` | Evaluate against root properties `request` and `context` |
@@ -93,7 +93,7 @@ Order deny statements before allow statements for readability, not behavior.
 | `redisRateLimiter` | `permitsPerSecond`; optional `windowSeconds`, `strictFailure` | Cluster-wide Redis limit |
 | `redisGroupedRateLimiter` | `part`, `permitsPerSecond`; optional `windowSeconds`, `strictFailure` | Cluster-wide Redis per-part limit |
 
-The Redis types exist only when cache support and `StringRedisTemplate` activate their Spring factories. They use an atomic sliding window, return 429 when exceeded, fail open on Redis errors by default, and fail closed when `strictFailure` is `true`. The auto-configured local-policy lifecycle starts after matcher registration, so bootstrap files may use them. The in-memory limiters also return 429 when exceeded.
+The Redis types exist only when cache support and `StringRedisTemplate` activate their Spring factories. They use an atomic sliding window allowing `permitsPerSecond × windowSeconds` requests per window, return 429 when exceeded, fail open on Redis errors by default, and return 429 on Redis errors when `strictFailure` is `true`. Their Redis counter is keyed by configuration (`permitsPerSecond`, `windowSeconds`, `strictFailure`) plus the grouped `part` value, so limiters with identical settings share one quota even across policies; vary a setting to separate them. The auto-configured local-policy lifecycle starts after matcher registration, so bootstrap files may use them. The in-memory limiters also return 429 when exceeded.
 
 `negate` is handled only by matchers based on `AbstractConditionMatcher`; the ungrouped `rateLimiter` and `redisRateLimiter` do not support it. Avoid negating any limiter because an exceeded quota throws before boolean negation.
 
@@ -123,13 +123,13 @@ All `and` entries must match. If `or` is present, at least one entry must match.
 - `request.header.{name}`, `request.attributes.{key}`, `request.path.var.{name}`
 - `context.tenantId`, `context.principal.id`, `context.principal.attributes.{key}`
 
-Use singular `request.header`, and use `request.path.var.id` only after the action matcher captures `{id}`. An unsupported part throws during evaluation.
+Use singular `request.header`, and use `request.path.var.id` only after the action matcher captures `{id}`. A part absent from the request reads as an empty string; an unsupported part name throws during evaluation (HTTP 500), not at load time. Never base a deny on a header the client can omit or forge.
 
 ## Security review
 
 Check the final policy for:
 
-- accidental broad global allows that short-circuit stricter principal or role tiers;
+- broad global allows that grant more than intended to everyone (a principal or role deny still overrides them, but nothing else will);
 - deny conditions whose negation is reversed;
 - missing HTTP method constraints on state-changing endpoints;
 - trusted-proxy assumptions behind `request.remoteIp`;
@@ -138,6 +138,8 @@ Check the final policy for:
 - local limiters used where a cluster-wide quota is required.
 
 ## Validation
+
+The human-facing reference is https://cosec.ahoo.me/guide/policies.
 
 Validate with CoSec's runtime parser, not JSON syntax alone. In a CoSec-based test:
 
