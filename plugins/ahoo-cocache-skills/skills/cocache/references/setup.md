@@ -10,7 +10,7 @@
 - [Without Spring Boot](#without-spring-boot)
 - [Single-Instance Setup (No Redis)](#single-instance-setup-no-redis)
 - [Spring Cache Bridge](#spring-cache-bridge)
-- [Actuator Endpoints](#actuator-endpoints)
+- [Actuator Endpoints](#actuator-endpoints) (and metrics)
 - [Disabling CoCache](#disabling-cocache)
 
 ## Dependencies
@@ -152,6 +152,8 @@ TTL guidance (all in seconds):
 - `ttl` caps how long a missed invalidation can survive (cache-aside races are only repaired by expiry). Keep it finite; `TtlAt.FOREVER` disables expiry.
 - `ttlAmplitude` spreads expirations to avoid avalanches (about 2–10 % of `ttl`).
 - `missingTtl` caps how long a newly created row stays invisible after a "not found" was cached. Keep it short.
+- `clientSideTtl` (default `0` = unlimited) caps how long an L2 copy lives before it is refilled from L1, which bounds staleness when an eviction event is lost.
+- `refreshAhead` (default `0` = off) reloads a value in the background once it has that many seconds left, so hot keys don't stall on expiry. It must be less than `ttl` and `clientSideTtl`.
 - L2 entries expire at their own `ttlAt`; `@CaffeineCache` only bounds size and idle time.
 
 ```kotlin
@@ -333,6 +335,8 @@ When Spring Actuator is on the classpath:
 | `/actuator/cocacheClient/{name}` | GET | Client-side cache size |
 | `/actuator/cocacheClient/{name}/{key}` | GET | Get a client-side cache entry |
 | `/actuator/cocacheClient/{name}` | DELETE | Clear a client-side cache |
+
+With Micrometer on the classpath, the starter also binds `cocache.*` meters tagged by `cache`: `hits{level=l2|l1}`, `misses`, `loads` (timer), `load.failures`, `filtered`, `stale.discards`, `evictions.received`, `resets`, `l2.size`, plus the untagged `eviction.publish.failures`. `hits{level=l2}` is recorded only with `cocache.metrics.client-side-hits=true` (off by default: it costs 8–15% of L2 hit throughput). The L2 hit ratio is `hits{level=l2} / (hits{level=l2} + misses)`.
 
 ## Disabling CoCache
 
