@@ -1,7 +1,7 @@
 {
   "name": "ahoo-cosec-skills",
   "description": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, authoring authorization policies, extending matchers, and troubleshooting access decisions.",
-  "version": "1.0.0+afa745db4516",
+  "version": "1.0.0+69f5dc747782",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"

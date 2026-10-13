@@ -24,9 +24,10 @@ The starter already brings `cosec-core` and `cosec-jwt`. Prefer its Gradle featu
 | Spring WebFlux | `webflux-support` | `cosec-webflux` |
 | Spring Cloud Gateway | `gateway-support` | `cosec-gateway` |
 | Social OAuth | `oauth-support` | `cosec-social` |
-| Redis cache, revocation, distributed limiters | `cache-support` | `cosec-cocache` |
+| Redis cache, revocation, cluster-wide rate limits | `cache-support` | `cosec-cocache` |
 | IP region | `ip2region-support` | `cosec-ip2region` |
 | OpenTelemetry | `opentelemetry-support` | `cosec-opentelemetry` |
+| Micrometer metrics | `micrometer-support` | `cosec-micrometer` |
 | OpenAPI | `openapi-support` | `cosec-openapi` |
 | Kafka audit sink | `kafka-support` | `cosec-kafka` |
 
@@ -87,8 +88,10 @@ Use `$cosec-policy-author` when the requested policy is more than this bootstrap
 
 - `local-policy.init-repository` is `false` by default. The bootstrap above enables it because the repository is not otherwise populated from local files. Disable it only when policies are already stored elsewhere; use `force-refresh` only when overwriting repository state is intended.
 - `cosec.jwt.token-revocation.enabled=true` needs a real `TokenStore`; the cache capability supplies the Redis-backed implementation. Without it, logout does not revoke tokens and the starter logs a warning.
-- The cache capability and a `StringRedisTemplate` enable `redisRateLimiter` and `redisGroupedRateLimiter`. The auto-configured local-policy lifecycle starts after `MatcherFactoryRegister`, so bootstrap files may use these types. Configure their shared prefix with `cosec.limiter.key-prefix`; use per-policy `strictFailure` when Redis outage behavior must fail closed.
+- Rate limit rules load from `cosec.limiter.locations` (default `classpath:cosec-rate-limit/*-rate-limit.json`); an unreadable rule fails startup. The starter wraps its auto-configured `Authorization` with `RateLimitingAuthorization`. With the cache capability and a `StringRedisTemplate` the counters are cluster-wide in Redis (prefix `cosec.limiter.key-prefix`), otherwise per JVM. Use per-rule `strictFailure` when Redis outage behavior must fail closed; `cosec.limiter.enabled=false` turns rate limiting off. The `rateLimiter`/`redisRateLimiter` policy conditions were removed in 6.1.0; migrate them to rules.
 - With the starter's auto-configured `Authorization`, audit logging is enabled by default. The logging sink records denies at WARN and allows at DEBUG under `me.ahoo.cosec.audit`; the Kafka capability replaces it when a unique Kafka template is available. A custom `Authorization` bean is not wrapped automatically, so compose it with `AuditingAuthorization` explicitly.
+- To decide in code (UI buttons, message consumers), inject `AuthorizationChecker` and call `check(context, path, method)` or `checkAll(context, mapOf(key to CheckRequest(...)))`. Checks reuse the policies, are not audited or rate limited, inherit the current request's app, space and IP, and deny on errors; keep enforcing on the real request.
+- For machine clients, enable `cosec.api-key.enabled=true` and configure `cosec.api-key.keys[n]` with `id`, `hash` (SHA-256 hex from `ApiKeys.hash(key)`; never the key itself), `principal-id`, `roles`, `policies`, optional `tenant-id` and `expires-at`. Keys arrive in `X-API-Key` (configurable) and take precedence over JWTs; invalid keys deny with `401 Token Invalid`. With `cache-support`, `cosec.api-key.store=redis` shares keys across instances; issue and revoke them through the `RedisApiKeyStore` bean (`issue`, `save`, `revoke`). A custom `ApiKeyStore` that does I/O needs `cosec.api-key.store-blocking=true`.
 - Set `cosec.authorization.remote-ip.max-trusted-index` to the real trusted-proxy depth. `0` ignores `X-Forwarded-For`.
 
 ## Verification
@@ -99,7 +102,7 @@ Start the application or run its context test, then verify:
 - an allowed anonymous request succeeds;
 - an unmatched anonymous request returns 401;
 - an authenticated but denied request returns 403;
-- a tripped limiter returns 429;
+- a request over a rate limit rule returns 429 with `Retry-After` and `RateLimit-*` headers;
 - Redis-backed features work from more than one instance when cluster-wide behavior is required.
 
 In a CoSec checkout, treat `cosec-spring-boot-starter/build.gradle.kts` and the `*Properties.kt` / auto-configuration classes under `cosec-spring-boot-starter/src/main/kotlin` as the source of truth for capabilities, defaults, and activation conditions.

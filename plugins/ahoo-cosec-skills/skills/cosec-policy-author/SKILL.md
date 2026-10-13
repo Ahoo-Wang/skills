@@ -1,6 +1,6 @@
 ---
 name: cosec-policy-author
-description: Write, review, validate, or explain CoSec policy JSON, including allow/deny precedence, action and condition matchers, tenant and role rules, and local or Redis rate limits. Do not use for Spring Boot setup.
+description: Write, review, validate, or explain CoSec policy and rate limit rule JSON, including allow/deny precedence, action and condition matchers, tenant and role rules, and per-IP or per-user quotas. Do not use for Spring Boot setup.
 ---
 
 # CoSec Policy Authoring
@@ -86,16 +86,36 @@ Order deny statements before allow statements for readability, not behavior.
 | `regular` | `part`, `pattern`; optional `timeout` (ms, default 1000) | Case-insensitive whole-value regex match with a time budget |
 | `path` | `part`, `pattern`, optional `options` | Spring path-pattern match on an extracted value |
 | `bool` | optional sibling arrays `and`, `or` | Combine conditions |
+| `time` | at least one of `notBefore`, `notAfter` (ISO date-times, exclusive end), `daysOfWeek`, `from`/`to` (`HH:mm`, may cross midnight); optional `zone` (default UTC) | Validity periods (self-expiring grants) and recurring windows, read from the server clock |
 | `spel` | `expression` | Evaluate against root properties `request` and `context` |
 | `ognl` | `expression` | Sandboxed expression using `#request` and `#context` |
-| `rateLimiter` | `permitsPerSecond` | One in-memory limit per matcher/JVM |
-| `groupedRateLimiter` | `part`, `permitsPerSecond`, `expireAfterAccessSecond` | In-memory per-part limit |
-| `redisRateLimiter` | `permitsPerSecond`; optional `windowSeconds`, `strictFailure` | Cluster-wide Redis limit |
-| `redisGroupedRateLimiter` | `part`, `permitsPerSecond`; optional `windowSeconds`, `strictFailure` | Cluster-wide Redis per-part limit |
+`negate` is handled by matchers based on `AbstractConditionMatcher`, which covers every built-in condition.
 
-The Redis types exist only when cache support and `StringRedisTemplate` activate their Spring factories. They use an atomic sliding window allowing `permitsPerSecond × windowSeconds` requests per window, return 429 when exceeded, fail open on Redis errors by default, and return 429 on Redis errors when `strictFailure` is `true`. Their Redis counter is keyed by configuration (`permitsPerSecond`, `windowSeconds`, `strictFailure`) plus the grouped `part` value, so limiters with identical settings share one quota even across policies; vary a setting to separate them. The auto-configured local-policy lifecycle starts after matcher registration, so bootstrap files may use them. The in-memory limiters also return 429 when exceeded.
+### Rate limits
 
-`negate` is handled only by matchers based on `AbstractConditionMatcher`; the ungrouped `rateLimiter` and `redisRateLimiter` do not support it. Avoid negating any limiter because an exceeded quota throws before boolean negation.
+Rate limits are not policy conditions; since 6.1.0 the `rateLimiter`, `groupedRateLimiter`, `redisRateLimiter`, and `redisGroupedRateLimiter` conditions no longer exist, and a policy using one fails to parse. Write a rate limit rule instead, in a file matching `cosec.limiter.locations` (default `classpath:cosec-rate-limit/*-rate-limit.json`, one rule or an array, schema `schema/rate-limit-rule.schema.json`):
+
+```json
+{
+  "id": "login-by-ip",
+  "action": { "path": { "pattern": "/auth/login", "method": "POST" } },
+  "condition": { "authenticated": { "negate": true } },
+  "key": "request.remoteIp",
+  "permitsPerSecond": 0.1,
+  "windowSeconds": 60,
+  "strictFailure": true
+}
+```
+
+| Field | Notes |
+|---|---|
+| `id` | Required, `[A-Za-z0-9_.-]+`, unique. The quota belongs to the id. |
+| `action`, `condition` | Same syntax as a statement; `condition` defaults to always. |
+| `key` | Optional part (e.g. `request.remoteIp`, `context.principal.id`) giving one bucket per value; omit for one shared bucket. Empty values share one bucket. |
+| `permitsPerSecond`, `windowSeconds` | A window of `windowSeconds` (default 1) allows `permitsPerSecond × windowSeconds` requests, at least one. |
+| `strictFailure` | `false` (default) skips the rule when the counter store fails; `true` returns 429. |
+
+Only requests that authorization allows spend permits. Every matching rule spends one, in order, and the first exhausted rule returns 429 with `Retry-After`. Counters are cluster-wide in Redis when the cache capability and `StringRedisTemplate` are present, otherwise per JVM. An unreadable rule file fails application startup. When migrating an old limiter condition, move the statement's action into `action`, its other conditions into `condition`, and `part` into `key`.
 
 ### Boolean example
 
@@ -122,6 +142,7 @@ All `and` entries must match. If `or` is present, at least one entry must match.
 - `request.appId`, `request.spaceId`, `request.deviceId`
 - `request.header.{name}`, `request.attributes.{key}`, `request.path.var.{name}`
 - `context.tenantId`, `context.principal.id`, `context.principal.attributes.{key}`
+- `resource.{key}`: attributes of the target object, passed by `AuthorizationChecker` checks in code (`CheckRequest(resource = ...)`) and empty in the request filter. Write object-level rules as denies guarded by a non-empty check (`eq` with `value: ""` and `negate: true`), e.g. deny unless `resource.ownerId` equals `#{principal.id}`; an allow that needs a resource part would block the route in the filter.
 
 Use singular `request.header`, and use `request.path.var.id` only after the action matcher captures `{id}`. A part absent from the request reads as an empty string; an unsupported part name throws during evaluation (HTTP 500), not at load time. Never base a deny on a header the client can omit or forge.
 
@@ -135,7 +156,19 @@ Check the final policy for:
 - trusted-proxy assumptions behind `request.remoteIp`;
 - tenant type (`inTenant`) being confused with tenant ID (`context.tenantId`);
 - unsafe or needlessly complex expressions when a built-in matcher suffices;
-- local limiters used where a cluster-wide quota is required.
+- rate limit rules that count per JVM (no Redis) where a cluster-wide quota is required.
+
+## Rolling out changes
+
+For changes to production policies, suggest shadow mode before enforcing: with `cosec.shadow.enabled=true`, candidate versions placed in `classpath:cosec-shadow/*-policy.json` (one policy per file, same `id` replaces, new `id` adds) are evaluated next to the enforced policies on sampled traffic (`cosec.shadow.sample-rate`), and every `WIDENED`, `NARROWED`, or `CANDIDATE_ERROR` diff is logged under `me.ahoo.cosec.shadow`. Responses never change. Treat any `WIDENED` diff as a grant to review. Candidate app permissions go in `classpath:cosec-shadow/*-app-permission.json` and replace the enforced catalog of the same app id; role grants are not shadowed.
+
+## Access review
+
+To answer "who can call X?" or "what can principal Y reach?" across policies, app permissions and role grants, use `AccessAnalyzer.load(policyLocations, appPermissionLocations, roles)` then `whoCan(request)` (allows and denies whose action matches, flagged `conditional` and `templated`) or `grantsOf(principal, appId)`. It matches actions only and errs on the side of listing a rule; use explanations for one concrete principal and request.
+
+## History and rollback
+
+With `cosec.authorization.cache.history.enabled=true`, every policy save records a revision (author via `setPolicy(p).contextWrite(PolicyRevisions.author("name", "note"))`). Use the `PolicyHistory` bean to list revisions and `rollback(policyId, revision, author)`; a rollback is itself a new revision.
 
 ## Validation
 
@@ -149,4 +182,6 @@ require(policies.isNotEmpty())
 policies.forEach(DefaultPolicyEvaluator::evaluate)
 ```
 
-`LocalPolicyLoader` logs and skips malformed policies, so assert that the expected policy ID loaded. `DefaultPolicyEvaluator` catches expected rate-limit and regex-timeout signals but surfaces other matcher configuration errors. Add one authorization test for each meaningful allow/deny boundary.
+Prefer declarative cases: a JSON suite (`policies`, optional `appPermissions` and `roles`, and `cases` of `principal`, `request`, `expect.result` = `ALLOW` | `EXPLICIT_DENY` | `IMPLICIT_DENY`, optionally `policyId` / `statementName` / `roleId` / `permissionId`) run with `PolicyTestKit.run("classpath:cosec-policy-test/*.json").assertPasses()`. Failures name the rule that decided instead.
+
+`LocalPolicyLoader` logs and skips malformed policies, so assert that the expected policy ID loaded. `DefaultPolicyEvaluator` catches expected regex-timeout signals but surfaces other matcher configuration errors. Add one authorization test for each meaningful allow/deny boundary.
