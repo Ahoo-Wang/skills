@@ -12,7 +12,9 @@
       "name": "ahoo-cocache-skills",
       "source": "CoCache",
       "skills": [
-        "cocache"
+        "cocache-develop",
+        "cocache-extend",
+        "cocache-migrate"
       ]
     },
     {

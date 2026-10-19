@@ -13,7 +13,7 @@
       "source": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
-      "commit": "3e4575c3313e0c4b7ee493b0933d0efb98a4d37b",
+      "commit": "5c25ed9d0a0ab3519395077479e2245f30cf9000",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -45,7 +45,7 @@
       "source": "Simba",
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
-      "commit": "e383c5ba3d7f5f9f8c9541e1029ff467a596744a",
+      "commit": "68aed0cdef50c435a96dd8d9e4c6aabced22cbb9",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
