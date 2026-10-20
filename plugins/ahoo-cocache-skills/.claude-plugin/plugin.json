@@ -1,7 +1,7 @@
 {
   "name": "ahoo-cocache-skills",
   "description": "Agent Skills for downstream Java/Kotlin applications built on CoCache, the two-level coherent cache (local Caffeine in front of shared Redis): declaring, testing, reviewing and debugging caches, invalidation after commit, Spring Cache, JoinCache and SetCache; upgrading from CoCache 5.x to 6.x; and implementing CoherenceBackend extensions that pass the cocache-test TCK.",
-  "version": "1.0.0+f9e07e560317",
+  "version": "1.0.0+47054fa0b5ac",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
