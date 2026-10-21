@@ -1,9 +1,8 @@
 ---
 type: regex
-pattern: 'drain'
-flags: i
+pattern: 'backfill-tags'
 match: contains
 target: last_message
 ---
 
-The answer names draining the old writers.
+The answer names `backfill-tags`.

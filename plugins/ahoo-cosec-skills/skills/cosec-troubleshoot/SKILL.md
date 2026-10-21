@@ -77,6 +77,11 @@ Each policy tier evaluates matched policy-level conditions once, pools all state
 - Verify the deny action and condition both match; array order cannot make an allow beat a same-tier deny.
 - Confirm the intended policy was loaded (local files no longer get skipped, and duplicate IDs fail startup, in 7.0; Redis-stored policies are what authorization reads).
 
+### Form POST body empty after CoSec on Spring MVC
+
+- Before 8.0, the WebMvc adapter read query parameters (`CoSec-App-Id`, `CoSec-Space-Id`, `CoSec-Device-Id` fallbacks, the `authorization` query token, `getQuery` in OGNL or custom matchers) with `HttpServletRequest.getParameter`. For an `application/x-www-form-urlencoded` POST the container then parsed and consumed the body inside CoSec's filter: the application read an empty body, some containers failed the request, and a form field could set the app or space id.
+- Since 8.0 every adapter reads the URL query string only, never the body. After upgrading, a client that sent those values as form fields must send them as headers or in the query string; a condition that matched a form field no longer matches (an allow stops allowing, a deny stops denying). Move such checks into the application.
+
 ### Policy file has no effect
 
 - Confirm `cosec.authorization.local-policy.enabled=true` and the file matches `local-policy.locations`.
@@ -116,6 +121,7 @@ Each policy tier evaluates matched policy-level conditions once, pools all state
 - Counter-store outages skip a rule by default. Set the rule's `strictFailure: true` only when availability loss should return 429.
 - Denied requests (401/403) never spend permits. A rule that never applies usually has a non-matching `action`/`condition`, or its file is outside `cosec.limiter.locations`.
 - A rule without `key` shares one bucket among all matching requests; requests whose `key` part is empty also share one bucket. Quotas belong to the rule `id`.
+- On 6.1.0 to 7.0.0, a Spring Cloud Gateway application with the cache capability fails to start with `The bean 'redisRateLimiter' ... could not be registered ... GatewayRedisAutoConfiguration`: both register a bean named `redisRateLimiter`. Fixed in 7.0.1 (CoSec's bean is `cosecRedisRateLimiter`). Before that, declare your own CoSec `RateLimiter` bean (`RedisRateLimiter(stringRedisTemplate, limiterProperties.keyPrefix)`); never enable bean overriding, which makes Spring Cloud Gateway fail instead.
 - After upgrading to 6.1, policies using `rateLimiter`, `groupedRateLimiter`, `redisRateLimiter`, or `redisGroupedRateLimiter` fail to parse: migrate them to rate limit rules.
 
 ## Reproduce narrowly

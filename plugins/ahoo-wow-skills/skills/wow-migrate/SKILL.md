@@ -1,13 +1,13 @@
 ---
 name: "wow-migrate"
-description: "Handle breaking Wow migrations in downstream services with a named Wow version, me.ahoo.wow imports or wow-* dependencies: cross-major upgrades between pinned releases, Wow source/configuration/generated/runtime contract breaks, Wow-managed storage/data history conversion, reconciliation, cutover and incompatible-write rollback, plus reviews and failures of such migrations. Not the Wow framework repository, generic database migrations, first adoption without history, or routine same-major upgrades."
+description: "Handle breaking Wow migrations, chiefly 9.x to V10, in downstream services and their TypeScript callers: Kotlin source, configuration, generated contracts, HTTP routes, fetcher-wow and 9.x wow-client or wow-generator to V10, data import, reconciliation, cut-over and rollback, plus reviews and failures of such migrations. Not the Wow framework repository beyond its platform ports, generic database migrations, or first adoption without history."
 ---
 
 # Migrate Wow Across Breaking Boundaries
 
 ## Scope gate
 
-Use only for a downstream application; the Wow framework repository and its modules never qualify. Require scoped source/target to use or introduce Wow plus a cross-major upgrade, known source/configuration/generated/runtime break, or Wow-managed storage/data change. Routine same-major non-breaking upgrades and first adoption stay with `wow-develop` unless adoption requires Wow-managed history/compatibility conversion, data reconciliation/cutover, or rollback after incompatible target writes. Checkout-wide markers and unrelated application contracts do not qualify. Otherwise state that this Skill does not apply and stop using it.
+Use only for a downstream application. The Wow framework repository and its modules never qualify, with one exception: porting a 9.x platform module of that repository (a view store, ops, dataset registry or analytics domain; its 9.x source is on `v9` or `v10-9x-baseline`, not on `main`) to a V10 project under `platform/`, which uses this Skill as a downstream port would. The framework itself, its releases and its other modules stay excluded. Require scoped source/target to use or introduce Wow plus a cross-major upgrade, known source/configuration/generated/runtime break, or Wow-managed storage/data change. Routine same-major non-breaking upgrades and first adoption stay with `wow-develop` unless adoption requires Wow-managed history/compatibility conversion, data reconciliation/cutover, or rollback after incompatible target writes. Checkout-wide markers and unrelated application contracts do not qualify. Otherwise state that this Skill does not apply and stop using it.
 
 Own the complete migration task. Treat breaking release upgrades—including cross-major and same-major source/config contract changes—and storage/data cutovers as platform, source, generated-contract, data, runtime, and release migrations rather than dependency bumps.
 
@@ -49,8 +49,11 @@ Execute only the stages required by the requested mode and explicitly authorized
 |---|---|
 | Platform, source, generated metadata, runtime or custom store audit | `references/migration-risk-map.md` |
 | Spring Boot 3 to 4 platform, starter/capability, configuration or Jackson migration | `references/spring-boot-3-to-4.md` |
+| Wow 9.x to V10 domain source: Gradle build, modules, annotations, command identity, handlers, rejections, request facts, events, upgrades and retired events, state and tags, sagas, reserved keys, routes and queries, tenancy, compensation, peer contexts, JSON, Java domains, REST clients, tests, `migration-map.json` | `references/v9-to-v10.md` |
+| HTTP routes and headers, and the TypeScript clients that call the service: `@ahoo-wang/fetcher-wow`, `fetcher-generator`, the 9.x `wow-client`, `wow-generator` and `wow-react` to V10 | `references/http-and-clients.md` |
 | Runtime dependency, isolated startup, HTTP/REST or actual transport, and shutdown validation | `references/runtime-rest-validation.md` |
-| Data inventory, rehearsal, cutover, reconciliation or rollback | `references/cutover-evidence.md` |
+| 9.x → V10 data with `wow-migrate-data`: the map check, import, tail, compare, snapshots, `backfill-tags`, reservations and parked executions | `references/data.md` |
+| Cut-over window, inventory, the types with no way back, rollback before and after V10 writes (`export`) | `references/cutover-evidence.md` |
 | Static discovery of v6 exposure | Read `scripts/audit-v6-usage.sh`, run it with `--help`, then execute it with the explicit target application/module root—not a monorepo default |
 | Migration plan or status report | Copy `assets/migration-matrix.md` and fill only evidence-backed fields |
 
