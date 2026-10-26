@@ -5,7 +5,7 @@
       "source": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
-      "commit": "a0e67e1d6dac3e6695eacf8fba8fea0743e9af68",
+      "commit": "16d4b61e61493142682dc752dc43537e05ce6ee8",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -13,7 +13,7 @@
       "source": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
-      "commit": "b60f6c63981d7a1a6dd8940c39be63a3bf49ccf4",
+      "commit": "504f2a1e2d5b162e6e4421a720c8b6771e44603e",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -21,7 +21,7 @@
       "source": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "2f0f5ef3b1b054906db1eebb5da59c042ef2d4ba",
+      "commit": "3dde4492e3430a943a6f40edbbc1cffa4d9a4f88",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -29,7 +29,7 @@
       "source": "CosId",
       "url": "https://github.com/Ahoo-Wang/CosId.git",
       "branch": "main",
-      "commit": "922f3e708d978ccb4a4d4d0fd65ec343dc279974",
+      "commit": "143213cba10a99e41d42f52cdc5e32b4e231d7d2",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -45,7 +45,7 @@
       "source": "Simba",
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
-      "commit": "832bcca2d5f56d77bbd8cd0c25557d5973f6e290",
+      "commit": "7f265f1005669a0abb0bf93d9e73d4770ce9acc4",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -53,7 +53,7 @@
       "source": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "1ac5ef00ac3c8926c842d5d7ff913010e6a4a194",
+      "commit": "7d967f58bb0e4886c7ff0e45fdfade1d08abb704",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
