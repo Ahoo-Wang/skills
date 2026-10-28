@@ -610,6 +610,21 @@ Kotlin callers of 9.x `CommandGateway` move to the host's `CommandClient` bean (
 
 The client runs the gateway's admission in process: the caller is authorized, the command validated (Bean validation, transformers) and not serialized for an aggregate the node serves. Give it a caller with `of(caller)`: the bean sends as an anonymous one. Code that needs the lower level keeps `CommandGateway` (`me.ahoo.wow.runtime.admission`) with `ServerCommandRequest.of(command, ref)` (decision D258). A Reactor caller wraps the `suspend` calls in `mono { … }` (`kotlinx-coroutines-reactor`); a Java caller uses `JavaCommandClient.of(commandClient)`. TypeScript clients are regenerated from the V10 Manifest and rewritten with the `wow-client` skill; do not hand-patch generated clients.
 
+A target pinned to an earlier V10 pre-release spelled Wow's own enumerations in upper snake case on the wire. They are lower-kebab now, and readers accept nothing else:
+
+- A command result's `status` (`succeeded`, `rejected`, `failed`), `hop.stage` (`accepted`, `committed`, `handled`) and `function.kind` (`command`, `saga`, …). Compare against these in client code, and regenerate TypeScript clients.
+- The Manifest's `creation` (`none`, `required`, `allowed`), `ownership` (`owner`, `tenant`), a subscription's `kind` and `start`, and a job's `scope` (`system`, `tenant`) and `misfire` (`coalesce`, `catch-up`). Re-record each Manifest baseline (`./gradlew updateManifestBaseline`) and regenerate TypeScript clients from it. A hand-written Manifest or contract fixture must use the new spelling: an entry with an unknown value is left out when read.
+- A command constraint violation's `code` is the constraint's name in lower-kebab: `NotBlank` is `not-blank`, `PositiveOrZero` is `positive-or-zero`.
+- CoSec's `wow.creation` attribute is lower-kebab too, so update a policy condition that matches it.
+- The failure ledger's values on the ops routes, in the ops service and console, and in the generic ops webhook are lower-kebab: an entry's `status` (`scheduled`, `exhausted`, `unrecoverable`, `resolved`), `recoverable` (`recoverable`, `unrecoverable`, `unknown`), `request` and `requested`, an action's or a resolution's `outcome` (`resumed`, `skipped`, `resolved`, `not-parked`), and the webhook's `event` (`parked`, `exhausted`). A webhook receiver that matches on `event` must change. The ledger's storage columns keep their spelling.
+
+Pre-release data is not carried: JSON that Wow stored in the old spelling, such as a snapshot's `schedules` with its `misfire`, is not read in the new one. Nodes and services exchange these values too (cluster replies, wait signals, peer calls' results and contracts), so a deployment that mixes nodes or services from both sides of this change is not supported: upgrade them together. HTTP methods, storage columns and a domain's own enumerations keep their spelling, and so does the query protocol for now.
+
+A target pinned to an earlier V10 pre-release also changed two request rules:
+
+- `If-Match` takes entity tags only (RFC 9110). A bare `3` is 400 `wow.request.malformed`; send `"3"`, or the `ETag` a state read answered (`"3-<digest>"`), which is taken by its version. Tags naming two different versions are 400, since a command takes one expected version. A weak tag or a tag that names no version is 412, and so is `*` on a command that always creates its aggregate. On any other command `*` adds no condition.
+- An aggregate ref whose id the server has not chosen yet has `"id": null`, in a command result and wherever else a ref is written. `(none)` is never an id: a ref that names it is refused, and so is a command sent to the id `(none)`. Client code that compared a result's `ref.id` with `(none)` checks for null instead. In TypeScript only a refused result can name no id: `RefusedResult`, whose `ref` is a `CommandRef` (`id: string | null`), is the type of `WowProblemError.result` and of what `send`, `wait` and a generated command method answer under `resolveRejected: true`. A `CommandResult` still names its id.
+
 ## Tests
 
 Rewrite `AggregateSpec<A, S>({ on { ... } })` to the functional DSL on the generated model: `given` events, `whenCommand` with an optional `scope`, request-fact `headers` (9.x `whenCommand(command, header, ownerId)`) and `operator`, then `expectEvents`, `expectRejected(code)`, `expectState`, `expectScope`. Keep every 9.x scenario; add one for each new rejection code, for the kernel's scope guard where an ownership policy was removed, and for each upgrade function. 9.x `givenState(state, version)` stays `givenState`; `expectError` by exception type is `expectError<T>()`, and an error code is `expectRejected(code)`. 9.x `SagaSpec` becomes `sagaSpec(<saga>Handlers(services…))) { whenEvent(stateEvent(…)) { expectCommand… } }`.
@@ -667,7 +682,7 @@ class CartSpec {
 
 Snapshot record fields (`SnapshotProperties`): `tenantId`, `aggregateId`, `version`, `ownerId`, `spaceId` (null when unset, 9.x wrote empty strings), `deleted`, `tags`, `firstEventTime`, `lastEventTime` (9.x `eventTime`), `operator` and `firstOperator` as `{id, tenantId, crossScope}` (9.x strings: filter `operator.id`), `schedules` and `state`. 9.x `eventId`, `snapshotTime`, `contextName` and `aggregateName` have no record field; a client that read them changes. The compiler generates a `<State>Properties` object (`OrderStateProperties.STATE__STATUS`) for each state when the module has `wow-query-api` on its class path.
 
-A `SnapshotQueryBackend`, `QueryService` or query SPI implementation of 9.x has no one-to-one port: V10 backends implement `QueryBackend` of `wow-query`; ask before porting one.
+A `SnapshotQueryBackend`, `QueryService` or query SPI implementation of 9.x has no one-to-one port: V10 backends implement `QueryBackend` of `wow-query` and hand out each aggregate type's binding through `QueryBindings` (a store's `StoreQueries` facet); ask before porting one.
 
 ## Request headers
 
@@ -726,7 +741,7 @@ Service mode, the default, calls the peer's internal port as this service (its `
 
 ## Datasets
 
-9.x `me.ahoo.wow.query.schema.QueryDataset` is `me.ahoo.wow.query.dataset.QueryDataset` in V10 `wow-query`, an `@ExperimentalWowApi` (opt in with `@OptIn(ExperimentalWowApi::class)`): named by an `AggregateType` (`QueryDataset.nameOf("<context>.<dataset>")`) instead of a `MaterializedNamedAggregate`, declared with `QueryDataset.of(name) { … }` or a dataset file (`QueryDatasetFiles`: `<config directory>/wow/dataset/`, then `META-INF/wow/dataset/` on the class path). Its scope names the tenant column or declares the dataset platform-level. Datasets are served under `/wow/dataset` ([Routing](#routing)); a 9.x dataset backend other than ClickHouse needs a `DatasetQueryBackendFactory`.
+9.x `me.ahoo.wow.query.schema.QueryDataset` is `me.ahoo.wow.query.dataset.QueryDataset` in V10 `wow-query`, an `@ExperimentalWowApi` (opt in with `@OptIn(ExperimentalWowApi::class)`): named by an `AggregateType` (`QueryDataset.nameOf("<context>.<dataset>")`) instead of a `MaterializedNamedAggregate`, declared with `QueryDataset.of(name) { … }` or a dataset file (`QueryDatasetFiles`: `<config directory>/wow/dataset/`, then `META-INF/wow/dataset/` on the class path). Its scope names the tenant column or declares the dataset platform-level. Datasets are served under `/wow/dataset` ([Routing](#routing)); a 9.x dataset backend other than ClickHouse needs a `QueryBindings<QueryDataset>` bean.
 
 ## Custom message functions
 

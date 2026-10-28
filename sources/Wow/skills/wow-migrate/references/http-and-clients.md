@@ -12,7 +12,7 @@ The job: the applications that call a 9.x service keep working against its V10 s
 | --- | --- |
 | `@ahoo-wang/fetcher-wow`, or a 9.x `@ahoo-wang/wow-client` | `@ahoo-wang/wow-client` of the V10 version (peers `@ahoo-wang/fetcher`, `@ahoo-wang/fetcher-eventstream`; no `fetcher-decorator`) |
 | `@ahoo-wang/fetcher-generator`, a 9.x `@ahoo-wang/wow-generator` reading the service's OpenAPI (`/v3/api-docs`, the `x-wow-*` extensions) | `@ahoo-wang/wow-generator` of the V10 version reading the service's **Manifest** (`GET /wow/manifest` or its committed `manifest/baseline.json`). The OpenAPI-to-Wow path, the `fetcher-generator` alias and `fetcher-generator.config.json` are gone; plain OpenAPI-to-TS generation remains for non-Wow APIs |
-| `@ahoo-wang/fetcher-react` Wow hooks, or a 9.x `@ahoo-wang/wow-react` | `@ahoo-wang/wow-react` of the V10 version: `use*Query({ query, execute })` over a client method, or `useFetcher*Query` over a route |
+| `@ahoo-wang/fetcher-react` Wow hooks, or a 9.x `@ahoo-wang/wow-react` | `@ahoo-wang/wow-react` of the V10 version: `use*Query({ query, execute })` over a generated client's method; no hook takes a route |
 | `@ahoo-wang/fetcher-viewer` | `@ahoo-wang/wow-view-engine` with a definition and a host, rebuilt, not renamed ($wow-view-definition, $wow-view-host) |
 | The 9.x view store (`/view-store/tenant/{tenantId}/owner/{ownerId}/…`) | `@ahoo-wang/wow-view-store`'s `WowViewStore` on the V10 view store service ($wow-view-host) |
 
@@ -25,6 +25,7 @@ Keep every Wow package on one V10 minor (`~` or exact).
 | `POST /{context}/[tenant/{tenantId}/][owner/{ownerId}/]{aggregate}/{id}/{command}` | `POST /{context}/{aggregate}/{id}/{command}` (kebab command); tenant and owner come from the caller, never the path |
 | `…/snapshot/{single,list,paged,cursor,count,aggregation}` and their `/state` forms; `…/event/…` | `POST /{context}/{aggregate}/{snapshot\|events}/query` with `kind` in the body (`single`, `list`, `paged`, `cursor`, `count`, `aggregate`) |
 | `GET …/snapshot/schema`, `…/event/schema` | `GET` on the same query route (`ETag` = version) |
+| The aggregate-management routes: delete, recover, snapshot regeneration | The system commands each aggregate lists in the Manifest, with their routes: `DELETE /{context}/{aggregate}/{id}`, `POST /{context}/{aggregate}/{id}/wow.lifecycle.<kebab>`, `POST /{context}/{aggregate}/wow.snapshot.rebuild` (`{"ids": [...]}`), and a context's jobs `POST /{context}/wow.schedule/{id}/{enable\|reschedule\|disable}`; a client sends each by its Manifest route, never a path it derives |
 | A state by id | `GET /{context}/{aggregate}/{id}/state` (`?version=`, `?at=`, `?minVersion=`, `…/state/trace`) |
 | `/dataset/…` | `GET /wow/dataset`, `/wow/dataset/{context}/{dataset}/query` |
 | `Command-Wait-Stage`, `-Context`, `-Processor`, `-Function`, `Command-Wait-Tail-*`, `Command-Wait-Timeout` | `Wow-Wait` (a plan: `accepted`, `committed`, `snapshot`, `handled([ctx/]Processor.function)`, chained with `>`), `Wow-Wait-Timeout` |
@@ -33,7 +34,7 @@ Keep every Wow package on one V10 minor (`~` or exact).
 | `Command-Tenant-Id`, `Command-Owner-Id`, `Command-Aggregate-Id` | From the caller and the route; an allowed caller acts elsewhere with `Wow-Scope`, `Wow-Space` |
 | `Command-Local-First`, `Command-Type`, `Command-Header-*` | Gone; request facts the service lists in `wow.http.request-facts` |
 
-Gateways, CoSec policies and API docs keyed on the 9.x paths move too: list every rule that names a 9.x path and its V10 replacement.
+Gateways, CoSec policies and API docs keyed on the 9.x paths move too: list every rule that names a 9.x path and its V10 replacement. With `wow.cosec.authorizer.enabled`, CoSec evaluates each command, whatever its entry, as its V10 route in the Manifest (a routeless system command as `POST /{context}/{aggregate}/{id}/{full type name}`), and a policy matching the command by attribute reads `wow.command`, the command's full type name (`shop.cart.AddItem`, a system command qualified by its aggregate type: `shop.cart.wow.lifecycle.DeleteAggregate`).
 
 ## Client code
 
@@ -49,7 +50,28 @@ Gateways, CoSec policies and API docs keyed on the 9.x paths move too: list ever
 | `DatasetDirectoryClient`, `DatasetQueryClient` | `DatasetClient` (`list()`, `dataset(context, name)`) |
 | `abort` argument, `urlParams.path.{ tenantId, ownerId }`, `contextAlias` | `RequestOptions.signal`; nothing (the caller); `WowClientOptions.basePath` for a gateway prefix |
 | `toWowError(error)`, `ErrorCodes`, `errorCode`, `errorMsg`, `bindingErrors` | `error instanceof WowProblemError`: `code`, `status`, `detail`, `violations` (`path`, `code`, `message`), `retry`; `FrameworkErrorCodes` and the generated `<Context>Contract.<Aggregate>.Errors` |
+| `useFetcher*Query({ url, fetcher })` (fetcher-react, 9.x wow-react) | The `use*Query` hook with `execute: (query, options) => client.<kind>(query, options)` on the generated query client, created once outside the component; a dataset's client is `new DatasetClient(options).dataset(context, name)` |
+| `useListStreamQuery`, a stream executor over `stream` | `useStreamQuery` with `execute: (query, options) => client.streamRows(query, options)`; it also returns `position`, which `requestOptions: { resume: { lastEventId } }` resumes after |
+| A cursor page through `useSingleQuery` and `setQuery({ ...query, cursor })`; `client.aggregate` in an effect | `useCursorQuery` (`items`, `hasMore`, `fetchNext()`; its query has no `cursor`) and `useAggregateQuery` |
+| A hook's error type argument `E` (`useSingleQuery<R, F, MyError>`) | Gone: `error` is an `Error`, and `problem` the `WowProblemError` when the service answered with one |
 | A failed command resolving with an error code | Every refusal and every command that did not succeed rejects (`resolveRejected: true` to resolve instead) |
+
+### `@ahoo-wang/wow-view-engine` type names (V10 pre-release)
+
+An application written against a V10 pre-release of the view engine renames these types; the values a config stores do not change. A type that holds a wow-client enum's values is named `<enum>Name`:
+
+| Before | After |
+| --- | --- |
+| `AnalysisGroupType` | `AggregationGroupTypeName` |
+| `AnalysisFunction` | `AggregationFunctionName` |
+| `AnalysisDateUnit` | `AggregationDateUnitName` |
+| `AnalysisDatePart` | `AggregationDatePartName` |
+| `AnalysisDateDiffUnit` | `DateDiffUnitName` |
+| `AnalysisExpressionOperator` | `AggregationExpressionOperatorName` |
+| `AnalysisWindowFunction` | `WindowFunctionName` |
+| `DurationComparison` | `ComparisonOperatorName` |
+| `SortDirection` (the engine's type) | `SortDirectionName`; wow-client's `SortDirection` enum is unchanged |
+| `PagingMode` (the engine's `'paged' \| 'cursor'`) | `RecordPagingMode`; wow-client's `PagingMode` enum is unchanged |
 
 ## Behaviour that changes without a type error
 
@@ -58,6 +80,7 @@ Gateways, CoSec policies and API docs keyed on the 9.x paths move too: list ever
 - **Time zones:** a relative-time filter without `zoneId` reads calendar days in UTC in V10 (9.x used the server's zone): pass `zoneId` wherever the application meant a local day.
 - **Event names:** `bodyType` class names become `name` values; saved filters, analytics and screens keyed on the old names change.
 - **Snapshot fields:** 9.x `eventId` and `snapshotTime` are gone; `firstEventTime`, `lastEventTime`, `operator`, `firstOperator`, `tags` remain.
+- **React hooks:** a change of `requestOptions` (scope, space, headers) by content runs the query again; a header value rebuilt on every render reruns it on every render.
 - **Waits:** 9.x stages map by meaning: `SENT` → `accepted`, `PROCESSED` → `committed`, `SNAPSHOT` → `snapshot` (the V10 default), `PROJECTED`, `EVENT_HANDLED`, `SAGA_HANDLED` → `handled('Processor.function')` naming the subscription, which the generated `<context>Wait` builders list.
 
 ## Steps and gates
