@@ -96,7 +96,7 @@ V10 annotations keep the package `me.ahoo.wow.api.annotation`, so kept names nee
 | none | `@OnRejected` | A saga's handler for the rejection of a command it derived (`CommandRejected<C>`, or `CommandRejected<*>` for any), returning the commands that compensate, or `Unit` to accept the rejection (decision D259; an `@OnCommitted` handler likewise). Without one, a rejected derived command parks the aggregate at once; 9.x had no such outcome. |
 | `@Retry(maxRetries, minBackoff, executionTimeout)` | `@Retry(maxAttempts, initialBackoff, maxBackoff, multiplier, timeout)` and `wow.subscriptions.[<name>].parked.*` | V10's `@Retry`, on a processor or its `@OnEvent` handler, is the in-process budget before the aggregate parks. The 9.x settings are the parked entry's long-horizon retries: `wow.subscriptions.[<processor.function>].parked.max-retries`, `min-backoff` and `execution-timeout`. |
 | `@Retry(recoverable, unrecoverable)`, `RecoverableExceptionProvider`, `RecoverableException`, `RecoverableType` | `@Retry(recoverable, unrecoverable)` and `FailureClassifier` (`me.ahoo.wow.spi.subscription`) | Same attributes; the nearer listed class decides. A `RecoverableExceptionProvider` becomes a `FailureClassifier` bean returning a `FailureClass`: 9.x `UNRECOVERABLE` → `UNRECOVERABLE` (parks at once, no automatic retries), `RECOVERABLE` and `UNKNOWN` → `RECOVERABLE` (retried within the budget, then parked). A store, broker or connection that is down is `SYSTEMIC` (V10 only): the subscription pauses the partition and retries until it is back, parking nothing (`wow.subscription.systemic.*`). `@Retry(enabled = false)` has no V10 form. |
-| `@OnError` | Removed | Return a rejection; compensate in a `@Saga`. |
+| `@OnError` | Removed | Return a rejection, with the events to record when the refusal should be kept (`reject(code, message, events = listOf(...))`); compensate in a `@Saga`'s `@OnRejected` handler. |
 | `@PreparableKey` | Removed | `DecideScope.reserve(namespace, key, tenancy)`; decide the tenancy of every key. See [Reserved keys](#reserved-keys-9x-preparekey). |
 | `@AggregateId`, `@TenantId`, `@OwnerId`, `@AggregateVersion` on command fields | Removed (compile error) | See [Command bodies](#command-bodies-carry-no-identity). |
 | `@StaticTenantId`, `@StaticAggregateId` | Removed | Fixed tenant is host configuration. |
@@ -152,6 +152,7 @@ Events lose identity fields the same way: the 9.x `OrderCreated.orderId` is now 
 | `ServerCommandExchange<X>` with the body unused | `X` |
 | `CommandResultAccessor.setCommandResult(k, v)` | `DecideScope.putResult(k, v)`; returned with this commit only, not persisted, absent from a duplicate's answer |
 | `require`/`check`/thrown exception | `Decision.reject(code, message)` with the code declared by `@ErrorCode` |
+| An error event (one implementing `ErrorInfo`) returned to record a refusal, usually marked `IgnoreSourcing` | `reject(code, message, events = listOf(TheEvent(...)))`: the events are ordinary events of the aggregate, committed with the rejection, and the caller gets the rejection with the version they reached. Give each one a sourcing function, empty (`fun onSourcing(event: TheEvent) = Unit`) for one that changes no state, as `IgnoreSourcing` meant; drop `ErrorInfo` from it. The refused decision's schedules are not committed and its reservations are released. A creation cannot carry them (its aggregate does not exist): reject it without events. Audit sinks of rejections have no V10 counterpart yet; a rejection is counted by `wow.command.rejections` and logged at INFO |
 | `onError(...)` | Delete when it only logs; compensation becomes a `@Saga` |
 | `CommandValidator.validate()` on the body, or a `require` on the command's own fields | Jakarta constraints on the command class (`@field:Positive`, `@field:NotBlank`, `@field:Valid`), checked at admission for every command (`wow.command.invalid`, 400, with `violations`); a rule that needs the state, or one Jakarta cannot express, is a rejection in decide |
 | Injected service; `@Name("x")` parameter | Parameter of the generated factory, bound once by the host; `@Name("x")` qualifies it |
@@ -579,6 +580,12 @@ V10 host keys live under `wow.*` but none of the 9.x keys carry over: `wow.servi
 
 A target pinned to an earlier V10 pre-release renamed two things that are not 9.x keys: an aggregate type routed through its context's command topic is `wow.aggregates.[<context>.<aggregate>].routing: topic` (it was `kafka`), and the subscriptions that write the published streams are named `transport-sink.<aggregate>` (they were `kafka-sink.<aggregate>`). A subscription's name is its checkpoint key, so a service upgraded in place from such a pre-release writes every published stream again from the beginning; its consumers see each commit again and must deduplicate it by its aggregate and version.
 
+A target pinned to an earlier V10 pre-release that read `WowProperties.mongo` or `WowProperties.postgres` in its own code reads its store's options instead: those classes are gone, and the keys (`wow.mongo.*`, `wow.postgres.*`) are unchanged. A store's `wow.stores.<name>.options.*` now takes only the options its store type declares: any other key fails the start, naming the declared ones.
+
+A target pinned to an earlier V10 pre-release changes in how its authorizers compose: an application's own `CommandAuthorizer` no longer switches CoSec's off; both must allow. Every `CommandAuthorizer` bean is asked in its order (`@Order`), and the first denial is the answer, so an authorizer allows (has no objection to) every command outside its own concern. `CallAuthorizer` is gone: a rule for the service identities' calls is a `CommandAuthorizer` that checks `caller.service`. `CoSecAuthorizers` is gone: an authorizer of the application's own roles that should decide only without CoSec takes `ObjectProvider<CoSecCommandAuthorizer>` and allows every command when there is one. Every `Observer` bean is told, so OpenTelemetry's observer runs beside the application's; and two beans of a single seam (`CallerResolver`, `GlobalIdGenerator`, `MaskStrategyResolver`, `DatasetVisibility`, `CommandCaller`, `QueryCountCache`) fail the start unless one is `@Primary`.
+
+A target pinned to an earlier V10 pre-release with `wow.cosec.authorizer.enabled` decides differently now: CoSec's authorizers evaluate each command and service-route call from the caller's application and in its space, as the web filter does, so a permission of the application's roles allows it. Before, they named no application, so no app-role permission applied and every command that only an app role allows was implicitly denied. Review what the application's roles allow before upgrading such a deployment.
+
 ## REST clients
 
 | 9.x | V10 |
@@ -623,7 +630,46 @@ Pre-release data is not carried: JSON that Wow stored in the old spelling, such 
 A target pinned to an earlier V10 pre-release also changed two request rules:
 
 - `If-Match` takes entity tags only (RFC 9110). A bare `3` is 400 `wow.request.malformed`; send `"3"`, or the `ETag` a state read answered (`"3-<digest>"`), which is taken by its version. Tags naming two different versions are 400, since a command takes one expected version. A weak tag or a tag that names no version is 412, and so is `*` on a command that always creates its aggregate. On any other command `*` adds no condition.
-- An aggregate ref whose id the server has not chosen yet has `"id": null`, in a command result and wherever else a ref is written. `(none)` is never an id: a ref that names it is refused, and so is a command sent to the id `(none)`. Client code that compared a result's `ref.id` with `(none)` checks for null instead. In TypeScript only a refused result can name no id: `RefusedResult`, whose `ref` is a `CommandRef` (`id: string | null`), is the type of `WowProblemError.result` and of what `send`, `wait` and a generated command method answer under `resolveRejected: true`. A `CommandResult` still names its id.
+- An aggregate ref whose id the server has not chosen yet has `"id": null`, in a command result and wherever else a ref is written. `(none)` is never an id: a ref that names it is refused, and so is a command sent to the id `(none)`. Client code that compared a result's `ref.id` with `(none)` checks for null instead. In TypeScript only a refused result can name no id: `RefusedResult`, whose `ref` is a `CommandRef` (`id: string | null`), is the type of `CommandRejectedError.result` and of `WowProblemError.result`. A `CommandResult` still names its id.
+
+The query protocol is lower-kebab too, in requests, in the descriptor (`GET` of a query route) and in the problems. Readers accept nothing else, so a client, a saved view and a dataset document that spell the old values must change:
+
+| What | Before | After |
+|---|---|---|
+| A filter's `op` | `"EQ"`, `"NOT_IN"`, `"AND"`, `"ELEMENT_MATCH"`, `"MATCH_ALL"` | `"eq"`, `"not-in"`, `"and"`, `"element-match"`, `"match-all"` |
+| A sort's `direction`, a page's `total` | `"ASC"`, `"EXACT"` | `"asc"`, `"exact"` |
+| A deletion filter's `state` | `"ACTIVE"`, `"ALL"` | `"active"`, `"all"` |
+| An aggregation's `type` | `"TERMS"`, `"DATE_HISTOGRAM"`, `"DISTINCT_COUNT"`, `"METRIC_REF"` | `"terms"`, `"date-histogram"`, `"distinct-count"`, `"metric-ref"` |
+| Its `function`, `unit`, `part` | `"SUM"`, `"DAY"`, `"DAY_OF_WEEK"` | `"sum"`, `"day"`, `"day-of-week"` |
+| A violation `code` | `"UNKNOWN_FIELD"` | `"unknown-field"` |
+| The descriptor's `model`, a field's `types`, `kind` and `semantic.type` | `"SNAPSHOT"`, `"STRING"`, `"SCALAR"`, `"TEMPORAL_EPOCH"` | `"snapshot"`, `"string"`, `"scalar"`, `"temporal-epoch"` |
+| A dataset document's `types` and `sensitive.level` | `"DECIMAL"`, `"CONFIDENTIAL"` | `"decimal"`, `"confidential"` |
+
+A custom query model or value type is spelled the same way, lower-kebab like the built-ins (`[a-z][a-z0-9]*(-[a-z0-9]+)*`): a dataset or schema configuration that names `CUSTOM_MODEL` or `"types": ["STRING"]` is refused when it is read, with the spelling it takes (`custom-model`, `["string"]`). A domain's own values are unchanged: a filter's `value`, an enum field's values in the descriptor, and a JDK `timeUnit` are written as before. In TypeScript the wow-client DSL members keep their names (`FilterOperator.NOT_IN`) and only their values change; code that compared a DSL value with a literal compares it with the member instead.
+
+The TypeScript command client takes Kotlin's name and model (D356). Regenerate the clients, then move hand-written code:
+
+| Before | After |
+|---|---|
+| `new CommandGateway(options, manifest)` | `new CommandClient(options, { manifest })`; without a Manifest it fetches the service's once (`GET /wow/manifest`) |
+| `resolveRejected: true`, then reading `result.status` and `result.error` | `try`/`catch`: a rejected command rejects with a `CommandRejectedError` (`code`, `result`, `problem`); anything else with a `WowProblemError` |
+| A `WowProblemError` whose `result.status` is `rejected` | A `CommandRejectedError`, its `problem` set when the service answered one |
+| `wait: [wait.committed()]`, `wait: 'committed'` | `wait: WaitPlan.COMMITTED`, `WaitPlan.of(wait.committed())`, `parseWaitPlan('committed')`; `.within(ms)` for its timeout, `timeout` still overriding it |
+| A request's `routes` | The client's Manifest; a generated client carries its context's routes (`manifest.ts`) |
+| A request's `bodyNumbers` | `new CommandClient(options, { bodyNumbers: { '<context>.<aggregate>.<Command>': marks } })` |
+| `ResolvingRejected<O>`, the overloads that answer `CommandResult \| RefusedResult` | One signature: `Promise<CommandResult>` |
+| A generated client's `.gateway` | `.commands` on `<Context>Client`, `.client` on `<Aggregate>CommandClient` |
+
+```ts
+import { CommandRejectedError } from '@ahoo-wang/wow-client';
+
+try {
+  await orders.payOrder('order-1', { amount: '39.80', paymentId: 'pay-1' });
+} catch (error) {
+  if (!(error instanceof CommandRejectedError)) throw error;
+  console.warn(error.code, error.result.error?.message);
+}
+```
 
 ## Tests
 

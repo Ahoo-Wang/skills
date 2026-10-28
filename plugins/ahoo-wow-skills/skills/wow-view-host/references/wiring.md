@@ -4,7 +4,7 @@ In depth: [Host the engine](https://wow.ahoo.me/typescript/view-engine/host) (en
 
 ## Sources: where each resource's rows come from
 
-A source is the Wow V10 query client of the model the definition reads: one route, `/{context}/{aggregate}/{model}/query`, whose `POST` answers the queries and whose `GET` answers the capability descriptor (its version is the `ETag`). The engine sends only Wow queries, so `viewSourceOf` adapts the client's `paged`, `cursor`, `aggregate` and `describe` as they are; `describe` lets the engine narrow every definition to the backend it runs on before the first query, and again when the version changes.
+A source is the Wow V10 query client of the model the definition reads: one route, `/{context}/{aggregate}/{model}/query`, whose `POST` answers the queries and whose `GET` answers the capability descriptor (its version is the `ETag`). The engine sends only Wow queries, so the client is a `ViewSource` as it is (its `paged`, `cursor`, `aggregate` and `describe`), with no adapter; `describe` lets the engine narrow every definition to the backend it runs on before the first query, and again when the version changes.
 
 <!-- typecheck: file=source.ts -->
 
@@ -12,13 +12,10 @@ A source is the Wow V10 query client of the model the definition reads: one rout
 import type { Fetcher } from '@ahoo-wang/fetcher';
 import { SnapshotQueryClient } from '@ahoo-wang/wow-client';
 import type { ViewSource } from '@ahoo-wang/wow-view-engine';
-import { viewSourceOf } from '@ahoo-wang/wow-view-store';
 
 export function orderSource(fetcher: Fetcher): ViewSource {
   // `POST /sales/order/snapshot/query` for the rows, `GET` on it for the descriptor.
-  return viewSourceOf(
-    new SnapshotQueryClient({ context: 'sales', name: 'order' }, { fetcher }),
-  );
+  return new SnapshotQueryClient({ context: 'sales', name: 'order' }, { fetcher });
 }
 ```
 
@@ -40,11 +37,10 @@ export async function datasetBindings(
   fetcher: Fetcher,
 ): Promise<ViewBinding[]> {
   // `GET /wow/dataset` lists them; each is queried on its own route.
-  const datasets = new DatasetResources(
-    engine,
-    datasetCatalogOf(new DatasetClient({ fetcher })),
-  );
-  const served = await datasets.refresh();
+  const datasets = new DatasetResources(engine, {
+    catalogs: datasetCatalogOf(new DatasetClient({ fetcher })),
+  });
+  const { datasets: served } = await datasets.refresh();
   return served.map(({ id }) =>
     bind(id, { route: view => `/datasets/${id}${view ? `/${view}` : ''}` }),
   );
@@ -253,7 +249,7 @@ expect(resolveNavigation(toQueue, bindingOf)).toMatchObject({
 
 Pointers only; do not hand-write either:
 
-- **Theme:** one choice on `ViewHost` — `theme="host"` with `@ahoo-wang/wow-view-engine/shadcn-bridge.css` for a host with a shadcn (Tailwind v4) theme, or `preset="…"` with that preset's stylesheet (and `brand`) for a host that wears the engine's. `colorMode="host"` where the app already paints dark mode (next-themes or its own toggle). The host's own chrome takes `className="fve-tokens"` on its shell, not on `<body>`. Inside it, style with the host's own classes reading the theme's tokens (`bg-card` mapped to `var(--card)`); the engine's `fve:` utilities, its `data-slot` attributes and its DOM are not public — only the tokens, the `data-fve-*` attributes, `.fve-root`/`.fve-tokens`, `.dark` and the token class `fve:bg-canvas` are. Details: [Theming](https://wow.ahoo.me/typescript/view-engine/theming).
+- **Theme:** one choice on `ViewHost` — `tokenSource="host"` with `@ahoo-wang/wow-view-engine/shadcn-bridge.css` for a host with a shadcn (Tailwind v4) theme, or `preset="…"` with that preset's stylesheet (and `brand`) for a host that wears the engine's. `colorMode="host"` where the app already paints dark mode (next-themes or its own toggle). The host's own chrome takes `className="fve-tokens"` on its shell, not on `<body>`. Inside it, style with the host's own classes reading the theme's tokens (`bg-card` mapped to `var(--card)`); the engine's `fve:` utilities, its `data-slot` attributes and its DOM are not public — only the tokens, the `data-fve-*` attributes, `.fve-root`/`.fve-tokens`, `.dark` and the token class `fve:bg-canvas` are. Details: [Theming](https://wow.ahoo.me/typescript/view-engine/theming).
 - **CSP:** serve the stylesheet as a file, publish the response's nonce in `<meta property="csp-nonce">`, and allow `blob:` in `img-src` for the chart PNG export. Details: [Content Security Policy](https://wow.ahoo.me/typescript/view-engine/csp).
 
 ## Server rendering (Next.js and other React SSR)
