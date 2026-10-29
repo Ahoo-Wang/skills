@@ -12,12 +12,15 @@ external attributes.
 
 Human-facing reference: https://cosec.ahoo.me/architecture/extending. In a CoSec checkout the ports live in
 `core/spi/src/main/kotlin/me/ahoo/cosec/spi/` (`attribute/`, `authn/`, `membership/`, `ratelimit/`, `token/`,
-`apikey/`, `snapshot/`, `audit/`; module `cosec-spi`, which depends only on the model, the contracts and coroutines), and
+`apikey/`, `snapshot/`, `audit/`; module `cosec-spi`, which depends only on the model, the contracts, the stability
+markers and coroutines), and
 the ones that carry runtime types in `core/runtime/src/main/kotlin/me/ahoo/cosec/runtime/` (`event/`, `attribute/` for
 `BlacklistSource`); the starter wires them in
 `host/spring-boot/src/main/kotlin/me/ahoo/cosec/spring/boot/starter/pipeline/CoSecPipelineAutoConfiguration.kt` and
 `CoSecPipelineIntegrationAutoConfiguration.kt`. A library that only implements a `cosec-spi` port depends on
-`cosec-spi` alone. Never opt in to `@InternalCoSecApi` declarations: they are CoSec-internal. Inspect the target version's interfaces before writing code.
+`cosec-spi` alone. Never opt in to `@InternalCoSecApi` declarations: they are CoSec-internal. The interfaces meant to be implemented carry
+`@CoSecSpi`; an `@ExperimentalCoSecApi` one may still change in a minor release. Inspect the target version's interfaces
+before writing code.
 
 ## Rules for every extension
 
@@ -37,7 +40,7 @@ The starter collects these beans:
 |---|---|---|---|
 | `AttributeProvider` | `me.ahoo.cosec.spi.attribute` | any number (ordered) | adds `ext.*` attributes to the catalog and fetches them |
 | `DecisionListener` | `me.ahoo.cosec.runtime.event` | any number, unique `name` | hears every decision event |
-| `MembershipProvider` | `me.ahoo.cosec.spi.membership` | at most one | answers memberships for tokens marked `cosec.membership: "provider"` |
+| `MembershipProvider` | `me.ahoo.cosec.spi.membership` | at most one; required with API keys | answers memberships for tokens marked `cosec.membership: "provider"` and for every API key's principal |
 | `RateLimiter` | `me.ahoo.cosec.spi.ratelimit` | one; yours replaces the Redis or local limiter | counts rate-limit permits |
 | `Authenticator` | `me.ahoo.cosec.spi.authn` | one; yours replaces the built-in token and API key authenticator | turns credentials into a principal |
 | `BlacklistSource` | `me.ahoo.cosec.runtime.attribute` | one; the starter wraps it in `BlacklistAttributeProvider` | says who and what is blocked |
@@ -96,22 +99,31 @@ fun riskAttributeProvider(risk: RiskClient): AttributeProvider = RiskAttributePr
 
 ## MembershipProvider: memberships outside tokens
 
-For principals whose roles change often, must be revoked at once, or do not fit in a token. Only tokens carrying
-`cosec.membership: "provider"` (and no `roles`/`policies` claims) are asked:
+For principals whose roles change often, must be revoked at once, or do not fit in a token, and for the principals of
+API keys, which carry no memberships of their own. Tokens carrying `cosec.membership: "provider"` (and no
+`roles`/`policies` claims) and every API key ask it:
 
 ```kotlin
 @Bean
 fun membershipProvider(directory: Directory): MembershipProvider = MembershipProvider { tenant, principal ->
     val grants = directory.grants(tenant.value, principal.value) // suspend, non-blocking
-    Memberships(
-        Memberships.Source.PROVIDER,
-        roles = grants.rolesBySpace.mapKeys { SpaceId(it.key) }.mapValues { (_, r) -> r.map(::RoleId).toSet() },
-        attachments = grants.policies.map(::PolicyId),
+        ?: return@MembershipProvider MembershipAnswer.Unknown // not in the directory: its credentials are refused
+    MembershipAnswer.Known(
+        Memberships(
+            Memberships.Source.PROVIDER,
+            roles = grants.rolesBySpace.mapKeys { SpaceId(it.key) }.mapValues { (_, r) -> r.map(::RoleId).toSet() },
+            attachments = grants.policies.map(::PolicyId),
+            active = !grants.disabled,
+        )
     )
 }
 ```
 
-Answer `Memberships(Memberships.Source.PROVIDER, emptyMap(), emptyList())` for an unknown principal. A thrown
+Answer `MembershipAnswer.Unknown` for a principal you do not know and `active = false` for a deactivated one: its API keys and its
+provider-marked tokens are then refused as `token-invalid` (IDN-3). Never answer empty memberships for an unknown
+principal: that is a known principal with no roles, whose keys keep working. Answer the principal's memberships, not a
+key's: the pipeline narrows them to the key's `roles` cap itself. With `cosec-cocache`, a `MembershipLoader` bean
+following the same contract gets `CoCacheMembershipProvider` from the starter. A thrown
 exception or a late answer (`cosec.authorization.membership.timeout`, default 500ms) fails the request with 503; it
 never counts as "no memberships"; so does an answer whose source is not `PROVIDER`. The default space's key is
 `SpaceId.DEFAULT` (`""`).

@@ -28,13 +28,14 @@ Status: first draft. V10 is still moving: verify every annotation, signature, ro
 | `wow-spring-boot-starter` with capability variants (`mongo-support`, `kafka-support`, ...) | `wow-spring-boot` (wiring only) plus one module per technology the host uses: `wow-postgres`, `wow-mongo`, `wow-kafka`, `wow-http`, `wow-cosec` |
 | `wow-core`, `wow-spring`, `wow-webflux`, `wow-rest-contract`, `wow-mock`, `wow-metadata`, `wow-schema` | Replaced: `wow-kernel` and `wow-runtime` (core), `wow-http` (routes, problem+json, SSE), `wow-manifest` (contract) |
 | `wow-redis`, `wow-bi` | Removed (no Redis backend; ClickHouse sink replaces BI sync) |
-| `wow-apiclient`, `wow-cocache` | Removed (decision D187); see [Clients of other services](#clients-of-other-services) |
+| `wow-apiclient` | Removed (decision D187); see [Clients of other services](#clients-of-other-services) |
+| `wow-cocache` | `wow-cocache` of the V10 version in a new shape (decision D364): the owner writes, readers inject `StateViewCache<V>`; see [State caches](#state-caches-9x-wow-cocache) |
 | `wow-compensation-*` (the 9.x compensation service) | Retired: each node's failure ledger and its operator routes, see [Compensation and failed executions](#compensation-and-failed-executions) |
 | `wow-opentelemetry` (the per-component instrumenters, the `wow.operation` meters) | `wow-observability`, settings under `wow.observability.*`: every metric and span is renamed, with no alias, so rebuild dashboards and alerts from the docs page Migrate › Metrics and Spans (`/migrate/metrics`) |
 | `wow-query` (protocol, DSL and engine) | `wow-query-api` (query types, the Kotlin DSL `me.ahoo.wow.api.query.dsl`, the field annotations) for domain and client code; `wow-query` (the engine, `QueryGateway`), which `wow-http` brings to a server; see [Queries](#queries) |
 | `wow-bom` 9.x | `wow-bom` of the V10 version, which constrains the V10 modules only |
 | `wow-models` (`EnumText`, `StatusCapable`, the `*Capable` interfaces, the `Tree` aggregate) | `wow-models` of the V10 version (the project `:models`, `extensions/models`, decision D187): the same packages (`me.ahoo.wow.models.common`, `me.ahoo.wow.models.tree`), so imports stay; a `Tree` subclass binds through the compiler (annotate its concrete create command `@AllowCreate`) |
-| `ksp("me.ahoo.wow:wow-compiler")` by hand | Gradle plugin `id("me.ahoo.wow")`: applies KSP with `wow-compiler` of its own version, excludes the 9.x processors, and adds `generateWowManifestFragment` and `mergeWowManifest` |
+| `ksp("me.ahoo.wow:wow-compiler")` by hand | Gradle plugins by role, of one version, each adding `platform("me.ahoo.wow:wow-bom:<its version>")`: `id("me.ahoo.wow")` on the domain module (KSP with `wow-compiler`, `wow-kernel`, `generateWowManifestFragment`, the `integrationTest` suite), `id("me.ahoo.wow.api")` on the api module, which declares `wowContract(project(":<x>-domain"))`, and `id("me.ahoo.wow.service")` on the server (`mergeWowManifest`, `checkWowManifest`); a single-module service applies `me.ahoo.wow.service` alone |
 | `wow-test` (`AggregateSpec<A, S>`) | The functional `aggregateSpec` and `sagaSpec` DSL (`me.ahoo.wow.test`), still the artifact `wow-test` (the project `:test-dsl` in the Wow repository): `testImplementation("me.ahoo.wow:wow-test:<version>")` |
 | In-memory stores and buses (`InMemoryEventStore`, `InMemorySnapshotStore`, ..., `wow-mock`) | No public in-memory store class: domain tests use `wow-test` (`aggregateSpec`, `sagaSpec` run on in-memory stores), a host uses `wow.backend: memory`, and a test without Kafka gives an `InMemoryTopics` bean (`me.ahoo.wow.kernel.memory`). The kernel's other `InMemory*` stores are `@InternalWowApi` |
 | Domain handlers returning `Mono`/`Flux` | `suspend`, or keep Reactor through `wow-reactor` (compile error without it) |
@@ -74,16 +75,28 @@ After, a downstream V10 domain module:
 ```kotlin
 plugins {
     kotlin("jvm")
+    // Brings wow-kernel and the BOM of its version.
     id("me.ahoo.wow") version "<pinned V10 version>"
 }
 dependencies {
     api(project(":ordering-api"))
-    // The generated models and the binding index return kernel types.
-    api("me.ahoo.wow:wow-kernel:<pinned V10 version>")
 }
 ```
 
-The eShop's domain modules apply KSP by hand with the plugin's options (`wow.model=generate`, `wow.manifest.module=<project>`), only because the plugin cannot be applied inside the build that produces it. A downstream module uses the plugin. The KSP option `wow.context` is needed only when the module has no single `@BoundedContext`.
+and its api module, which declares the domain module whose contract it carries:
+
+```kotlin
+plugins {
+    kotlin("jvm")
+    // Brings wow-api and the BOM of its version.
+    id("me.ahoo.wow.api") version "<pinned V10 version>"
+}
+dependencies {
+    wowContract(project(":ordering-domain"))
+}
+```
+
+The eShop's modules apply the plugins as a downstream build does: `me.ahoo.wow` on each domain module, `me.ahoo.wow.api` on its api module, `me.ahoo.wow.service` on its server. The plugin passes the KSP options itself (`wow.model=generate`, `wow.manifest.module=<project path>`); `wow { context = "…" }` sets `wow.context`, needed only when the module has no single `@BoundedContext`.
 
 ## Annotation mapping
 
@@ -608,6 +621,7 @@ A target pinned to an earlier V10 pre-release renames these host keys, with no a
 - `wow.cluster.max-in-flight-per-peer` is `max-in-flight-per-node`; `wow.query.cross-tenant.enabled` is `wow.query.allow-cross-tenant`; `wow.snapshot.interval`, `.batch` and `.pages` are `wow.snapshot.maintenance-interval`, `.rebuild.page-size` and `.rebuild.max-pages`; `wow.kafka.topic-prefix` is `wow.kafka.topics.prefix`.
 - `wow.state-views.max-bytes` is a size (`64MB`); a number is still read as bytes.
 - `wow.query.memory.enabled` is `true` by default, and an aggregate's `clickhouse.history.enabled` is `auto`, `true` or `false`.
+- The analytics catalog service drops `wow.analytics.catalog.engine` (ClickHouse is its one engine); `approval.sources` and `approval.publications` are `require-source-approval` and `require-publication-approval`, and `datasets.serve` is `datasets.serving.enabled`.
 
 A target pinned to an earlier V10 pre-release changes in how its authorizers compose: an application's own `CommandAuthorizer` no longer switches CoSec's off; both must allow. Every `CommandAuthorizer` bean is asked in its order (`@Order`), and the first denial is the answer, so an authorizer allows (has no objection to) every command outside its own concern. `CallAuthorizer` is gone: a rule for the service identities' calls is a `CommandAuthorizer` that checks `caller.service`. `CoSecAuthorizers` is gone: an authorizer of the application's own roles that should decide only without CoSec takes `ObjectProvider<CoSecCommandAuthorizer>` and allows every command when there is one. Every `Observer` bean is told, so OpenTelemetry's observer runs beside the application's; and two beans of a single seam (`CallerResolver`, `GlobalIdGenerator`, `MaskStrategyResolver`, `DatasetVisibility`, `CommandCaller`, `QueryCountCache`) fail the start unless one is `@Primary`.
 
@@ -647,7 +661,7 @@ The client runs the gateway's admission in process: the caller is authorized, th
 A target pinned to an earlier V10 pre-release spelled Wow's own enumerations in upper snake case on the wire. They are lower-kebab now, and readers accept nothing else:
 
 - A command result's `status` (`succeeded`, `rejected`, `failed`), `hop.stage` (`accepted`, `committed`, `handled`) and `function.kind` (`command`, `saga`, …). Compare against these in client code, and regenerate TypeScript clients.
-- The Manifest's `creation` (`none`, `required`, `allowed`), `ownership` (`owner`, `tenant`), a subscription's `kind` and `start`, and a job's `scope` (`system`, `tenant`) and `misfire` (`coalesce`, `catch-up`). Re-record each Manifest baseline (`./gradlew updateManifestBaseline`) and regenerate TypeScript clients from it. A hand-written Manifest or contract fixture must use the new spelling: an entry with an unknown value is left out when read.
+- The Manifest's `creation` (`none`, `required`, `allowed`), `ownership` (`owner`, `tenant`), a subscription's `kind` and `start`, and a job's `scope` (`system`, `tenant`) and `misfire` (`coalesce`, `catch-up`). Re-record each Manifest baseline (`./gradlew updateWowManifestBaseline`) and regenerate TypeScript clients from it. A hand-written Manifest or contract fixture must use the new spelling: an entry with an unknown value is left out when read.
 - A command constraint violation's `code` is the constraint's name in lower-kebab: `NotBlank` is `not-blank`, `PositiveOrZero` is `positive-or-zero`.
 - CoSec's `wow.creation` attribute is lower-kebab too, so update a policy condition that matches it.
 - The failure ledger's values on the ops routes, in the ops service and console, and in the generic ops webhook are lower-kebab: an entry's `status` (`scheduled`, `exhausted`, `unrecoverable`, `resolved`), `recoverable` (`recoverable`, `unrecoverable`, `unknown`), `request` and `requested`, an action's or a resolution's `outcome` (`resumed`, `skipped`, `resolved`, `not-parked`), and the webhook's `event` (`parked`, `exhausted`). A webhook receiver that matches on `event` must change. The ledger's storage columns keep their spelling.
@@ -803,6 +817,25 @@ A context that sends commands to, or reads the published streams of, another con
 | `@EnableCoApi(clients = […])` | Nothing to declare: the host creates the clients; `wow.peer.mode` (`service`, default, or `user`) and `wow.peer.forwarded-headers` |
 
 Service mode, the default, calls the peer's internal port as this service (its `wow.calls.token`), asserting the caller; the peer must trust the service (`wow.callers.<service>.tokens`) and may narrow what it reads (`.reads`). User mode calls the peer's public routes with the end user's credential (the request's `Authorization` by default). A saga's synchronous call is `SagaContext.call` over the same service mode.
+
+## State caches (9.x `wow-cocache`)
+
+9.x `wow-cocache` gave each reader the parts to build its own cache of another context's state: a CoCache cache it declared, a refresher it registered on the state events, and a source it loaded misses from. V10's `wow-cocache` (decision D364) keeps one shared cache per aggregate type, written by the context that owns the aggregate and read by every service with nothing declared: the docs page Guide › Share State through CoCache. The cache of each reader is replaced, not ported; report each one and what replaces it.
+
+| 9.x `wow-cocache` | V10 |
+|---|---|
+| `SetStateCacheRefresher` / `EvictStateCacheRefresher` registered on an aggregate's state events, in the reader | The owner lists the aggregate: `wow.cocache.publish: [<context>.<aggregate>]`; its sink subscription writes each commit's state at its version, only over an older one. Delete the refreshers |
+| An evicted key on a deleted aggregate (`evict`) | A tombstone at the deletion's version, which no older state undoes |
+| `StateToCacheDataConverter` (state → cached data) | The generated `<State>View` of the owner's api is the cached value; there is no converter. A reader that needs fewer fields reads them off the view |
+| `QueryApiCacheSource`, `QueryGatewayCacheSource`, `StateCacheSource` (load on a miss) | Nothing to write: a miss reads the owner through the node's typed queries (`snapshots<V>()`), in process or over HTTP as this service, a batch as one `IN` query per tenant |
+| `LoadCacheSourceConfiguration.timeout` | CoCache's load policy: `cocache.caches.[wow.<context>.<aggregate>].load-async-timeout` |
+| `ttl` / `ttlAmplitude` (`TtlConfiguration`) | `cocache.caches.[wow.<context>.<aggregate>].ttl` and `ttl-jitter` on each side; `wow.cocache.ttl` for what the owner writes |
+| A `@CoCache` interface or `CacheSpec` per reader, often in a `<context>-cache` module | Inject `StateViewCache<OrderStateView>` (from `wow-cocache-api`, no dependency); delete the declaration and the module |
+| A cache keyed by the aggregate id (`String`) | `StateKey(tenantId, id)`: a key holds the tenant |
+| Cache names and Redis keys of the 9.x caches | New names, `wow.<context>.<aggregate>`: the V10 caches start empty and fill from the owner's writes and the readers' misses; nothing in Redis is migrated |
+| `refreshWindow` on a state cache | None: the caches are versioned, and CoCache refuses an early refresh on them |
+
+A reader that used the cached state to decide a command now asks the owner instead: the cache is a trusted read, and a check that must be consistent belongs to the aggregate it is about ([Peer contexts](#peer-contexts)).
 
 ## JSON
 
