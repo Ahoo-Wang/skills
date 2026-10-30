@@ -91,6 +91,17 @@ Two paths, never confused:
 
 "Redeploy 9.x" is not a rollback once V10 has written. Neither is a rollback rehearsed only before V10 wrote.
 
+## An estate of services
+
+9.x services that consume each other's events, send each other commands, call each other's Wow routes or share api jars cut over together (decision D379): V10 reads no 9.x topic, 9.x reads no V10 stream (no 9.x-format sink), Wow routes change, and no module mixes 9.x and V10 api jars. The site's Cut Over page, section *Cut over an estate*, is the procedure; check it at the pinned target. What the agent must not miss:
+
+- **Find the estate** from each service's `runtimeClasspath` and its api module's (other services' `*-api` jars, cycles), its 9.x processors, sagas and projections of other services' events, the commands and clients it uses, the services its configuration names, and the 9.x brokers' consumer groups (`kafka-consumer-groups --describe --all-groups`). Report the table of services and links; a link not checked is `MISSING EVIDENCE`.
+- **One write stop**, drained: stop ingress estate-wide, wait until no 9.x consumer group lags, then stop every 9.x node and compensation service; record the stop instant. Each service picks offline or online on its own; every `migrate-data` run (one per V10 log store) passes its own gate, and one failed gate sends the whole estate back to 9.x.
+- **Imported history reaches peers marked** (X-38): each appending pass records the cut-over (`CUTOVER` line; checkpoint rows `wow.migrate/<context>` / `cutover` in the target), and an activated service's transport sink publishes every record up to it with `imported: true`. A peer's saga or reactor passes over those records, its projection builds from them; nothing to configure. Size the published topics' retention for the whole history. Confirm the pinned target prints `CUTOVER`; an older one does not mark the history, and a cross-context saga then acts on all of it again: record it, and set those subscriptions' `start` to the write stop.
+- **V10 topics apart from 9.x topics**: a 9.x state topic and a V10 published stream share `wow.<context>.<aggregate>.state`; on a shared broker V10 needs `wow.kafka.topics.prefix`.
+- **Start every node on standby, activate together**, callees of synchronous calls first; switch traffic only once every node is active.
+- **Roll back the whole estate or none**: every service's `export --dry-run` verdict must allow it, so the earliest window to close closes the estate's.
+
 ## Report
 
-Offline or online and why, the inventory, the rehearsal's evidence (each command with its exit code and counts), the signed-off difference kinds, the list of types with no way back and the user's decision on them, the window's timings, the switch's steps as done, and every gap as `MISSING EVIDENCE`. State separately: data imported and compared, V10 serving, external consumers moved, rollback rehearsed; none implies the next.
+Offline or online and why, for an estate its services, links and stop instant, the inventory, the rehearsal's evidence (each command with its exit code and counts), the signed-off difference kinds, the list of types with no way back and the user's decision on them, the window's timings, the switch's steps as done, and every gap as `MISSING EVIDENCE`. State separately: data imported and compared, V10 serving, external consumers moved, rollback rehearsed; none implies the next.
