@@ -18,7 +18,7 @@ Use this map to locate the first incorrect stage before changing anything. Prefe
 | `GET /actuator/cocache/{name}` | Per-instance counters: loads, L1 hits, misses, lease waits, fill rejections, degraded fills, reclaims, resets, dropped invalidations, `readsUnknown`, `typeMismatches`, `unversionedAbsentRefusals` |
 | `GET /actuator/health/cocache` | `heartbeat.error`, `channelMode`, `atomicBroadcast`, `pendingInvalidations` |
 | Micrometer `cocache.*` meters (tag `cache`) | Rates over time; L2 hits only with `cocache.metrics.local-hits=true` |
-| Logs | `Cache[x] - created as <type> on namespace[...]` (the declared type), `Invalidation channel heartbeat failed`, `... dropped: L1 keeps the stale value ...`, `corrupted payload, reclaim and reload` |
+| Logs | `Cache[x] - created as <type> on namespace[...]` (the declared type; `unlayered` when no `cocache.*` property reaches it), `Invalidation channel heartbeat failed`, `... put [...] failed, retrying the invalidation.` (an outcome-unknown put, compensated), `... dropped: L1 keeps the stale value ...`, `corrupted payload, reclaim and reload` |
 | Read-only `redis-cli` | `TYPE`, `PTTL`, `GETRANGE key 2 2` (state byte `V`/`M`/`L`, and `E` for an evicted versioned key), `PUBSUB NUMSUB {keyPrefix}inv:{namespace}` (`PUBSUB SHARDNUMSUB` in `sharded` mode), `CLIENT LIST` with `cocache.redis.client-name` |
 
 ## Reading a key inspection
@@ -49,7 +49,8 @@ Use this map to locate the first incorrect stage before changing anything. Prefe
 | Hit rate collapsed, `cocache.local.size` near zero | Health `heartbeat.error`, `cocache.resets` rate | Heartbeat failing: `PING` denied (`NOPERM`), network dropping connections, `command-timeout` too low | Allow `PING`, fix the network path, raise `command-timeout` |
 | Source overloaded or `SourceLoadRejectedException` | `cocache.loads`, `remote.failures`, `degraded.fills`, `resets` | Redis failing, synchronized expiry (tiny jitter), cold L1 after resets, uncached key patterns | Handle rejections; raise `load-max-concurrent` only with source headroom; keep jitter; refresh-ahead; `KeyFilter` |
 | Several loads per key across instances | `lease.wait.timeouts` vs `lease.waits` | Loader slower than `lease-wait` | Raise `lease-wait`, keep `lease-ttl` above the worst case, or speed up the loader |
-| `pendingInvalidations` above zero, `invalidations.dropped` rising | Redis availability, `ERROR` dropped log | `Cache.invalidate` cannot reach Redis | Restore Redis; re-invalidate dropped keys; consider `invalidate-failure: throw` |
+| `pendingInvalidations` above zero, `invalidations.dropped` rising | Redis availability, `ERROR` dropped log | `Cache.invalidate`, or the compensation of an outcome-unknown `Cache.put`, cannot reach Redis | Restore Redis; re-invalidate dropped keys; consider `invalidate-failure: throw` |
+| A `cocache.caches.[name]` setting has no effect | Start log line of that cache, endpoint `layered` and `policy` | The cache was created with `runtime.create` (unlayered), the field is locked by a library, or the key does not apply to the type | Create it through `CoCacheFactory`; `unlock` the field on purpose; check `skippedConfiguration` |
 | `cocache.reclaims` rising | Inspection `UNREADABLE` | Incompatible value class change, two apps sharing keys with different codecs, foreign writer | New namespace for incompatible changes or dual-format codec; distinct key prefixes |
 | `CacheReadException` (cause `ForeignFormatException`) on a read without a source (authoritative type, externally sourced `Cache` without a loader) | Inspection `UNREADABLE` | The key holds content CoCache can't read (wire format 0 or 1, a native Redis type another program wrote, or for a `Store` a tampered digest); a read with a source reclaims and reloads it, one without leaves the key alone | Find the writer; once authorized, `put` the key (or `invalidate` a `Cache`) |
 | `cocache.unknown.formats` rising | Versions of all instances | Some instance writes a newer wire format | Expected during a format rollout; otherwise find the newer instance |
@@ -61,7 +62,10 @@ Use this map to locate the first incorrect stage before changing anything. Prefe
 | Message (abridged) | Cause |
 |---|---|
 | `cocache.caches configures undeclared caches [x]` | Typo in a cache name under `cocache.caches` |
-| `... must be positive`, `refreshWindow ... must be less than ...` | Invalid policy after all layers; bare numbers are seconds |
+| `... must be positive`, `refreshWindow ... must be less than ...` | Invalid policy after all layers, from the declaration or a `cocache.caches.[name]` field (a conflict caused only by a global layer turns the window off instead) |
+| `<key>: "60" needs a unit ...` | A duration without a unit; write `60s`, `5m` or `PT2M` (`ms` under `cocache.redis`) |
+| `... doesn't apply to ...`, `... is locked by ...; list ... in ....unlock` | A per-cache key the type does not have (fails unless `cocache.caches-validation: warn`), or a field a library locked |
+| `Authoritative caches [...] ... can evict them` / `Cannot read maxmemory-policy` | Eviction check: `allkeys-*`, and an unreadable policy without `cocache.redis.assume-maxmemory-policy`, always fail; `volatile-*` with a finite `ttl` fails only with `store-eviction-check: fail` |
 | `@CoCache.<attribute> = FOREVER is not supported` | `FOREVER` outside `ttl`/`expireAfterAccess` |
 | `Cache[x] already exists.` / `Namespace[x] is already used` / bean name in use | Duplicate declarations or names |
 | `must extend exactly one of [...]` | The interface extends none or several of the five types |
