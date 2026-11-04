@@ -13,7 +13,7 @@
       "source": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
-      "commit": "885cc8a0b9d1c99375d7440b138480e11814bf86",
+      "commit": "e59b355d1a944f7ca995a37b3da36d6fcd5a4291",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -53,7 +53,7 @@
       "source": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "205c033dd4c63acdec8bb2207116465c4a0ea887",
+      "commit": "9f8363a137f374fe4c07d7f87caf83c932a10522",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },

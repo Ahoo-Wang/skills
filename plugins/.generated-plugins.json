@@ -13,8 +13,7 @@
       "source": "CoCache",
       "skills": [
         "cocache-develop",
-        "cocache-extend",
-        "cocache-migrate"
+        "cocache-extend"
       ]
     },
     {

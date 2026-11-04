@@ -1,7 +1,7 @@
 {
   "name": "ahoo-cocache-skills",
-  "description": "Agent Skills for downstream Java/Kotlin applications built on CoCache, the two-level coherent cache (local Caffeine in front of shared Redis): declaring, testing, reviewing and debugging caches, invalidation after commit, Spring Cache, JoinCache and SetCache; upgrading from CoCache 5.x to 6.x; and implementing CoherenceBackend extensions that pass the cocache-test TCK.",
-  "version": "1.0.0+f7cd8f3768fc",
+  "description": "Agent Skills for downstream Java/Kotlin applications built on CoCache, the two-level coherent cache (local Caffeine in front of shared Redis): declaring, testing, reviewing and debugging caches, invalidation after commit, Spring Cache, JoinCache, and choosing between Cache, VersionedCache, Store, VersionedStore and SetStore; and implementing CoherenceBackend extensions that pass the cocache-test TCK.",
+  "version": "1.0.0+9e9e52895619",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
@@ -22,20 +22,19 @@
     "kotlin",
     "java",
     "join-cache",
-    "migration",
     "tck"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Ahoo CoCache Skills",
-    "shortDescription": "Agent Skills for downstream Java/Kotlin applications built on CoCache, the two-level coherent cache (local Caffeine in front of shared Redis): declaring, testing, reviewing and debugging caches, invalidation after commit, Spring Cache, JoinCache and SetCache; upgrading from CoCache 5.x to 6.x; and implementing CoherenceBackend extensions that pass the cocache-test TCK.",
-    "longDescription": "Agent Skills for downstream Java/Kotlin applications built on CoCache, the two-level coherent cache (local Caffeine in front of shared Redis): declaring, testing, reviewing and debugging caches, invalidation after commit, Spring Cache, JoinCache and SetCache; upgrading from CoCache 5.x to 6.x; and implementing CoherenceBackend extensions that pass the cocache-test TCK.",
+    "shortDescription": "Agent Skills for downstream Java/Kotlin applications built on CoCache, the two-level coherent cache (local Caffeine in front of shared Redis): declaring, testing, reviewing and debugging caches, invalidation after commit, Spring Cache, JoinCache, and choosing between Cache, VersionedCache, Store, VersionedStore and SetStore; and implementing CoherenceBackend extensions that pass the cocache-test TCK.",
+    "longDescription": "Agent Skills for downstream Java/Kotlin applications built on CoCache, the two-level coherent cache (local Caffeine in front of shared Redis): declaring, testing, reviewing and debugging caches, invalidation after commit, Spring Cache, JoinCache, and choosing between Cache, VersionedCache, Store, VersionedStore and SetStore; and implementing CoherenceBackend extensions that pass the cocache-test TCK.",
     "developerName": "Ahoo Wang",
     "category": "Development",
     "capabilities": [
       "Skills"
     ],
     "websiteURL": "https://github.com/Ahoo-Wang/skills",
-    "defaultPrompt": "Help me build, test, review or debug this application's CoCache caches, upgrade it from CoCache 5.x, or implement a CoherenceBackend, using verifiable evidence."
+    "defaultPrompt": "Help me build, test, review or debug this application's CoCache caches, or implement a CoherenceBackend, using verifiable evidence."
   }
 }
