@@ -29,7 +29,7 @@ Field by field, lowest to highest (configuration reference: https://cocache.ahoo
 5. `cocache.overrides.cache.*` / `cocache.overrides.store.*`: **tighten only**. `local-max-age`, `degraded-local-max-age`, `absent-ttl` and a `Cache`'s `ttl` take the minimum; `read-failure`, `fill-in-transaction` and `invalidate-fills-on-rollback` take the stricter (`throw`; `private` > `registered-keys` > `allow`; `true`). `overrides.cache.ttl` also caps `ttlOf` and `put(k, v, ttl)` lifetimes (`cocache.ttl.clamped`); a longer `cocache.caches.[name].ttl` raises the cap for that cache. Every other key is skipped.
 6. `cocache.caches.[name].*`: sets any field that applies, plus `unknown-read`, `key-prefix` and `unlock`.
 
-Then library constraints, then the validation chain. Global layers never fail startup: a key that does not apply to the type, is not allowed in that layer (`defaults.store.ttl`, `unknown-read`, anything but staleness bounds and `read-failure` in `overrides`), or is locked is skipped for that cache, logged as `WARN` and listed in the endpoint's `skippedConfiguration`. To force a value over every declaration, use `overrides` (if the field may tighten) or `caches.[name]`; `defaults` never overrides a declaration. Only caches created through `CoCacheFactory` are layered; `runtime.create` gives an unlayered cache that no layer reaches.
+Then library constraints, then the validation chain. Global layers never fail startup: a key that does not apply to the type, is not allowed in that layer (`defaults.store.ttl`, `unknown-read`, anything but staleness bounds, `read-failure`, `fill-in-transaction` and `invalidate-fills-on-rollback` in `overrides`), or is locked is skipped for that cache, logged as `WARN` and listed in the endpoint's `skippedConfiguration`. To force a value over every declaration, use `overrides` (if the field may tighten) or `caches.[name]`; `defaults` never overrides a declaration. Only caches created through `CoCacheFactory` are layered; `runtime.create` gives an unlayered cache that no layer reaches.
 
 Applicability: lease, load, `degraded-local-max-age`, `invalidate-failure`, `read-failure`, `fill-in-transaction` and `invalidate-fills-on-rollback` apply only to `Cache` (loader or externally sourced) and `VersionedCache`; `refresh-window` only to a `Cache` with a loader and `VersionedCache`; `tombstone-ttl` only to the versioned types; `unknown-read` only to an externally sourced `Cache`, `Store` and `VersionedStore`. `ttl`, `ttl-jitter`, `absent-ttl`, `local-max-age`, `read-timeout` and `local-maximum-size` apply to every type.
 
@@ -45,7 +45,7 @@ Validation chain: when a global layer makes `refresh-window` not less than `loca
 | `cocache.defaults.cache.*` / `cocache.defaults.store.*` | | Global defaults below the declaration |
 | `cocache.overrides.cache.*` / `cocache.overrides.store.*` | | Global overrides that only tighten |
 | `cocache.caches.[name].*` | | Per-cache policy, `unknown-read`, `key-prefix`, `unlock` |
-| `cocache.caches-validation` | `fail` | `fail` or `warn` for a `cocache.caches` name that matches no cache, or a per-cache key that does not apply. An entry naming an unlayered cache always only warns. |
+| `cocache.caches-validation` | `fail` | `fail` or `warn` for a `cocache.caches` name that matches no cache, a per-cache key CoCache doesn't know (such as `ttl-forever`), or a per-cache key that does not apply. An entry naming an unlayered cache always only warns. |
 | `cocache.redis.*` | | Redis backend settings |
 | `cocache.spring-cache.require-sync` | `false` | `true` fails startup on a non-sync `@Cacheable` on a CoCache cache |
 | `cocache.spring-cache.degrade-on-error` | `false` | `true`: `DegradingCacheErrorHandler` logs read and write failures on CoCache caches instead of rethrowing them; invalidation failures and other caches go to the previous handler |
@@ -83,7 +83,7 @@ Valid under `cocache.defaults.cache.`, `.defaults.store.`, `.overrides.cache.`, 
 
 - Quote and bracket cache names in YAML (`"[UserCache]"`). Names match case-insensitively, so `COCACHE_CACHES_USERCACHE_TTL=10m` works.
 - Only `ttl-jitter`, `lease-wait` and `load-acquire-timeout` may be `0s` (besides `refresh-window: 0s`); none may be negative or above 100 years.
-- Spring Boot silently ignores keys CoCache does not define, such as `cocache.defaults.ttl` (missing `.cache` / `.store`) or `cocache.defaults.key-prefix`. When a cache's policy looks unchanged, check the endpoint's `policy` (source of each field) and `skippedConfiguration`.
+- Spring Boot silently ignores keys CoCache does not define in the global layers, such as `cocache.defaults.ttl` (missing `.cache` / `.store`) or `cocache.defaults.key-prefix`. Under `cocache.caches.[name]` an unknown key fails startup (`caches-validation: warn` only warns). When a cache's policy looks unchanged, check the endpoint's `policy` (source of each field) and `skippedConfiguration`.
 
 ## Locks (libraries)
 
@@ -105,7 +105,7 @@ The topology comes from `spring.data.redis.*`: `cluster.nodes` (Cluster), `senti
 
 With any `Store`, `VersionedStore` or `SetStore` (lazy ones included), the starter reads `maxmemory-policy` from `INFO memory` at startup. `allkeys-*` always fails startup, and so does an unreadable policy without `assume-maxmemory-policy`, whatever `store-eviction-check` says. In `pubsub` mode the backend probes at startup and falls back to publish-after-write where atomic cross-slot publish is unsupported (health shows `atomicBroadcast: false`).
 
-To share one Redis between applications, set `cocache.key-prefix: ${spring.application.name}:`. The invalidation channel `{keyPrefix}inv:{namespace}` carries the prefix, so applications with different prefixes never receive each other's invalidations.
+To share one Redis between applications, set `cocache.key-prefix: "${spring.application.name}:"` (quoted: an unquoted YAML value can't end with `:`). The invalidation channel `{keyPrefix}inv:{namespace}` carries the prefix, so applications with different prefixes never receive each other's invalidations.
 
 ## Actuator and health
 
