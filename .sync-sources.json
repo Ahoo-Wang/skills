@@ -13,7 +13,7 @@
       "source": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
-      "commit": "f12dc1355f6a14f0fbb0b7aaa0fb93bde2c8f920",
+      "commit": "190af7410b6d38e340d625a7e544a9e1c0c78ff6",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -21,7 +21,7 @@
       "source": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "b425773fde07496222bb13f219e2b1ed633bb6e3",
+      "commit": "1cb3f124b599b18cb306c828447e3241cfd032bf",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
