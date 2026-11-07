@@ -122,6 +122,13 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   `cosec.authorization.snapshot.eviction-check=warn`; the instance then logs `!!! ... Starting anyway
   (eviction-check=warn)` at every start. Never suggest `warn` to silence a Redis that really evicts: an evicted app or
   tenant document reads as absent, and its DENYs silently stop applying.
+- **`CoSec's Redis template [<bean>] reads from replicas (ReadFrom...)`**: the Lettuce client behind the template CoSec
+  injects (the only `StringRedisTemplate` / `ReactiveStringRedisTemplate`, or the `@Primary` one), named in the message,
+  reads from replicas (`spring.data.redis.lettuce.read-from`, or a `LettuceClientConfigurationBuilderCustomizer` that
+  sets `ReadFrom`). Remove it or set `upstream` on that factory. Other data may read from replicas through a template
+  and connection factory of its own that is not the one CoSec injects (not `@Primary`). Never suggest replica reads
+  for CoSec: Redis is its store of record, and a lagging replica can hand back a revoked API key.
+  https://cosec.ahoo.me/operations/troubleshooting#startup-fails-because-redis-is-read-from-replicas
 - **`JWT is enabled, but no TokenStore records revoked tokens`** or **`Tokens are verified, but no revocation reader
   is available`**: revocation is always on. Add `cosec-cocache` (Redis token store), or register a `TokenStore` and a
   `RevocationReader` bean, or set `cosec.jwt.enabled=false` on a service that does not verify tokens.
@@ -153,7 +160,14 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   writes only the `(platform)` tenant's document), or it was lost (evicted): an absent platform fails every request
   closed. Readiness refuses traffic until the platform document and every `prewarm-apps`/`prewarm-tenants` document is
   installed; the `cosecSnapshot` health indicator shows `platform` (`installed`, `failed`, `absent`, `loading`) and
-  `prewarmed`.
+  `prewarmed`, and only it belongs in the readiness group. Beside it, `cosecSnapshotEviction` is `DOWN` with an
+  `eviction` detail while Redis may evict the snapshot (each instance reads `maxmemory-policy` every
+  `revalidate-interval` on its own thread, and logs `ERROR` from `EvictionPolicyMonitor` when that starts): an alert,
+  never a readiness signal (it also turns the aggregate `/actuator/health` DOWN, so load balancers poll the readiness
+  group); requests are still decided, but set `noeviction` again before an app or tenant document is
+  evicted. `Cannot tell whether Redis may evict` there is `eviction-check=fail` on a Redis that denies or times out
+  `INFO`: allow `+info`, or set `warn` when the operator has set `noeviction`, under which it is `UP` with
+  `eviction: unknown`. https://cosec.ahoo.me/operations/troubleshooting#cosecsnapshoteviction-is-down
 - A document the request needs does not decode or compile: its new revision is installed as failed
   (`SnapshotUnavailableException: ... revision <n> cannot be compiled`, caused by a `DocumentCompileException` listing
   JSON paths), and every request that needs it fails closed; the previous revision is not kept. Compile the stored
@@ -181,6 +195,12 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 - **A REQUIRED decision listener failed or timed out** (`cosec.audit.required.timeout`): it turns a permit into 503.
 - **The authenticator's dependency failed** (for example the API key or revocation store); a revocation read that
   fails answers "not revoked" instead (the documented exception to fail closed).
+- **An id with an unpaired UTF-16 surrogate** (IDN-10, RC1-52): an authenticator gave a principal whose id, tenant,
+  credential id or claimed roles hold one (`Principal [<id>] of tenant [<tenant>] holds an id with an unpaired UTF-16
+  surrogate`), an API key record names one (`API key [<id>] holds an id ...`), or the `MembershipProvider` answered a
+  space, role or policy id with one (`The membership provider answered an id with an unpaired UTF-16 surrogate`). A
+  Redis key would hold `?` in its place, sharing another id's key, so the request fails closed. Fix the source: an id
+  is Unicode text. Logs write such a surrogate as `\uD800`, never `?`: `beta\uD800` is not the tenant `beta?`.
 - **Every request with one API key is 503** and the log says the key `is stored in the format before 8.0`: convert
   the keys with `cosec-migrate api-keys` (dry run first; grant the report's memberships and role bindings, then run
   it again without `--dry-run`).
@@ -208,6 +228,10 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   request `503` (`The authentication method [jwt] is CoSec's own token's`): that name is reserved.
 - `token-invalid` for a token whose `tenantId` claim is not a string, or whose `attributes` name `apiKeyId` (reserved
   for API keys).
+- `token-invalid` for a token whose `sub`, `tenantId`, `jti`, `roles` or `policies` hold an unpaired UTF-16 surrogate,
+  which JSON writes as an escape (`"beta\uD800"`), IDN-10: a Redis key would write it as `?` and read another id's
+  documents, memberships and revocations. CoSec's own `JwtTokenConverter` refuses to sign one (login fails with
+  `holds an unpaired UTF-16 surrogate`). Fix the issuer or the user store; surrogate pairs (emoji) are fine.
 - Anonymous callers belong to tenant `(0)` and have no roles: a `subject: "*"` ALLOW must not require
   `subject.authenticated`.
 
@@ -241,7 +265,8 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 The service reads the caller from `CoSec-Identity`, which only the CoSec gateway sets (it strips the client's own). No
 header: anonymous. Otherwise never anonymous:
 
-- 400 `invalid-request`: not base64url JSON of format v1, unknown or missing members, over
+- 400 `invalid-request`: not base64url JSON of format v1, unknown or missing members, an id with an unpaired
+  surrogate (IDN-10), over
   `cosec.pipeline.gateway.max-size` (8KB), sent more than once, or a scope that does not resolve here.
 - 401 `token-invalid`: unsupported version, no `auth.exp`, or issued in the future (beyond
   `cosec.authentication.revocation.skew`).
@@ -277,6 +302,8 @@ header: anonymous. Otherwise never anonymous:
 - Denied requests never spend permits. A rule that never applies has a non-matching action (namespace), resource or
   condition. Rules count per document: an app's or tenant's rule has its own buckets.
 - A limiter failure skips the rule unless `strictFailure: true` (then 503, not 429).
+- A `key` value with an unpaired UTF-16 surrogate counts in a bucket of its own, `e:` and the value escaped (`\uD800`,
+  `\` doubled), never in the bucket of the value with `?` in its place (IDN-10). Other values keep `g:<value>`.
 - On a Redis Cluster, `CROSSSLOT Keys in request don't hash to the same slot` in that log line means a version whose
   counters have no hash tag (8.0.0-alpha.2 or earlier): every rule is skipped, or with `strictFailure` every permit is
   503. Upgrade; counters are `<cosec.key-prefix>:rate-limiter:{<rule>:<bucket>}:<window>`. A `cosec.key-prefix` with
@@ -291,8 +318,19 @@ change, or the change is in another state (409 `change-unreadable`: an earlier b
 cannot be an app id; remove its record); 410 the revision is no longer kept; 412 an operation's `ifMatch` digest
 does not match; 422 the candidate does not compile, refers to a missing policy, or uses a reserved id prefix
 (`cosec:`, `g:`, `r:`); 428 a DENY with `onMissing: nomatch` needs a confirmation; 503 the decision or store could not
-be read. Large bodies on WebFlux need `spring.codec.max-in-memory-size`; on WebMvc a body over
-`cosec.control.http.max-body-size` is 400. Without a platform document the control API itself answers 503; publish the
+be read; 500 a stored document or record does not decode (a newer version wrote it during a rolling upgrade: `a stored
+value does not decode` at `ERROR`, the exception naming the key), else a defect. A 400's `detail` is one of the control
+plane's own checks or names the field that does not parse, never an exception's message; a 400 without `detail` is
+logged at `INFO` (`Control API <method> <path> (request <requestId>) is 400: <reason>`). `simulate` and `explain` are
+authorized on the tenant that decides the request, `(0)` for one without a `principal` (an anonymous request that
+names another tenant is 400), and refuse with 400 a header their documents read sent with different values, as
+enforcement does, and an `http` path enforcement refuses (a dot segment, a malformed escape, over 2,048 characters or
+256 per segment; path parameters are removed as there) or a typed id over those lengths. Any control request whose
+path, query or body holds a string with an unpaired UTF-16 surrogate (a JSON escape such as `"\uD800"`) is 400
+before its route reads it (`The request holds a string with an unpaired UTF-16 surrogate`, IDN-10). A 429 on the
+control API is the pipeline's: a platform rate limit rule on its paths (per tenant with `key: "scope.tenant"`). A
+request without a permitted credential is 401 before any of its body is read. Large bodies on WebFlux need
+`spring.codec.max-in-memory-size`; on WebMvc a body over `cosec.control.http.max-body-size` is 400. Without a platform document the control API itself answers 503; publish the
 first one with `cosec-migrate publish`. A 401, 403, 404, 500 or 503 carries no `detail`: read why in the control
 host's log, `Control API <method> <path> by <tenant>/<principal> is <status> (request <requestId>): <reason>` at
 `INFO` from `me.ahoo.cosec.control.api`, matching the problem's `requestId`.

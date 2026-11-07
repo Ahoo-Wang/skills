@@ -64,6 +64,7 @@ while (true) {
 - Neither touches L2. `getIfChanged` throws `CacheReadException` on a Redis failure regardless of `unknownRead`; `putIfMatch` and `deleteIfMatch` throw `CacheWriteException` and are not idempotent: when `outcomeUnknown` is `true`, re-read before retrying. Without atomic broadcast, a conflict whose digest is the caller's own value republishes the invalidation, so a replay repairs a lost publish.
 - Unreadable content: newer-format values and sets always throw, key untouched. A value the codec can't decode makes the read throw, and the write only conflicts on it. Content in another wire format (format 0 or 1, e.g. written by another program) throws too and is never treated as no value. Only `Store` has these methods; creating a `Store` fails on a backend without conditional writes.
 - Cost: an unchanged `getIfChanged` reads only the header in Redis (`GETRANGE` + `STRLEN`), so it costs the same whatever the value's size.
+- For a fresh answer without a write (what Redis holds now, such as a revocation check), call `lookupRemote(key)` on a `Store` or `VersionedStore` rather than `getIfChanged(key, null)`: one Redis read, no L2, no lease, no coalescing, returning `Lookup.Known` (`Present` or `Absent`; a tombstone is `Absent`) and throwing `CacheReadException` on a Redis failure regardless of `unknownRead`. Keep `getIfChanged(key, null)` for the read of a read-modify-write, where `putIfMatch` needs the digest. Plain `lookup` may answer from L2, an absent copy included, within `absent-ttl` / `local-max-age`.
 
 ## Versioned writers
 
@@ -87,6 +88,7 @@ store.deleteIfNewer(id, version)             // VersionedStore: ordered delete (
 - Operator delete: the endpoint's per-key `DELETE` on a `VersionedCache` is `evict` (keeps the version), on a `VersionedStore` `purge` (drops it; needs `management.endpoint.cocache.allow-purge=true`, as does `?purge=true` on a `VersionedCache`). After `evict` the next read loads from the source, and a loader behind Redis is returned but not written (`cocache.fill.rejections`).
 - Creating a versioned type fails when the backend's store has no `versioned()` capability; Redis and in-memory support it. Coroutines: `suspendingVersionedLoader` on `versionedCacheSpec`.
 - `putIfNewer` throws `CacheWriteException` on Redis failure; replaying the same version is safe (returns `Stale`, and an equal version republishes the invalidation).
+- The `ttl` overloads (`putIfNewer(key, value, version, ttl)`, `invalidateIfNewer` / `deleteIfNewer(key, version, ttl)`) accept `null`, meaning the policy's lifetime (`ttlOf` first; `tombstoneTtl` for tombstones): pass an optional lifetime straight through instead of branching.
 
 ## Inside a transaction
 
