@@ -150,7 +150,7 @@ fun denyAlerts(alerts: Alerts): DecisionListener = object : DecisionListener {
 ```
 
 - `BEST_EFFORT` (default): queued off the request path into a bounded queue; a full queue drops the event.
-- `Delivery.REQUIRED`: runs before the response, within `cosec.audit.required.timeout` (1s); a failure or timeout turns
+- `Delivery.REQUIRED`: runs before the response, within `cosec.observability.listener.required-timeout` (1s); a failure or timeout turns
   a permit into 503. Make it idempotent by `event.id`. Use it only for an audit that must not be lost.
 - Events carry the decision, deciding statement (`by`) and binding (`via`), break-glass flag, snapshot revisions,
   subject, scope, action, resource, request summary, attribute statuses (never values), trace ids. They carry no
@@ -199,8 +199,10 @@ answers 500 rather than forward an identity that never expires.
 
 Replace `CoCacheControlStore` only to keep control-plane records outside Redis. Besides keyed, conditional reads and
 writes, implement `documents()` (every document with indexed revisions; may name more, never fewer),
-`openChanges()` (changes that may still be open; may name more, never fewer) and `acquireLease` / `releaseLease`
-(release only while the holder still has it). A failed read throws; never answer "absent". Start from
+`openChanges()` (changes that may still be open; may name more, never fewer), `acquireLease` / `releaseLease`
+(release only while the holder still has it, checked and removed in one atomic step), `withdrawCandidate(key, window)`
+(remove the candidate only while it is still that window's, in one atomic step), referrers with the revision that
+indexed each, and `RevisionIndex.reclaiming` kept with the index. A failed read throws; never answer "absent". Start from
 `InMemoryControlStore` and the KDoc of `core/control/src/main/kotlin/me/ahoo/cosec/control/store/ControlStore.kt`.
 
 ## IdGenerator: CoSec's ids
