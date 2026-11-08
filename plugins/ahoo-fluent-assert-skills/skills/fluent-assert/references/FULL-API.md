@@ -14,7 +14,7 @@
 ### Gradle (Kotlin DSL)
 
 ```kotlin
-testImplementation("me.ahoo.test:fluent-assert-core:1.2.1")
+testImplementation("me.ahoo.test:fluent-assert-core:1.3.0")
 ```
 
 ### Maven
@@ -23,7 +23,7 @@ testImplementation("me.ahoo.test:fluent-assert-core:1.2.1")
 <dependency>
     <groupId>me.ahoo.test</groupId>
     <artifactId>fluent-assert-core</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -62,12 +62,12 @@ All value receivers below are nullable. `AssertProvider<A>.assert()` is the only
 | `Iterable<T>?` | `IterableAssert<T>` |
 | `Iterator<T>?` | `IteratorAssert<T>` |
 | `Collection<T>?` | `CollectionAssert<T>` |
-| `Array<T>?` | `ObjectArrayAssert<T>` |
+| `Array<out T>?` (including `vararg` parameters) | `ObjectArrayAssert<T>` |
 | `BooleanArray?` / `ByteArray?` / `ShortArray?` / `IntArray?` / `LongArray?` / `FloatArray?` / `DoubleArray?` / `CharArray?` | `BooleanArrayAssert` / `ByteArrayAssert` / `ShortArrayAssert` / `IntArrayAssert` / `LongArrayAssert` / `FloatArrayAssert` / `DoubleArrayAssert` / `CharArrayAssert` |
 | `List<T>?` | `ListAssert<T>` |
 | `Optional<T>?` | `OptionalAssert<T>` |
 | `Map<K, V>?` | `MapAssert<K, V>` |
-| `Stream<T>?` | `ListAssert<T>` |
+| `Stream<out T>?` | `ListAssert<T>` (the first content check consumes the stream) |
 | `<T : Comparable<T>?> T?` | `GenericComparableAssert<T>` |
 | `<T> T?` | `ObjectAssert<T>` |
 
@@ -110,7 +110,8 @@ Kotlin selects an extension from the receiver's static type. Keep examples and f
 
 - Call `.assert()` directly on primitive arrays. `IntArray`, `LongArray`, and the other primitive arrays resolve to their AssertJ `XxxArrayAssert` (for example `ints.assert().hasSize(3).contains(42)`); no conversion is needed.
 - Box primitive streams before using stream assertions. Only `Stream<T>` has a dedicated overload; `IntStream`, `LongStream`, and `DoubleStream` resolve to `ObjectAssert`, so use `stream.boxed().assert()`.
-- Convert statically `CharSequence`-typed text before using string assertions: it resolves to `ObjectAssert`, so use `text.toString().assert()`. `StringBuilder` and `StringBuffer` resolve to `CharSequenceAssert` and need no conversion.
+- Convert statically `CharSequence`-typed text before using string assertions: it resolves to `ObjectAssert`, so use `text.toString().assert()`. Keep `null` for a nullable `CharSequence?` with `text?.toString().assert()`; a plain `.toString()` asserts on the text `"null"`, so content checks such as `isNotBlank()` wrongly pass. `StringBuilder` and `StringBuffer` resolve to `CharSequenceAssert` and need no conversion.
+- Assert a `Stream` while it is still open: creating the assertion does not consume it, the first content check does. Run content checks inside `use { }`, not on an assertion returned from it.
 - Keep a receiver statically typed as `Iterable<T>` to exercise `IterableAssert`; a `List<T>` receiver resolves to `ListAssert`.
 - Keep a receiver statically typed as `Temporal` to exercise `TemporalAssert`; concrete time types resolve to their dedicated assertion classes.
 - Expect `CompletionStage<V>.assert()` to return `CompletableFutureAssert<V>`; AssertJ has no `CompletionStageAssert`.
@@ -184,6 +185,13 @@ temporal.assert().isEqualTo(Instant.parse("2024-01-01T00:00:00Z")) // TemporalAs
 
 val stage: CompletionStage<String> = CompletableFuture.completedFuture("done")
 stage.assert().isCompletedWithValue("done") // CompletableFutureAssert<String>
+```
+
+### Nullable text
+
+```kotlin
+val text: CharSequence? = loadText()
+text?.toString().assert().isNotBlank() // null stays null and fails, instead of passing as the text "null"
 ```
 
 ### Time, predicates, and recursive comparison

@@ -163,6 +163,18 @@
         "Calls containsExactly(\"a\", \"b\") on the resulting IterableAssert",
         "Explains that Comparable plus Iterable makes batch.assert() ambiguous"
       ]
+    },
+    {
+      "id": 15,
+      "prompt": "A Kotlin test receives `val text: CharSequence? = loadText()`. Using FluentAssert, assert that the text is not blank, and that a null result fails the check.",
+      "expected_output": "Use text?.toString().assert().isNotBlank(), explaining that a CharSequence receiver returns ObjectAssert so the text must be converted, and that a plain text.toString() would turn null into the string \"null\" and make isNotBlank() wrongly pass",
+      "files": [],
+      "expectations": [
+        "Converts with a safe call, text?.toString().assert(), before calling isNotBlank()",
+        "Does not call text.toString().assert() without the safe call",
+        "Explains that a plain toString() turns null into the text \"null\", which passes isNotBlank()",
+        "Does not call string assertion methods on text.assert()"
+      ]
     }
   ]
 }
