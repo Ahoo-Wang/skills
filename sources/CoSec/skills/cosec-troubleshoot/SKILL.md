@@ -14,7 +14,7 @@ Gather evidence before proposing a document or code change.
 
 Capture: method and path, status, the problem+json body (`type`, `title`, `status`, `requestId`, optional `traceId`)
 and the `CoSec-Request-Id` header; the principal's tenant, id, roles and attached policies (token claims, never the
-token itself); `CoSec-App-Id` / `CoSec-Space-Id` and the host's `cosec.authorization.scope.app-id`; the route map entry
+token itself); the token's `aud` or the API key's `app`, `CoSec-Space-Id` and the host's `cosec.authorization.scope.app-id`; the route map entry
 (which action and resource the request gets); the revisions of the platform, app and tenant documents; startup and
 request logs. Redact tokens, API keys and secrets.
 
@@ -42,7 +42,7 @@ Indeterminate in an explanation.
 | 401 | `unauthorized` | Denied, and the caller is anonymous (no credentials, or an anonymous caller asking for a space). |
 | 401 | `token-invalid`, `token-expired`, `token-revoked` | The credentials were rejected (an invalid API key is `token-invalid`); the request was evaluated as anonymous and denied. |
 | 403 | `forbidden` | Denied for an authenticated principal: a DENY matched, or nothing allowed (both look the same on purpose). |
-| 403 | `scope-rejected` | `CoSec-App-Id` differs from the host's app (on a gateway the route's metadata `cosec-app-id`, else `cosec.authorization.scope.app-id`), or is not a valid app id (blank, `*`, `:` or a control character, over 128 characters), or `CoSec-Space-Id` names a space where the principal has no role. |
+| 403 | `scope-rejected` | The credential declares an app other than the host's, or none (on a gateway the route's metadata `cosec-app-id`, else `cosec.authorization.scope.app-id`): issue the token for this app. Or the credential's app is not a valid app id (blank, `*`, `:` or a control character, over 128 characters), or `CoSec-Space-Id` names a space where the principal has no role. |
 | 429 | `too-many-requests` | Permitted, but a rate limit rule's bucket is exhausted; `Retry-After` and `RateLimit-*` headers. |
 | 503 | `unavailable` | No decision could be made (Indeterminate), the authenticator's dependency failed, or `cosec.pipeline.timeout` passed. Never retried by a `Retry-After`. |
 | 500 | `internal-error` | An exception nothing modelled: a CoSec defect. Read the server log. |
@@ -67,9 +67,9 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   bound on a lost invalidation (SNP-6), so the interval must be at least 1 second, at most 5 minutes, less than
   `lag-warn`, and, with `fail-closed.tenants`, less than `fail-closed.max-lag`. Use a value within the bounds; never
   suggest turning revalidation off.
-- **`CoSec no longer reads cosec.authorization.snapshot.key-prefix`** (or `cosec.authorization.cache.key-prefix`,
-  `cosec.api-key.key-prefix`): one `cosec.key-prefix` replaced them (SNP-9), and startup fails whatever
-  `cosec.unknown-properties` says. The message lists the families that move from where to where. Have the token
+- **`CoSec does not read ... cosec.authorization.snapshot.key-prefix`** (or `cosec.authorization.cache.key-prefix`,
+  `cosec.api-key.key-prefix`): one `cosec.key-prefix` replaced them (SNP-9), and they fail startup as unknown keys. Which
+  families move, from where to where, is at https://cosec.ahoo.me/operations/upgrading#from-8-0-0-alpha-2. Have the token
   revocations and API keys copied to the new keys first (`COPY`, or `RENAME`, which keeps the expiry): a revocation
   left under the old prefix is no longer read, so the token it revoked would be accepted again. Then set
   `cosec.key-prefix` to the snapshot documents' prefix and remove the old properties; never suggest only renaming them.
@@ -78,11 +78,10 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   characters of its text, twice after a leading `**`). The control plane answers a
   `COMPILE` finding; on the data plane the stored document is installed as failed and its requests are 503.
 
-- **`CoSec does not read <n> cosec.* properties, which would do nothing:`** followed by `<key> -> <replacement>` lines:
-  a typo or a 7.x key (for example `cosec.authentication.enabled -> cosec.authentication.login.enabled`,
-  `cosec.authentication.social.* -> cosec.authentication.login.social.*`). Rename or remove the key; the 7.x table is
-  at https://cosec.ahoo.me/operations/upgrading#removed-and-renamed-properties. `cosec.unknown-properties=warn` only
-  logs the list; do not suggest it to hide a real typo. On Kubernetes, keys such as `cosec.gateway.service.host` or
+- **`CoSec does not read <n> cosec.* properties, which would do nothing:`** followed by the keys: a typo or a key a
+  release renamed or removed (for example `cosec.authentication.enabled`, now `cosec.authentication.login.enabled`).
+  Rename or remove the key; the table is at https://cosec.ahoo.me/operations/upgrading#removed-and-renamed-properties.
+  No property turns the check off. On Kubernetes, keys such as `cosec.gateway.service.host` or
   `cosec.gateway.port` (`does not read 8 cosec.* properties`, a crash loop) are service links
   (`COSEC_GATEWAY_SERVICE_HOST`, `COSEC_GATEWAY_PORT_80_TCP_ADDR`, ... for a Service named `cosec` or `cosec-*` in the
   namespace). 8.0.0-alpha.2 and later skip exactly those variables, only from the process environment; a mistyped
@@ -92,9 +91,8 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   (STA-1).`**: a feature that is on needs a CoSec module that is missing. `A Spring MVC host` needs `cosec-webmvc`,
   `A WebFlux host` `cosec-webflux`, `A Spring Cloud Gateway host` `cosec-gateway` (checked even with
   `cosec.enabled=false`: its filter strips a client's `CoSec-Identity`), `cosec.api-key.store=redis` `cosec-cocache`,
-  `cosec.audit.kafka.delivery=required` `cosec-kafka`, `cosec.cosid.generator` `cosec-cosid`. Add the named artifact next to `cosec-spring-boot`; 8.0 has no
-  starter capabilities (`requireCapability("me.ahoo.cosec:...-support")` from 7.x no longer resolves). Do not suggest
-  turning the feature off unless the user does not want it.
+  `cosec.audit.kafka.delivery=required` `cosec-kafka`, `cosec.cosid.generator` `cosec-cosid`. Add the named artifact next to `cosec-spring-boot`. Do not
+  suggest turning the feature off unless the user does not want it.
 - **`cosec.audit.kafka.delivery=required, but no Kafka audit listener was created`** (STA-1): `cosec-kafka` is there,
   but the listener is not: add a `KafkaOperations` bean (`spring-boot-starter-kafka` with `spring.kafka.*`), and keep
   `cosec.audit.enabled` and `cosec.audit.kafka.enabled` on; or use `best-effort`.
@@ -223,14 +221,16 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   `500`) and the log says `holds content this cache cannot read (format[1], this node writes format[2]`: the data
   alpha wrote through CoCache 6. Stop every instance and run `cosec-migrate cocache8` (dry run first). Never delete
   those keys by hand: a deleted revocation accepts its token again.
-- **Every request with one API key is 503** and the log says the key `is stored in the format before 8.0`: convert
+- **Every request with one API key is 503** and the log says `API key format [null] is not 2.` (`null`: the record has
+  no `format`, as a key written by 7.x): convert
   the keys with `cosec-migrate api-keys` (dry run first; grant the report's memberships and role bindings, then run
   it again without `--dry-run`).
 
 ### Unexpected 401
 
-- Did the request carry credentials? Tokens come from `Authorization`, then the `authorization` cookie; the query
-  parameter only with `cosec.pipeline.allow-query-token=true`. API keys from `X-API-Key`
+- Did the request carry credentials? Tokens come from `Authorization`; the query parameter only with
+  `cosec.pipeline.allow-query-token=true`, the `authorization` cookie only with
+  `cosec.pipeline.allow-cookie-token=true`. API keys from `X-API-Key`
   (`cosec.pipeline.api-key-header`).
 - `token-expired`, `token-revoked` (by token, or every token of the principal issued before a `revokeSubject`, with
   `cosec.authentication.revocation.skew`), `token-invalid` (wrong algorithm or secret: only HMAC256/384/512; or a
@@ -260,7 +260,16 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 ### Unexpected 403 or missing allow
 
 - Which action and resource did the request get? With a route map, a mapped request is `service:verb` on
-  `type/id`; **`http:*` statements never apply to it**. Unmapped requests are `http:<METHOD>` on `http:path:<path>`.
+  `type/id`; **`http:*` statements and `http:` rate limit rules never apply to it**. Unmapped requests are
+  `http:<METHOD>` on `http:path:<path>`, and `service:verb` statements never apply to them. On a gateway every request is
+  `http:`: a permission written only on `service:verb` (an OpenAPI-generated app document) permits nothing there
+  (https://cosec.ahoo.me/scenarios/gateway).
+- A role that should grant does not: roles are read from the document as expanded bindings (`role:<roleId>@<app>:<permission>`),
+  so check, in order: the token's `aud` is the host's app (`scope-rejected` otherwise); the role is in the token as
+  `role` or, in a space, `role@space`; a custom role (tenant document) names the request's app and, if it names a `space`,
+  the request's; a permission in a group that is not `spaced` applies in the default space only (a role held in a named
+  space and a non-spaced permission never meet); the permission is in the catalog with an `action` (an entry without one
+  grants nothing); a `role:` binding id collision or more than 50,000 derived bindings fails the document at `$.roles`.
 - Is the policy bound in the right document, with the right app and space? `space: ""` is the default space only;
   roles count only in the request's space (`role@space` claims; unsuffixed roles in the default space).
 - Is the binding expired (`expiresAt`)? Is the tenant held by a boundary that does not cover the request?
@@ -271,12 +280,13 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   `set-cookie`, `x-api-key`, `cosec-identity`) does not compile:
   `` `<path>` is a credential header, which no attribute reference may read ``. A header name that is not an ASCII
   token (RFC 9110) does not compile either: `` `<path>` is not a header name ``.
-- `scope-rejected`: the client's `CoSec-App-Id` or `CoSec-Space-Id` (see the table).
+- `scope-rejected`: the credential's app, or the client's `CoSec-Space-Id` (see the table).
 
 ### Request allowed unexpectedly
 
 - Find the deciding statement in the audit event or with `explain`. Any matching DENY would have won, so the expected
-  DENY did not match: check its action namespace (`http:*` vs mapped `service:verb`), resource pattern, condition
+  DENY did not match: check its action namespace (`http:*` vs mapped `service:verb`: a platform DENY on `http:*` stops
+  covering a path the moment a route map maps it, https://cosec.ahoo.me/scenarios/route-maps), resource pattern, condition
   (an absent attribute makes `eq`/`in`/`prefix`/`cidr` false), binding scope, and `onMissing: nomatch` (lapses
   while its provider fails).
 - Is the instance on the expected revision? Compare the audit event's snapshot versions with the published head.
@@ -333,6 +343,13 @@ header: anonymous. Otherwise never anonymous:
 
 ### Control-plane errors
 
+A first platform document that does not let authenticated callers reach `/cosec/control/v1/**` leaves the control plane
+unreachable (403 from the pipeline, before any control check) and `cosec-migrate publish` never overwrites: add the
+`control-api` policy of https://cosec.ahoo.me/guide/quick-start to the platform document, which is only possible through
+the control plane, so a deployment without it must be re-published into an empty Redis or key prefix. A control token
+is issued for tenant `(platform)` (or the tenant) and app `cosec.control.app-id`; a token for another app is
+`scope-rejected` on a host with an app.
+
 Problem bodies of the control API: 401 no authenticated caller; 403 the operator lacks the `cosec:*` action on that
 document (bound through `cosec:platform-admin`, `cosec:tenant-admin`, `cosec:tenant-viewer` in app `cosec-control`);
 404 no such document, change or route; 409 the change's `base` revision is stale, the document is staged by another
@@ -357,7 +374,11 @@ host's log, `Control API <method> <path> by <tenant>/<principal> is <status> (re
 `INFO` from `me.ahoo.cosec.control.api`, matching the problem's `requestId`.
 
 A platform change with the `V2` finding `[<id>] is a policy id [tenant:...] already use` adds an id a tenant document
-defines or binds; rename the platform policy, or have the tenant remove its own first. A `REVIEW_NEEDED` change event
+defines or binds; rename the platform policy, or have the tenant remove its own first. A tenant change with the `V2`
+finding `[<id>] is a platform policy's id, and this policy is not an exact copy of it` has the id of a platform policy
+and different content: a tenant may hold only an exact copy of it (the partition flow), so rename it or make it
+identical. While a copy exists the platform's policy cannot be changed (`[<id>] is copied by [tenant:...]`). A
+`REVIEW_NEEDED` change event
 after a publish means another document the change was checked with moved before the write and the analysis now finds
 an escalation nobody approved; the change stays published and needs a person's review.
 
@@ -402,7 +423,7 @@ declared types must match on every instance and the control host; the change is 
 ## Reproduce narrowly
 
 - Document problems: decode and compile the exact document
-  (`PolicyDocumentCompiler.forPlatform(platform).compile(PolicyDocumentCodec.decode(kind, owner, bytes))`); the
+  (`PolicyDocumentCompiler.forPlatform(platform).validate(PolicyDocumentCodec.decode(kind, owner, bytes))`); the
   exception lists every error with its JSON path.
 - Decisions: `simulate` / `explain` on the control plane, or an engine-level conformance scenario
   (`test/conformance/src/test/resources/scenarios/`) in a CoSec checkout.
