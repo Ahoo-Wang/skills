@@ -15,7 +15,7 @@ Files from the user's project, shown inline:
 ```json
 {
   "model" : "events",
-  "version" : "sha256:eb2ac39cd73372cc41b295fc55ddbd96128aa1b782a0687c5a56949ec2370f35",
+  "version" : "sha256:c67e31946b47bb973613ff62f50c7ab2aca8eecbf8423451f331fa46ae1af899",
   "timeZone" : "Z",
   "record" : {
     "identity" : "aggregateId",
@@ -83,7 +83,7 @@ Files from the user's project, shown inline:
     "nullable" : true,
     "project" : true,
     "filter" : {
-      "operators" : [ ]
+      "operators" : [ "is-null", "is-not-null", "exists", "not-exists" ]
     },
     "sort" : {
       "paged" : false,
@@ -97,7 +97,7 @@ Files from the user's project, shown inline:
     "nullable" : true,
     "project" : true,
     "filter" : {
-      "operators" : [ ]
+      "operators" : [ "is-null", "is-not-null", "exists", "not-exists" ]
     },
     "sort" : {
       "paged" : false,
@@ -188,7 +188,7 @@ Files from the user's project, shown inline:
     "nullable" : false,
     "semantic" : {
       "type" : "temporal-epoch",
-      "timeUnit" : "MILLISECONDS"
+      "timeUnit" : "milliseconds"
     },
     "project" : true,
     "filter" : {
@@ -674,7 +674,7 @@ Files from the user's project, shown inline:
   "dynamic" : [ ],
   "constraints" : [ {
     "type" : "null-or-empty-as-missing",
-    "fields" : [ "access", "operator", "ownerId", "spaceId" ]
+    "fields" : [ "access", "access.owner", "access.space", "operator", "ownerId", "spaceId" ]
   }, {
     "type" : "array-equality"
   }, {

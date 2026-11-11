@@ -5,7 +5,7 @@
       "source": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
-      "commit": "67aacc5e78f3adfb139d83174ecfc8b9b1c73bfe",
+      "commit": "99c71f59969fc3ac760152785f7948c9d52a647f",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -13,7 +13,7 @@
       "source": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
-      "commit": "863b0edf4d136e7964936d3d3cc1a80bf1fde0a1",
+      "commit": "3bb8886df87593dc76188942a9b428f5686a8710",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -37,7 +37,7 @@
       "source": "FluentAssert",
       "url": "https://github.com/Ahoo-Wang/FluentAssert.git",
       "branch": "main",
-      "commit": "33e232920b53d23a3defc9b53fa7e8d02b155d0b",
+      "commit": "ed1e8575eb1509b8f34750558f43f364fe17ec03",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -45,7 +45,7 @@
       "source": "Simba",
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
-      "commit": "d774e9cb042faf23c91028dfdd99f61981ff0a63",
+      "commit": "5e60954105144000e0c2aeb6a41d4a98d3d89976",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -53,7 +53,7 @@
       "source": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "eb98255df03ff0b5dc8b5bfab25d30e8f7c39884",
+      "commit": "9454ecadab3bed4d2608023be4f4d3624ff59856",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
