@@ -45,7 +45,7 @@
       "source": "Simba",
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
-      "commit": "5e60954105144000e0c2aeb6a41d4a98d3d89976",
+      "commit": "85885bab0e03a86aab6d9c6cf8c2c709f4144c3c",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
@@ -53,7 +53,7 @@
       "source": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "940e489f246805416b92b9edebb8b2526c532e44",
+      "commit": "d66305ba9ab17147543a65ace92a3057d0d7c79f",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json"
     },
