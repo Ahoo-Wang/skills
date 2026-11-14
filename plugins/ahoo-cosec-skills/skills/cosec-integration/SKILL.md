@@ -130,6 +130,9 @@ in-memory store without it. **Until a platform document exists, every request is
   revisions only, never overwrites, and reads a `report.json` with each file's SHA-256 (`convert` writes it; for
   hand-written files write `{"accepted": true, "outputSha256": {"platform.json": "<sha256>"}}`). Migrating 7.x data:
   `cosec-migrate convert`, then `publish`; see https://cosec.ahoo.me/operations/upgrading.
+  The tool is `cosec-migrate-<version>.zip` on each GitHub release (Java 21+; as a Kubernetes Job in the same page). Seed
+  hand-written app and tenant documents after the platform document with `bootstrap` and the control plane's
+  `POST .../documents/app:<id>:apply` (https://cosec.ahoo.me/operations/storage#seeding-documents-you-wrote-by-hand).
 - Later changes go through the control plane (below). `cosec-migrate bootstrap` writes only the platform tenant's
   document; it does not create the platform document. **The first platform document must let authenticated callers
   reach `/cosec/control/v1/**`** (`http:GET`, `http:POST`, `http:DELETE` on `http:path:/cosec/control/v1/**`, condition
@@ -222,8 +225,12 @@ https://cosec.ahoo.me/guide/security-model#trust-boundaries.
   "provider"` and no roles or policies takes them from a `MembershipProvider` bean instead; a `JwtTokenConverter` bean
   of your own with `membershipClaimLimit` set issues such tokens when the claims would exceed that many bytes (the
   starter's converter never does). Register the provider before issuing them, or those requests are 503.
-- Logout: `TokenRevoker.revoke(accessToken)`. Emergency: `TokenRevoker.revokeSubject(tenant, principal)` revokes every
-  token of a principal issued until now (needs the Redis token store).
+- Sessions: issue tokens through `TokenCompositeAuthentication`, which starts a session (a token family); refresh with
+  `SimpleRefreshTokenAuthentication(verifier, tokenRevocation, tokenFamilies)`. Only the newest pair refreshes, an older
+  one presented again ends the session, and a session lasts `cosec.jwt.session.lifetime` (30 days).
+- Logout: `TokenRevoker.revoke(accessToken)` ends the session, or `revoke(compositeToken)` once the access token has
+  expired. Emergency: `TokenRevoker.revokeSubject(tenant, principal)` revokes every token of a principal issued until now
+  (needs the Redis token store).
 - API keys: `cosec.api-key.enabled=true`, keys in `cosec.api-key.keys[n]` (`id`, `hash` = SHA-256 hex of the key,
   `principal-id`, `tenant-id` (required), exactly one of `roles` and `uncapped: true`, `expires-at`, `enabled`; any
   other field fails startup) or `cosec.api-key.store=redis`. They arrive in `X-API-Key` (`cosec.pipeline.api-key-header`). A key grants nothing of
