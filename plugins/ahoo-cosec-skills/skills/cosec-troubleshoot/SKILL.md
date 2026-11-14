@@ -216,7 +216,7 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   the request sent that header more than once with different values (`Header [<name>] arrived with different
   values`); an ALLOW on it then does not match. One value repeated reads as that value.
 - **Rate limiter cannot count** and the matching rule has `strictFailure: true` (on a Redis Cluster, `CROSSSLOT` in
-  the log: see Rate limiting).
+  the log: see Rate limiting; without Redis, a full `LocalRateLimiter`: see Rate limiting).
 - **A REQUIRED decision listener failed or timed out** (`cosec.observability.listener.required-timeout`): it turns a permit into 503.
 - **The authenticator's dependency failed** (for example the API key or revocation store); a revocation store that
   cannot be read lets the request's token through instead (the documented exception to fail closed), unless
@@ -230,8 +230,13 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   is Unicode text. Logs write such a surrogate as `\uD800`, never `?`: `beta\uD800` is not the tenant `beta?`.
 - **Every request is 503 after upgrading from 8.0.0-alpha** (revoked tokens `503` instead of `401`, the control API
   `500`) and the log says `holds content this cache cannot read (format[1], this node writes format[2]`: the data
-  alpha wrote through CoCache 6. Stop every instance and run `cosec-migrate cocache8` (dry run first). Never delete
-  those keys by hand: a deleted revocation accepts its token again.
+  alpha wrote through CoCache 6. Stop every instance and move it with the `cosec-migrate` of 8.0.0-alpha.4 (dry run
+  first): 8.0.0's no longer has the command. Never delete those keys by hand: a deleted revocation accepts its token
+  again.
+- **`cosec-migrate publish` refuses** with `Refused: [<p>:meta:cocache8] marks a CoCache 6 to 8 upgrade`: an
+  8.0.0-alpha upgrade stopped after it deleted the documents, which are in its export. Finish it with the 8.0.0-alpha.4
+  `cosec-migrate` (`publish --resume`, `--in` on the export the message names), or check every document the marker
+  lists is published and delete the key.
 - **Every request with one API key is 503** and the log says `API key format [null] is not 2.` (`null`: the record has
   no `format`, as a key written by 7.x): convert
   the keys with `cosec-migrate api-keys` (dry run first; grant the report's memberships and role bindings, then run
@@ -345,6 +350,11 @@ header: anonymous. Otherwise never anonymous:
 - Denied requests never spend permits. A rule that never applies has a non-matching action (namespace), resource or
   condition. Rules count per document: an app's or tenant's rule has its own buckets.
 - A limiter failure skips the rule unless `strictFailure: true` (then 503, not 429).
+- The per-JVM `LocalRateLimiter` holds at most 100,000 buckets, 50,000 of one rule (OBL-6), and never evicts one to
+  make room. When full, a new key cannot be counted: `The local rate limiter holds its maximum of buckets (rule [<id>]:
+  ...)` in the stack trace of `Rate limiter unavailable`, and the rule's `strictFailure` decides (503 or skipped);
+  existing buckets keep counting. Typically the rule's `key` reads something a client varies: key it on the principal
+  or a trusted address. A bucket is removed only after an hour idle and two of its rule's windows (OBL-5).
 - A `key` value with an unpaired UTF-16 surrogate counts in a bucket of its own, `e:` and the value escaped (`\uD800`,
   `\` doubled), never in the bucket of the value with `?` in its place (IDN-10). Other values count in `k:<value>`.
 - On a Redis Cluster, `CROSSSLOT Keys in request don't hash to the same slot` in that log line means a version whose

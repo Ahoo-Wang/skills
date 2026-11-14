@@ -78,7 +78,8 @@ A policy does nothing until a binding (or a token's `policies` claim, for an `at
 ### Actions and resources
 
 - Action: `service:verb`, `service:*` or `*`; compared exactly, case included. HTTP actions are `http:GET`,
-  `http:POST`, ..., and `http:*`.
+  `http:POST`, ..., and `http:*`. Never `http:HEAD` or a lower-case `http` verb (`http:get`): a HEAD request is decided
+  as GET and a lower-case method is refused, so such a statement matches nothing and does not compile (`DOC-8`).
 - Resource: a typed pattern `type/segment/...` where a segment is a literal, `*` (one non-empty segment), `{name}`
   (one segment, captured) or a final `**`; or `http:path:<pattern>` (Spring-like: literals, `?`, `*`, `{name}`,
   `**` and `{*name}` at the start or end; no `{name:regex}`, and no half of a surrogate pair without the other: write
@@ -309,9 +310,11 @@ Check the final document for:
    (`testImplementation("me.ahoo.cosec:cosec-testkit")`): keep the documents as `cosec-migrate convert` writes them
    (`platform.json`, `apps/<app>.json`, `tenants/<tenant>.json`, ids URL-encoded) and one scenario per JSON file, then
    `PolicyTestKit.load(documentsDir).tests(scenariosDir)` from a JUnit 5 `@TestFactory`. A scenario is
-   `{"description", "credential": {"tenant", "id", "roles", "policies", "attributes"}, "request": {"action",
-   "resource": {"type", "id"}, "app", "space", ...}, "expect": {"decision": "Permit"}}`; only the fields `expect` names
-   are compared, and `"by"` pins the deciding statement (`"by": null` is the implicit deny). Write one scenario per
+   `{"description", "credential": {"tenant", "id", "roles", "policies", "attributes", "app"}, "request": {"action",
+   "resource": {"type", "id"}, "space", "hostApp", ...}, "expect": {"decision": "Permit"}}`; `expect` must name a
+   `decision`, only the fields it names are compared, and `"by"` pins the deciding statement (`"by": null` is the
+   implicit deny). The kit reads the request as the pipeline does: `http:HEAD` is decided as `http:GET`, and a
+   lower-case method or a path with a dot segment is `{"decision": "InvalidRequest"}`. Write one scenario per
    meaningful allow/deny boundary, and one per explicit DENY with its `by`. The kit does not run rate limits or route
    maps, and documents that read `ext.*` do not load in it. https://cosec.ahoo.me/policies/testing#testing-decisions
 4. **Simulate and explain** through the control plane (`cosec-control`), as an operator allowed to:
