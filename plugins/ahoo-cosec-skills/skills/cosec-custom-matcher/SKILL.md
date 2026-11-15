@@ -24,6 +24,7 @@ before writing code.
 
 ## Rules for every extension
 
+- **Implement in Kotlin.** Ports are `suspend` functions and the ids are value classes, so Java cannot implement them; durations, instants and clocks in their signatures are `java.time`.
 - **Never block the calling thread.** Every SPI is a Kotlin `suspend` function and may run on an event loop. Wrap a
   blocking client with `withContext(yourBoundedDispatcher)`; never use `runBlocking`, `GlobalScope` or
   `Dispatchers.IO` inside the pipeline.
@@ -54,7 +55,7 @@ The starter collects these beans:
 
 Declare them as ordinary `@Bean`s. There is no `META-INF/services` registration for these SPIs.
 
-Not an extension point: `RequestGate` (`me.ahoo.cosec.runtime`), what the web adapters call. `Pipeline` is one;
+Not an extension point: `RequestGate` (`me.ahoo.cosec.runtime.http`), what the web adapters call. `Pipeline` is one;
 `IdentityGate` is the other, for a service behind a CoSec gateway (`cosec.pipeline.mode=gateway`). Both build every
 outcome through `StatusMapping`; do not write a third.
 
@@ -66,7 +67,7 @@ their values when a request's statements need them:
 ```kotlin
 class RiskAttributeProvider(private val risk: RiskClient) : AttributeProvider {
     override val attributes = listOf(AttributeDeclaration("ext.risk.level", AttributeType.STRING))
-    override val timeout: Duration? = 200.milliseconds // kotlin.time; null uses cosec.authorization.attributes.timeout
+    override val timeout: Duration? = Duration.ofMillis(200) // java.time; null uses cosec.authorization.attributes.timeout
 
     override suspend fun fetch(request: AttributeRequest, names: Set<String>): Map<String, Any> {
         val level = risk.level(request.subject.id, request.remoteIp) ?: return emptyMap() // absent, not failed

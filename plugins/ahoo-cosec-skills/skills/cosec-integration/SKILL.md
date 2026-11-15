@@ -48,7 +48,8 @@ implementation("me.ahoo.cocache:cocache-spring-boot-starter")
 ```
 
 Maven takes the same artifacts. The "Also add" column mirrors the `compileOnly` lines of
-`host/spring-boot/build.gradle.kts`; with Maven, import `me.ahoo.cosec:cosec-dependencies` or pin their versions.
+`host/spring-boot/build.gradle.kts`; give each its version yourself, with Gradle or Maven: no CoSec module imports a platform
+([what CoSec needs from your build](https://cosec.ahoo.me/guide/introduction#what-cosec-needs-from-your-build): Spring Boot 4.1, CoCache 8 for `cosec-cocache`, JDK 21).
 There are no starter capabilities (`requireCapability(...-support)`) in 8.0: replace each with its module.
 Startup fails with `... needs <artifact> (me.ahoo.cosec:<artifact>) on the classpath ... (STA-1)` when the web stack's
 adapter is missing (MVC, WebFlux, or Gateway even with `cosec.enabled=false`), when `cosec.api-key.store=redis` lacks
@@ -226,7 +227,7 @@ https://cosec.ahoo.me/guide/security-model#trust-boundaries.
   of your own with `membershipClaimLimit` set issues such tokens when the claims would exceed that many bytes (the
   starter's converter never does). Register the provider before issuing them, or those requests are 503.
 - Sessions: issue tokens through `TokenCompositeAuthentication`, which starts a session (a token family); refresh with
-  `SimpleRefreshTokenAuthentication(verifier, tokenRevocation, tokenFamilies)`. Only the newest pair refreshes, an older
+  `RefreshTokenAuthentication(verifier, tokenRevocation, tokenFamilies)`. Only the newest pair refreshes, an older
   one presented again ends the session, and a session lasts `cosec.jwt.session.lifetime` (30 days).
 - Logout: `TokenRevoker.revoke(accessToken)` ends the session, or `revoke(compositeToken)` once the access token has
   expired. Emergency: `TokenRevoker.revokeSubject(tenant, principal)` revokes every token of a principal issued until now
