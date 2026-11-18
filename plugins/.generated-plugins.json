@@ -40,7 +40,6 @@
       "name": "ahoo-fetcher-skills",
       "source": "fetcher",
       "skills": [
-        "fetcher-cosec-auth",
         "fetcher-decorator-service",
         "fetcher-eventbus",
         "fetcher-integration",
