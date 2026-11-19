@@ -269,8 +269,9 @@ https://cosec.ahoo.me/guide/security-model#trust-boundaries.
 The starter registers one filter: `PipelineServletFilter` (MVC), `PipelineWebFilter` (WebFlux) or
 `PipelineGatewayFilter` (Gateway). Adapters only translate; status codes and problem+json bodies are decided once, in
 the pipeline: 401/403 deny, 429 rate limited, 503 undecidable, 400 ambiguous request. A permitted request carries a
-`SecurityContext`: `ServerWebExchange.getSecurityContext()` / `HttpServletRequest.getSecurityContext()` (extension
-functions in `ServerWebExchanges` / `ServletRequests`). Web details: https://cosec.ahoo.me/integration/web.
+`SecurityContext`: `requireSecurityContext()` (throws) or `securityContextOrNull()` on a `ServerWebExchange`, a Reactor
+`ContextView` or an `HttpServletRequest` (extension functions in `ServerWebExchanges`, `ReactiveSecurityContexts`,
+`ServletRequests`), or `SecurityContextHolder.requireSecurityContext()` on the request thread of blocking code. Web details: https://cosec.ahoo.me/integration/web.
 
 To decide in code **for the request in progress** (UI buttons, object-level checks), inject `AuthorizationChecker` and
 pass it the `SecurityContext` of that request:
@@ -288,7 +289,7 @@ enforcing on the real request. A check is not for a message consumer, a schedule
 permitted, and checks no age, revocation or change of roles. Once the adapter has ended the request every check of its
 context is `false` (`PIP-26`); a transport of your own ends its request by closing the `Outcome` of `Pipeline.evaluate`
 (`use { }`, or `close()` when a streamed response completes), and one that never closes it keeps permitting after
-logout or after a role is removed; in tests, `PipelineFixture.end(context)` and `PermittedRequest.end(context)`. Authorize where the request arrives and carry the decision, not the context, with the work; run a
+logout or after a role is removed; in tests, `PipelineFixture.end(context)` and `PermittedRequest.end(context)`. To test a handler, run it behind `CoSecTestBindings.filter(fixture.pipeline)` (`cosec-testkit`, `me.ahoo.cosec.testkit.webflux` or `.webmvc`) with `fixture.authorization(principal)`; a unit test binds `PermittedRequest.forSubject(...)` (enforce mode) or `withIdentity(IdentityHeader.forSubject(...))` (behind a gateway) with `CoSecTestBindings.withSecurityContext`/`bind`, which refuse a hand-made context (PIP-29). A slice needs the filter bean, not CoSec's auto-configurations. Authorize where the request arrives and carry the decision, not the context, with the work; run a
 transport of your own through `Pipeline.evaluate` (`Outcome.security?.securityContext`) rather than verifying tokens by
 hand; and when you must verify a token yourself, call `TokenVerifier.verify` and then `TokenRevocation.check` (the
 starter's bean), which `verify` alone does not replace. CoSec decides no work the system starts itself in 8.0. A check
@@ -339,7 +340,7 @@ tokens and decides in its own code). Tokens are issued for one app (`TokenSubjec
 - Blacklist: declare a `BlacklistSource` bean and the starter registers the blacklist provider; without one, startup
   logs an INFO line and nothing is blocked.
 - Extension beans (`AttributeProvider`, `MembershipProvider`, `DecisionListener`, `RateLimiter`, `Authenticator`): use
-  `$cosec-custom-matcher`. Register the same attribute providers on every instance and on the control-plane host.
+  `$cosec-extending`. Register the same attribute providers on every instance and on the control-plane host.
 - Policy tests: `cosec-testkit` (test scope) runs scenarios against your documents; use `$cosec-policy-author`.
 
 ## Verification

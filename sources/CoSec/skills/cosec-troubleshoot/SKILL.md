@@ -46,6 +46,7 @@ Indeterminate in an explanation.
 | 429 | `too-many-requests` | Permitted, but a rate limit rule's bucket is exhausted; `Retry-After` and `RateLimit-*` headers. |
 | 503 | `unavailable` | No decision could be made (Indeterminate), the authenticator's dependency failed, or `cosec.pipeline.timeout` passed. Never retried by a `Retry-After`. |
 | 500 | `internal-error` | An exception nothing modelled: a CoSec defect. Read the server log. |
+| 5xx without a `type` | none | Not CoSec's: its refusals are always `application/problem+json` with a `type` under `cosec.ahoo.me/problems/`. See "A permitted request answers 500 from the gateway" below. |
 
 A 401 always means "authenticate (again)"; a 403 means the identity is known and denied.
 
@@ -111,6 +112,16 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 - **`cosec.audit.kafka.delivery=required, but no Kafka audit listener was created`** (STA-1): `cosec-kafka` is there,
   but the listener is not: add a `KafkaOperations` bean (`spring-boot-starter-kafka` with `spring.kafka.*`), and keep
   `cosec.audit.enabled` and `cosec.audit.kafka.enabled` on; or use `best-effort`.
+- **`STA-5: <n> CorsConfigurationSource beans of the application`**: the starter's CORS filter takes one source. Keep one,
+  or declare a `CorsFilter` bean of your own.
+- **`cosec.authorization.shadow.report-interval is at least one millisecond, not <d>.`**: set it to 1ms or more (default
+  `10s`). **`cosec.audit.kafka.delivery=[<value>] is neither required nor best-effort.`**: write one of the two.
+- **A message that names `server.forward-headers-strategy`, `RemoteIpValve` or `max-trusted-index`**: the host cannot say
+  which party writes the client address. `framework`, or a `ForwardedHeaderFilter` bean that rewrites the request: use
+  `native` and configure the proxies on the server, or `none` and set `cosec.authorization.remote-ip.max-trusted-index`;
+  Tomcat with `native`: remove `max-trusted-index`; Reactor Netty or Jetty with `native` and index `0`: set the number of
+  proxies, or `none`.
+  https://cosec.ahoo.me/operations/troubleshooting#startup-fails-on-the-client-address
 - **`cosec-cocache needs a ReactiveStringRedisTemplate bean`** (STA-1): add `spring-boot-data-redis` and configure
   Redis; without it no snapshot is read and rate limits would count per instance.
 - **`cosec.pipeline.mode=gateway on a Spring Cloud Gateway host`**: a gateway always runs `enforce`; set `gateway` on
@@ -360,11 +371,22 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   token (RFC 9110) does not compile either: `` `<path>` is not a header name ``.
 - `scope-rejected`: the credential's app, or the client's `CoSec-Space-Id` (see the table).
 
+### A permitted request answers 500 from the gateway
+
+The body is Spring Boot's default error object (`timestamp`, `path`, `status`, `error`, `requestId`), with no `type`, so it is
+not a CoSec problem. The gateway log has `500 Server Error for HTTP GET "<path>"` at `ERROR` from
+`AbstractErrorWebExceptionHandler`, followed by `java.net.UnknownHostException: Failed to resolve '<host>'`: the host of
+the route's `uri` does not resolve (a Kubernetes Service missing from the gateway's namespace; the demo route
+`cosec-auth` of `k8s/` points at one it does not create). CoSec permitted the request, so nothing in the documents caused
+it: fix the route's `uri`, or create the Service or the DNS name.
+https://cosec.ahoo.me/operations/troubleshooting#a-permitted-request-answers-500-with-the-gateways-own-error-body
+
 ### Request allowed unexpectedly
 
 - Find the deciding statement in the audit event or with `explain`. Any matching DENY would have won, so the expected
   DENY did not match: check its action namespace (`http:*` vs mapped `service:verb`: a platform DENY on `http:*` stops
-  covering a path the moment a route map maps it, https://cosec.ahoo.me/scenarios/route-maps), resource pattern, condition
+  covering a path the moment a route map maps it, and a host with a route map logs `... mapped route(s) escape its
+  http: statements ...` at WARN for such a document, https://cosec.ahoo.me/scenarios/route-maps), resource pattern, condition
   (an absent attribute makes `eq`/`in`/`prefix`/`cidr` false), binding scope, and `onMissing: nomatch` (lapses
   while its provider fails).
 - Is the instance on the expected revision? Compare the audit event's snapshot versions with the published head.
@@ -373,7 +395,11 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 ### Service behind a gateway (`cosec.pipeline.mode=gateway`)
 
 The service reads the caller from `CoSec-Identity`, which only the CoSec gateway sets (it strips the client's own). No
-header: anonymous. Otherwise never anonymous:
+header: anonymous. Otherwise never anonymous. A bare 400/401 says no more by design; the reason is the service's log
+line `the forwarded identity is refused (<status> <problem>), <reason>` (logger `...identity.IdentityGate`, WARN at
+most once a minute per problem type, DEBUG every time). Gateway mode records no decision events or audit; every refusal
+is counted in `cosec.identity.refused{problem}` (with cosec-micrometer), where any non-zero rate is a misconfigured hop
+or a request that bypassed the gateway:
 
 - 400 `invalid-request`: not base64url JSON of format v1, unknown or missing members, an id with an unpaired
   surrogate (IDN-10), over

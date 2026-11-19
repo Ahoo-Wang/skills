@@ -20,7 +20,7 @@
       "name": "ahoo-cosec-skills",
       "source": "CoSec",
       "skills": [
-        "cosec-custom-matcher",
+        "cosec-extending",
         "cosec-integration",
         "cosec-policy-author",
         "cosec-troubleshoot"
