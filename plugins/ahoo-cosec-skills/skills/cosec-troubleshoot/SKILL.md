@@ -69,7 +69,7 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   suggest turning revalidation off.
 - **`CoSec does not read ... cosec.authorization.snapshot.key-prefix`** (or `cosec.authorization.cache.key-prefix`,
   `cosec.api-key.key-prefix`): one `cosec.key-prefix` replaced them (SNP-9), and they fail startup as unknown keys. Which
-  families move, from where to where, is at https://cosec.ahoo.me/operations/upgrading#from-8-0-0-alpha-2. Have the token
+  families move, from where to where, is at https://cosec.ahoo.me/operations/upgrading-previews#from-8-0-0-alpha-2. Have the token
   revocations and API keys copied to the new keys first (`COPY`, or `RENAME`, which keeps the expiry): a revocation
   left under the old prefix is no longer read, so the token it revoked would be accepted again. Then set
   `cosec.key-prefix` to the snapshot documents' prefix and remove the old properties; never suggest only renaming them.
@@ -87,6 +87,21 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   namespace). 8.0.0-alpha.2 and later skip exactly those variables, only from the process environment; a mistyped
   `COSEC_*` variable or the same key in `application.yaml` still fails. On alpha.1, or to keep them out of the pod, set
   `enableServiceLinks: false` on the pod, as `k8s/` does.
+- **`CoSec cannot read <n> cosec.* switch(es); a value it cannot read would switch the feature off without a word:`**
+  followed by `<key>=[<value>]: write true or false` (or `enforce or gateway`, `memory or redis`): a switch such as
+  `cosec.enabled`, `cosec.jwt.enabled`, another `*.enabled`, `cosec.pipeline.mode` or `cosec.api-key.store` was written
+  `1`, `on`, `yes`, an empty string (a Helm or Compose template that left the variable empty) or `true` with spaces.
+  Write `true` or `false` (the enum's value), or remove the key to take its default. Never suggest `cosec.enabled=false`
+  to get past it.
+- **`CoSec is off: cosec.enabled=false.` (WARN, not a failure):** nothing is protected by CoSec on that application;
+  ask whether that is intended.
+- **`This is a Spring Cloud Gateway host: CoSec decides the requests of gateway routes only. ... answered with no CoSec
+  decision: <beans>` (WARN):** the application's own controllers or functional routes are outside CoSec; move them
+  behind the gateway, or secure them in the application.
+- **`No platform document under [<prefix>:snapshot:platform] in Redis <host:port/db>: this instance is not ready ...`
+  (WARN, repeated every `lag-warn`):** the instance waits for its platform document. Check, in this order, that
+  something was published (`cosec-migrate publish --key-prefix <prefix>`), that `cosec.key-prefix` is the publisher's, and
+  that the Redis database and host are the publisher's.
 - **`<what> needs <artifact> (me.ahoo.cosec:<artifact>) on the classpath: add it to the application's dependencies
   (STA-1).`**: a feature that is on needs a CoSec module that is missing. `A Spring MVC host` needs `cosec-webmvc`,
   `A WebFlux host` `cosec-webflux`, `A Spring Cloud Gateway host` `cosec-gateway` (checked even with
@@ -161,9 +176,12 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   and connection factory of its own that is not the one CoSec injects (not `@Primary`). Never suggest replica reads
   for CoSec: Redis is its store of record, and a lagging replica can hand back a revoked API key.
   https://cosec.ahoo.me/operations/troubleshooting#startup-fails-because-redis-is-read-from-replicas
-- **`JWT is enabled, but no TokenStore records revoked tokens`** or **`Tokens are verified, but no revocation reader
-  is available`**: revocation is always on. Add `cosec-cocache` (Redis token store), or register a `TokenStore` and a
-  `RevocationReader` bean, or set `cosec.jwt.enabled=false` on a service that does not verify tokens.
+- **`CoSec's tokens are on, but <stores> are missing`**: revocation is always on, and the message names every missing
+  store of the three (`TokenStore`, `RevocationReader`, `TokenFamilyStore`). Add `cosec-cocache` (all three on Redis),
+  or register a bean of each missing one, or set `cosec.jwt.enabled=false` on a service that does not verify tokens.
+  **`Tokens are verified against RevocationReader.NONE`** (`WARN`): revoked tokens are accepted until they expire;
+  right only where no one revokes a token. A service verifying an issuer's tokens reads the issuer's revocations
+  (`cosec-cocache` on the issuer's Redis, same `cosec.key-prefix`; https://cosec.ahoo.me/scenarios/resource-server).
 - **`Property [cosec.jwt.secret] must not be blank`**: set the secret (same algorithm and secret as the issuer).
   **`Property [cosec.jwt.secret] has <n> bytes, and HMAC256 needs at least 32`**: the secret must be at least 32, 48 or
   64 UTF-8 bytes for `hmac256`, `hmac384`, `hmac512` (RFC 7518 §3.2); set a longer one on the issuer and every verifier.
@@ -176,6 +194,8 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 - **`API keys are enabled, but no ApiKeyReader is available`**: `cosec.api-key.store=redis` needs a
   `ReactiveStringRedisTemplate`.
 - **`cosec.api-key.enabled=true needs a MembershipProvider bean`** (IDN-6): a key's memberships are its principal's.
+  On the `cosec-gateway-server` image the message ends `The cosec-gateway-server image ships none, so as shipped it cannot use API
+  keys`: the image has no `MembershipProvider` bean, so API keys need an image derived from it that adds one.
   Add `cosec-cocache` and a `MembershipLoader` bean (the starter then wires `CoCacheMembershipProvider`), or declare a
   `MembershipProvider`. Checked only in `cosec.pipeline.mode=enforce`, where keys are read.
 - **`API key [<id>] needs exactly one of roles ... and uncapped: true`**: a configured key states its cap (`roles`,
@@ -192,6 +212,15 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   share a listener name or an attribute path.
 
 ## Symptoms
+
+### A check in code is false though the documents permit it
+
+- `decide` answers `Deny(null)` before reading any document when the context's request has ended (`PIP-26`: kept
+  after the response was written; check within the request, which a streamed body or an async servlet request still
+  is), when the pipeline did not make the context (`PIP-27`: the readers return none for a hand-made or mocked one; in
+  tests use `PipelineFixture.securityContext` or `PermittedRequest`), or when the action has no `:` or names what
+  enforcement refuses (`PIP-15`).
+  https://cosec.ahoo.me/operations/troubleshooting#a-check-answers-false
 
 ### Every request is 503, or the instance is not ready
 
@@ -276,6 +305,8 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 - `token-expired`, `token-revoked` (by token, or every token of the principal issued before a `revokeSubject`, with
   `cosec.authentication.revocation.skew`), `token-invalid` (wrong algorithm or secret: only HMAC256/384/512; or a
   delegation token, one with an `act` claim, which 8.0 refuses: audit `reasonCode` `DELEGATION_UNSUPPORTED`, IDN-4;
+  or, intermittently at second boundaries, an issuer's clock ahead by more than `cosec.authentication.revocation.skew`:
+  log `Token refused as not valid yet`, decision event `subject.rejected` `TOKEN_NOT_YET_VALID`, IDN-29;
   or a claim CoSec refuses: `tenantId` empty or not a string, `roles` or `policies` not an array of strings, `attributes` not an
   object).
 - `token-invalid` for an API key, or a token marked `cosec.membership: provider`, whose principal the
@@ -350,7 +381,8 @@ header: anonymous. Otherwise never anonymous:
 - 401 `token-invalid`: unsupported version, no `auth.exp`, or issued in the future (beyond
   `cosec.authentication.revocation.skew`).
 - 401 `token-expired`: the credential expired, or the identity is older than `cosec.pipeline.identity.max-age` (60s)
-  plus the skew. Check clocks.
+  plus the skew. Check clocks. In a test without a gateway: a header (`IdentityHeader`) made once and reused; make one
+  per request.
 - On the gateway, a 500 with `Request [<id>]: the identity cannot be forwarded.`: the credential never expires (an API
   key without `expires-at`), or the identity is too large or a `cosec.gateway.identity.claims` value is not a string
   (at most 1024 characters), number or boolean.
@@ -415,10 +447,19 @@ application port. https://cosec.ahoo.me/operations/troubleshooting#probes-answer
 
 A first platform document that does not let authenticated callers reach `/cosec/control/v1/**` leaves the control plane
 unreachable (403 from the pipeline, before any control check) and `cosec-migrate publish` never overwrites: add the
-`control-api` policy of https://cosec.ahoo.me/guide/quick-start to the platform document, which is only possible through
-the control plane, so a deployment without it must be re-published into an empty Redis or key prefix. A control token
+`control-api` policy of https://cosec.ahoo.me/guide/quick-start to the platform document. Once a platform document
+exists, never empty Redis: a later change that closed the control API (every control call 401/403) is undone with
+`cosec-migrate restore --to-redis <uri> --document platform --revision <last good>`, which prints the plan, then
+`--confirm <head revision>` writes the kept revision as the next one through the control plane's writer
+(https://cosec.ahoo.me/operations/storage#recovering-from-a-lock-out). The control plane refuses such a change with 422
+(`V4`, `... could not reach the control plane: ...`) unless the publisher sends `"lockout": true`. A control token
 is issued for tenant `(platform)` (or the tenant) and app `cosec.control.app-id`; a token for another app is
 `scope-rejected` on a host with an app.
+
+An `:apply` with `REPLACE` answers 409 `REPLACE removes what the file leaves out, and the file was read at revision <m>`
+when the file's header `revision` is not the head's: re-read the head, merge, set `revision` to the head's. An `:apply`
+with `MERGE` never removes: its `OPERATION` WARNING at `$.policies`/`$.bindings`/`$.roles`/`$.rateLimits` names what
+it kept.
 
 A change refused with `REFERENCES` or `V2` (422) names what it met: `[<id>] is referred to by [<doc>]` for a `<doc>` that
 does not refer to it is a publish of `<doc>` that indexed the reference and lost its head write (run `cosec-migrate

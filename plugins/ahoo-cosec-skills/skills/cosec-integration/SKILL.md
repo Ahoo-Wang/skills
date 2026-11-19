@@ -35,7 +35,7 @@ other CoSec module it finds on the classpath. Add each integration as a dependen
 | Ids from CosId 5 | `cosec-cosid` | `me.ahoo.cosid:cosid-spring-boot-starter` 5.x |
 | OpenTelemetry spans | `cosec-opentelemetry` | |
 | Micrometer metrics | `cosec-micrometer` | |
-| OpenAPI route map and app document generation | `cosec-openapi` | `org.springframework.boot:spring-boot-starter-actuator`, `org.springdoc:springdoc-openapi-starter-common` |
+| OpenAPI route map and app document generation | `cosec-openapi` | `org.springframework.boot:spring-boot-starter-actuator`, `org.springdoc:springdoc-openapi-starter-webflux-api` or `-webmvc-api` |
 | Kafka audit | `cosec-kafka` | `org.springframework.boot:spring-boot-starter-kafka` |
 
 ```kotlin
@@ -59,22 +59,27 @@ adapter is missing (MVC, WebFlux, or Gateway even with `cosec.enabled=false`), w
 ```yaml
 cosec:
   jwt:
-    algorithm: hmac256          # hmac256 | hmac384 | hmac512
-    secret: ${COSEC_JWT_SECRET} # blank fails startup while JWT is enabled
-  authorization:
-    scope:
-      app-id: order-service     # the app this host serves: only credentials declaring it are served
-    remote-ip:
-      max-trusted-index: 1      # trusted X-Forwarded-For hops; 0 ignores the header
-    routes:
-      location: classpath:cosec-routes.json   # names the route map; unset, the host loads none
+    secret: ${COSEC_JWT_SECRET} # HMAC key; blank fails startup while JWT is enabled
 ```
+
+Everything else has a default. Add a setting only for the need it serves, and know its consequence:
+
+| Add | When | Consequence |
+|---|---|---|
+| `cosec.authorization.scope.app-id: order-service` | the host serves one app | Only credentials declaring that app are served: a token issued with `TokenSubject(app = null)`, as the Quick Start's demo issues, is `403` `scope-rejected` on every request |
+| `cosec.authorization.routes.location: classpath:cosec-routes.json` | actions come from a route map | The file must exist and hold routes, or startup fails; unset, the host loads none and a request is `http:<METHOD>` |
+| `cosec.authorization.remote-ip.max-trusted-index: 0` | clients reach the host directly | The default `1` trusts one `X-Forwarded-For` hop, which a directly exposed host's clients can forge; `0` ignores the header |
+| `cosec.authentication.revocation.fail-closed: true` | a Redis outage must not accept tokens whose revocation cannot be read | Every authenticated request is `503` while revocations cannot be read |
 
 Startup fails, on purpose, when:
 
 - **JWT is on without revocation storage.** Revocation is always on. With `cosec-cocache` the Redis token store
-  supplies it; without it, register a `TokenStore` and a `RevocationReader` bean yourself, or set
-  `cosec.jwt.enabled=false`.
+  supplies it; without it, register all three beans yourself (`TokenStore`, `RevocationReader`, `TokenFamilyStore`), or
+  set `cosec.jwt.enabled=false` on a service that issues no tokens and reads none. **A service that only verifies tokens
+  another service issues must read the issuer's revocations**: `cosec-cocache` on the issuer's Redis with the issuer's
+  `cosec.key-prefix`. `RevocationReader.NONE` is only for tokens that nobody, anywhere, revokes: with it the service
+  accepts every token the issuer revoked until it expires
+  (https://cosec.ahoo.me/scenarios/resource-server).
 - **A route map is left out or empty.** `classpath:cosec-routes.json` exists while
   `cosec.authorization.routes.location` is unset (name it, or set the property empty to run without one); a location
   that does not exist; a map with no routes. A gateway host loads no route map.
@@ -210,6 +215,10 @@ cosec:
   credential's expiry, is 401 `token-expired`; unknown version, no expiry or an identity from the future is 401
   `token-invalid`; a scope that does not resolve here (for example a different `scope.app-id`) is 400.
 - Startup fails for an unknown `cosec.pipeline.mode`, and for `mode=gateway` on a Spring Cloud Gateway host.
+- Tests of such a service, without a gateway: `IdentityHeader` (`cosec-testkit`, experimental) writes the header a
+  gateway sends: `forSubject(subject, tenant, app, space, roles)`, `of(identity)`, or `withToken(token, verifier,
+  revocations)` for a real token's session. A header is refused after 60s: make one per request. Never hand-write the
+  JSON, and never use it in production.
 
 Details: https://cosec.ahoo.me/integration/web#services-behind-the-gateway and
 https://cosec.ahoo.me/guide/security-model#trust-boundaries.
@@ -227,7 +236,9 @@ https://cosec.ahoo.me/guide/security-model#trust-boundaries.
   of your own with `membershipClaimLimit` set issues such tokens when the claims would exceed that many bytes (the
   starter's converter never does). Register the provider before issuing them, or those requests are 503.
 - Sessions: issue tokens through `TokenCompositeAuthentication`, which starts a session (a token family); refresh with
-  `RefreshTokenAuthentication(verifier, tokenRevocation, tokenFamilies)`. Only the newest pair refreshes, an older
+  `RefreshTokenAuthentication(verifier, tokenRevocation, tokenFamilies, memberships)`, where `memberships` is
+  `MembershipRefresh.CLAIMS` (keeps the old token's roles: a removed role applies at the next sign-in or after
+  `revokeSubject`) or a `MembershipRefresh` that looks the user up again. Only the newest pair refreshes, an older
   one presented again ends the session, and a session lasts `cosec.jwt.session.lifetime` (30 days).
 - Refresh and logout routes: set `cosec.authentication.login.refresh.path` and `logout.path` and the starter serves them
   (`POST`, the pair as JSON; `200` pair, `401` token-*, `503` unavailable, `500` error; logout `204`), on Spring MVC and
@@ -261,7 +272,8 @@ the pipeline: 401/403 deny, 429 rate limited, 503 undecidable, 400 ambiguous req
 `SecurityContext`: `ServerWebExchange.getSecurityContext()` / `HttpServletRequest.getSecurityContext()` (extension
 functions in `ServerWebExchanges` / `ServletRequests`). Web details: https://cosec.ahoo.me/integration/web.
 
-To decide in code (UI buttons, message consumers, object-level checks), inject `AuthorizationChecker`:
+To decide in code **for the request in progress** (UI buttons, object-level checks), inject `AuthorizationChecker` and
+pass it the `SecurityContext` of that request:
 
 ```kotlin
 checker.check(securityContext, "order:ship", "order/42")      // suspend
@@ -271,7 +283,17 @@ checker.checkBlocking(securityContext, "order:ship", "order/42") // cosec-webmvc
 
 The resource is `type/id`, or a path (`/orders/42`) for an `http:` action. It uses the principal and scope of the
 permitted request, runs no rate limits and notifies no listener, and is `false` on any deny, error or outage. Keep
-enforcing on the real request. To record what permitted an action, `checker.decide(...)` (suspend) answers the
+enforcing on the real request. A check is not for a message consumer, a scheduler or any work after the request, and a
+`SecurityContext` must never be stored: a check decides with the principal and memberships frozen when the request was
+permitted, and checks no age, revocation or change of roles. Once the adapter has ended the request every check of its
+context is `false` (`PIP-26`); a transport of your own ends its request by closing the `Outcome` of `Pipeline.evaluate`
+(`use { }`, or `close()` when a streamed response completes), and one that never closes it keeps permitting after
+logout or after a role is removed; in tests, `PipelineFixture.end(context)` and `PermittedRequest.end(context)`. Authorize where the request arrives and carry the decision, not the context, with the work; run a
+transport of your own through `Pipeline.evaluate` (`Outcome.security?.securityContext`) rather than verifying tokens by
+hand; and when you must verify a token yourself, call `TokenVerifier.verify` and then `TokenRevocation.check` (the
+starter's bean), which `verify` alone does not replace. CoSec decides no work the system starts itself in 8.0. A check
+applies no route map: `http:POST` on a path decides as `http:POST` even where a route maps it, so check a mapped route by
+its action and typed resource (https://cosec.ahoo.me/integration/checks). To record what permitted an action, `checker.decide(...)` (suspend) answers the
 `Decision` itself: `Decision.Permit.by` names the statement and, in `via`, the binding and its document. Keep a
 `Decision` in the process; never put it into a response. See https://cosec.ahoo.me/integration/checks.
 
@@ -299,7 +321,8 @@ and never writes Redis (https://cosec.ahoo.me/scenarios/roles, https://cosec.aho
 Worked examples with documents and settings that run: https://cosec.ahoo.me/scenarios/simple-mode (one tenant, no apps),
 `/scenarios/app` (an app without spaces), `/scenarios/spaces` (per-app and shared spaces), `/scenarios/service-account`
 (an API key limited to one space), `/scenarios/tenant-owner` (an owner by attachment), `/scenarios/gateway` (which
-action names the gateway and the service use). Tokens are issued for one app (`TokenSubject.app`): the service's
+action names the gateway and the service use), `/scenarios/resource-server` (a service that verifies another service's
+tokens and decides in its own code). Tokens are issued for one app (`TokenSubject.app`): the service's
 `cosec.authorization.scope.app-id` must be the token's. The model: https://cosec.ahoo.me/guide/model.
 
 ## Optional behavior
