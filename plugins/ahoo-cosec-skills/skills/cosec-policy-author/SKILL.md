@@ -11,7 +11,7 @@ is for (anyone, a principal, a role), in which tenant, app and space, and the ex
 
 The human-facing reference is https://cosec.ahoo.me/policies/language. In a CoSec checkout the format is defined in
 `core/document/src/main/kotlin/me/ahoo/cosec/document/format/PolicyDocumentFormats.kt` (generated into
-`schema/cosec-snapshot-document.schema.json`, `cosec-binding.schema.json`, `cosec-catalog.schema.json`) and read by
+`schema/8.0/cosec-snapshot-document.schema.json`, `cosec-binding.schema.json`, `cosec-catalog.schema.json`) and read by
 `PolicyDocumentCodec`; conditions are checked by `model/.../condition/ConditionChecker.kt`. Treat those as the truth.
 
 ## Documents
@@ -117,6 +117,12 @@ A policy does nothing until a binding (or a token's `policies` claim, for an `at
   character of their text (`report-*.pdf` is 14), twice after a leading `**`. Prefer whole-segment `*`, `{name}` and
   `**`, which cost nothing, and keep the text in glob segments short.
 - A DENY on a bare type (`order`) does not compile: it would only cover the empty id. Write `order/**`.
+- A DENY (or a rate limit rule) with `"decodeAndParseSegments": false` does not compile (DOC-14): it matches the path
+  still percent-encoded, so `/%61dmin/users` escapes a DENY on `/admin/**`. Only an ALLOW may turn decoding off.
+  `caseSensitive` defaults to `true` on a DENY too: write `false` when a backend routes paths ignoring case.
+- No id holds a control character or an unpaired surrogate (DOC-13): policy ids, statement names, binding ids and
+  subjects, roles, catalog permission ids, declared attributes, attribute paths and path variable names. The document
+  does not compile. A role's or catalog entry's `name` and `description` are display text and may hold anything.
 - How a request gets its action: on WebFlux and WebMvc hosts a route map (`cosec-routes.json`) maps method and path to
   `service:verb` on a typed resource (`order/{orderId}`); any request no route matches keeps `http:<METHOD>` on
   `http:path:<path>`. A Spring Cloud Gateway host loads no route map: every request is in the `http` namespace.
@@ -172,6 +178,11 @@ requests without the attribute. Prefer an ALLOW on the positive fact, and put ne
 
 Limits (platform `limits`, defaults): `maxNodes` 64, `maxDepth` 8, `maxInValues` 1024, `maxCidrBlocks` 256,
 `maxLiteralBytes` 1024, `maxCost` 256 per statement condition. Every document compiles against the platform's limits.
+The same `limits` hold the entry budgets the control plane checks every change against (CTL-40, CTL-41): per document
+`maxPolicies` 10,000, `maxStatements` 20,000, `maxRoleBindings` 10,000, `maxAnyoneBindings` 1,000, and
+`maxChangeOperations` 20,000 per change. A change may not raise a count over its budget; a document already over one
+is served, may change and may shrink. Hosts never enforce them. Split a large document by app or tenant before raising
+them.
 
 ### External attributes
 
@@ -249,7 +260,10 @@ with `action` may not coexist with a hand-written policy of its id: write a poli
 action) only for a condition, a DENY or several statements. An entry with neither is for UIs only and no role can list
 it. A system role (app document) names no `app` or `space`, applies to every tenant, and may list `"*"`; a custom role
 (tenant document) names its `app` (required), optionally one `space`, lists permissions only, and applies to that
-tenant. Roles are expanded into bindings (`role:<roleId>@<app>:<permission>`) before anything reads them; hand-written
+tenant. A role id is not qualified by its app in a membership (`role@space`): a member whose roles come from a provider
+or a token bound to no app holds a role in every app that defines its id, and an app change that defines a system role
+another app defines is warned (`ROL-12`); prefix role ids with the app (`wms.clerk`) when that is not meant. Roles are
+expanded into bindings (`role:<roleId>@<app>:<permission>`) before anything reads them; hand-written
 `bindings` still work, with `{"role": …}` subjects, and the two may both grant a role. Without spaces write nothing about
 them: no `spaced`, no `space`, no `@` in the token's roles, no `CoSec-Space-Id`.
 
@@ -331,7 +345,7 @@ Check the final document for:
 
 ## Validation and rollout
 
-1. **Schema:** validate the document against `schema/cosec-snapshot-document.schema.json` (its `platformDocument`,
+1. **Schema:** validate the document against `schema/8.0/cosec-snapshot-document.schema.json` (its `platformDocument`,
    `appDocument` and `tenantDocument` definitions). The schema cannot check unique ids, binding placement, attribute
    types or limits; compiling does.
 2. **Compile:** in Kotlin, `PolicyDocumentCompiler.forPlatform(platform).validate(PolicyDocumentCodec.decode(kind,

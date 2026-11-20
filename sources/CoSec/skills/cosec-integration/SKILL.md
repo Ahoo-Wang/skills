@@ -202,14 +202,19 @@ as the gateway, and `forward-authorization=true` so it gets the token), or trust
 cosec:
   pipeline:
     mode: gateway   # read the caller from CoSec-Identity; no snapshot, engine, route map, listeners or Redis
+    identity:
+      only-gateway-can-reach: true   # the operator's statement; startup fails without it (STA-7)
   jwt:
     enabled: false  # it verifies no tokens, so it needs no secret
 ```
 
 - Add only the web module (`cosec-webflux` or `cosec-webmvc`); no `cosec-cocache`. No `AuthorizationChecker`
   is wired in this mode.
-- **Only the gateway may reach it** (NetworkPolicy, private network or mTLS): it believes any `CoSec-Identity`, and
-  logs a WARN at startup saying so. Never expose such a service directly.
+- **Only the gateway may reach it** (NetworkPolicy, private network or mTLS): it believes any `CoSec-Identity`, and does
+  not start until `cosec.pipeline.identity.only-gateway-can-reach=true` states that it is so (`STA-7`; write it only when it
+  is true). It also fails to start with a hidden-method filter (`spring.mvc.hiddenmethod.filter.enabled`,
+  `spring.webflux.hiddenmethod.filter.enabled`, or a `HiddenHttpMethodFilter` bean, `STA-6`): the gateway removes the
+  method-override headers and decided the request line's method. Never expose such a service directly.
 - Answers: no header is anonymous; unreadable, repeated or oversize (`cosec.pipeline.identity.max-size`, 8KB) is 400;
   older than `cosec.pipeline.identity.max-age` (60s) plus `cosec.authentication.revocation.skew`, or past the
   credential's expiry, is 401 `token-expired`; unknown version, no expiry or an identity from the future is 401
@@ -237,14 +242,17 @@ https://cosec.ahoo.me/guide/security-model#trust-boundaries.
   starter's converter never does). Register the provider before issuing them, or those requests are 503.
 - Sessions: issue tokens through `TokenCompositeAuthentication`, which starts a session (a token family); refresh with
   `RefreshTokenAuthentication(verifier, tokenRevocation, tokenFamilies, memberships)`, where `memberships` is
-  `MembershipRefresh.CLAIMS` (keeps the old token's roles: a removed role applies at the next sign-in or after
+  `MembershipRefresh.CLAIMS` (keeps the old token's memberships: a removed role applies at the next sign-in or after
   `revokeSubject`) or a `MembershipRefresh` that looks the user up again. Only the newest pair refreshes, an older
   one presented again ends the session, and a session lasts `cosec.jwt.session.lifetime` (30 days).
 - Refresh and logout routes: set `cosec.authentication.login.refresh.path` and `logout.path` and the starter serves them
   (`POST`, the pair as JSON; `200` pair, `401` token-*, `503` unavailable, `500` error; logout `204`), on Spring MVC and
   WebFlux, never on a gateway. A document must permit an anonymous `POST` of each path, or every refresh is
   `401 token-expired`. A `MembershipRefresh<RefreshTokenCredentials>` bean is used; it refuses by throwing
-  `TokenRevokedException`. Unset, write the routes yourself as below.
+  `TokenRevokedException`. With no such bean (and no `RefreshTokenAuthentication` of your own) startup fails until
+  `cosec.jwt.session.memberships-on-refresh=from-token` states that a refreshed token keeps the old token's memberships (`STA-8`):
+  ask the operator which they want (a bean applies a removal within the access token's lifetime, the property at the
+  next sign-in, `cosec.jwt.session.lifetime` at the latest) and never write it just to start. Unset, write the routes yourself as below.
 - Logout: `TokenRevoker.revoke(accessToken)` ends the session, or `revoke(compositeToken)` once the access token has
   expired. Emergency: `TokenRevoker.revokeSubject(tenant, principal)` revokes every token of a principal issued until now
   (needs the Redis token store).
