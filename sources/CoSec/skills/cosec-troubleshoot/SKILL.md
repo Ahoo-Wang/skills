@@ -122,6 +122,8 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   Tomcat with `native`: remove `max-trusted-index`; Reactor Netty or Jetty with `native` and index `0`: set the number of
   proxies, or `none`.
   https://cosec.ahoo.me/operations/troubleshooting#startup-fails-on-the-client-address
+- **`Social sign-in, whose states are kept in Redis ..., needs cosec-cocache`** (STA-1): add `cosec-cocache`, declare
+  your own `SocialStateStore` bean, or set `cosec.authentication.login.social.enabled=false`.
 - **`cosec-cocache needs a ReactiveStringRedisTemplate bean`** (STA-1): add `spring-boot-data-redis` and configure
   Redis; without it no snapshot is read and rate limits would count per instance.
 - **`cosec.pipeline.mode=gateway: this service believes any CoSec-Identity header it receives ... State it once it is
@@ -203,6 +205,9 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 - **`CoSec's tokens are on, but <stores> are missing`**: revocation is always on, and the message names every missing
   store of the three (`TokenStore`, `RevocationReader`, `TokenFamilyStore`). Add `cosec-cocache` (all three on Redis),
   or register a bean of each missing one, or set `cosec.jwt.enabled=false` on a service that does not verify tokens.
+  **`A TokenVerifier bean turns token authentication on ... no RevocationReader is available`**: a service with its own
+  `TokenVerifier` and no `cosec.jwt.secret` has tokens on and needs only the reader: `cosec-cocache` on the issuer's Redis,
+  a `RevocationReader` bean, or `RevocationReader.NONE` where no one revokes a token.
   **`Tokens are verified against RevocationReader.NONE`** (`WARN`): revoked tokens are accepted until they expire;
   right only where no one revokes a token. A service verifying an issuer's tokens reads the issuer's revocations
   (`cosec-cocache` on the issuer's Redis, same `cosec.key-prefix`; https://cosec.ahoo.me/scenarios/resource-server).
@@ -567,6 +572,10 @@ bootstrap, a migration or an older instance, which may have been publishing the 
 over the same base first, by <id>` are publishes that crossed: rebase the change that lost. Blocking a principal is not
 a document change: use the blacklist's `BlacklistSource`, which waits for no slot.
 
+When a tenant change waits for approval with `TOO_LARGE`, the grant analysis spent its four million comparisons
+before it reached those grants (`CTL-49`): split the change; what counts is what it adds or rewrites, times what its
+author holds.
+
 When every tenant grant over every app (a binding with app `*`, an attachment, also one whose condition narrows it to
 apps the change does not name) waits for approval as `UNREADABLE`
 after an upgrade, and the control plane logs `The app list is missing or incomplete`, the app list is not complete:
@@ -581,6 +590,12 @@ back-references of 8.0.0-beta.4 or earlier, one value per policy, which this ver
 (`CTL-42`). Any other failure of a set, a timeout or a failover, comes through as what it is, without that advice. Stop every control plane of an earlier version and run `cosec-migrate repair-references` once: it converts
 them into sets, never replaces a set, and removes the old document list last (`MIG-4`). Data-plane instances are not
 affected.
+
+When `GET /changes` answers `503` and the reclaim pass logs `The open-change sets are not kept` at `WARN`, revisions
+are not reclaimed: the store still holds the open-change list of 8.0.0-beta.4 or earlier, or an older control plane
+wrote it again, and the open-change sets are not trusted until `cosec-migrate repair-references` lists every change of
+it and removes it (`CTL-54`). Stop every older control plane and run the command; a `FAILED change [<id>] does not read`
+line names a change record to remove or fix before the next run.
 
 A shadow window that stays blocked has a `CANDIDATE_ERROR`: one instance cannot compile the candidate, usually because
 it reads an `ext.*` attribute whose provider runs on the control host but not on that instance. Providers and their

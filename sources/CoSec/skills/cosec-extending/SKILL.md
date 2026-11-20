@@ -172,7 +172,7 @@ fun interface RateLimiter {
 
 Implement `me.ahoo.cosec.spi.ratelimit.RateLimiter`. The rules
 stay in the documents; the limiter only counts. Return `RateLimitResult(allowed, limit, remaining, resetAfter)`; use
-`RateLimiter.window(limit)` for the same sliding window as the built-in limiters. Throw when the store fails: the
+`limit.limitPerWindow`, `limit.windowMillis` and `limit.resultOf(...)` (import `me.ahoo.cosec.spi.ratelimit.resultOf`) for the same sliding window as the built-in limiters. Throw when the store fails: the
 rule's `strictFailure` then decides (skip, or 503). The built-ins are `ReactiveRedisRateLimiter` (with a
 `ReactiveStringRedisTemplate`) and `LocalRateLimiter` (per JVM).
 
@@ -185,7 +185,7 @@ fun interface Authenticator {
 ```
 
 `Credentials` holds the bearer token (`Authorization` header, or the query or the cookie when allowed) and the API key header.
-Return `AuthnResult.Authenticated(AuthenticatedPrincipal(id, tenant, memberships, attributes, credential), "method")`,
+Return `AuthnResult.Authenticated(AuthenticatedPrincipal(id, tenant, memberships, attributes, credential), Identity.Method("name"))`,
 `Anonymous` (no credentials), `Rejected(reason)` (401 `token-*` on deny), or `Unavailable(cause)` (503). Memberships
 you pass have source `Memberships.Source.CLAIMS` (`MembershipClaims.parse(roles, policies)` builds them from
 `role`/`role@space` strings); pass `null` to ask the `MembershipProvider`. A bean of yours replaces the built-in `CompositeAuthenticator`
@@ -204,7 +204,9 @@ writes, implement `documents()` (every document with indexed revisions; may name
 (release only while the holder still has it, checked and removed in one atomic step), `withdrawCandidate(key, window)`
 (remove the candidate only while it is still that window's, in one atomic step), `stagedCandidate` and `putCandidate`
 with the digest it read (write only over the candidate read), referrers with the revision that
-indexed each, and `RevisionIndex.reclaiming` kept with the index. A failed read throws; never answer "absent". Start from
+indexed each, and `RevisionIndex.reclaiming` kept with the index. A failed read throws; never answer "absent":
+`ControlStoreException` when the store cannot answer (the control API answers 503), `SnapshotFormatException` when a
+value does not decode (500). Start from
 `InMemoryControlStore` and the KDoc of `core/control/src/main/kotlin/me/ahoo/cosec/control/store/ControlStore.kt`.
 
 ## IdGenerator: CoSec's ids
