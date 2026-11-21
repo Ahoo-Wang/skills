@@ -272,6 +272,11 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   JSON paths. Usually a document a newer CoSec wrote during a rolling upgrade, or a direct write to the store. Compile the stored
   document yourself (see "Reproduce narrowly") to see the errors. Documents compile against the platform's `limits` and
   `attributes`, so a platform change can make an app or tenant document stop compiling.
+- A compilation does not end (R2D-11): `Compiling snapshot document [<doc>] revision <n> did not end within <budget>`
+  at `ERROR`. The load fails at the next revalidation tick (cold: 503; reload: the previous revision is kept); the
+  revision is not compiled again while that compilation runs, each such revision holding one compile thread. Usually
+  a revision written to Redis outside the control plane: publish a corrected one.
+  https://cosec.ahoo.me/operations/troubleshooting#a-compilation-does-not-end
 - Redis is unreachable for a document not yet held locally (`cold-load-timeout`, default 2s), or the snapshot lags
   beyond `fail-closed.max-lag` for a tenant in `cosec.authorization.snapshot.fail-closed.tenants`.
 
@@ -449,7 +454,7 @@ or a request that bypassed the gateway:
   keeping revision <n>` means Redis could not be read: the installed revision stays until a read succeeds.
   `Snapshot document [<key>] regressed from revision <a> to <b>` means the store lost a write (for example a
   failover); `cosec-migrate verify-chain` names every document whose revision chain lost a record.
-- The control plane's `GET /documents/{key}/revisions/{rev}/propagation` reports how many of the recently reporting instances (those with `cosec.authorization.shadow.enabled`) have installed it.
+- The control plane's `GET /documents/{key}/revisions/{rev}/propagation` reports, of the recently reporting instances (those with `cosec.authorization.shadow.enabled`, `recent`), how many hold the document (`holding`) and how many of those have installed it (`installed`), as read at `asOf` (at most 5 seconds ago). No instance is behind when `installed` equals `holding`; `holding: 0` means no instance holds the document, and the first request loads it at the published revision.
 
 ### Snapshot log lines missing / housekeeping summary
 
@@ -596,6 +601,19 @@ are not reclaimed: the store still holds the open-change list of 8.0.0-beta.4 or
 wrote it again, and the open-change sets are not trusted until `cosec-migrate repair-references` lists every change of
 it and removes it (`CTL-54`). Stop every older control plane and run the command; a `FAILED change [<id>] does not read`
 line names a change record to remove or fix before the next run.
+
+A shadow window that does not close while the control plane logs `Shadow window <w> of change <c> is waiting for
+[<instances>]` lost the report of an instance that had reported on it (stopped, scaled down, a Redis failover). Its
+evidence is missing, so the window waits for it (`CTL-56`); an instance that still serves reports again within its
+report interval. Otherwise the window closes insufficient at `cosec.control.shadow.max-duration`, naming the instance in
+`vanished`: publish with the summary acknowledged, or abandon and stage again.
+
+A shadow window that does not close while the control plane logs `Shadow window <w> of change <c> is waiting for the
+acknowledgement of [<instances>]` (and `GET /changes/{id}` names them in `shadow.waitingFor`) waits for live instances
+that do not acknowledge it (`CTL-10`): an older version (finish the upgrade; its status expires within two minutes once
+it is gone) or an instance that cannot read the staged list (`The staged list cannot be read` in its log, a rising
+`cosec.shadow.staged.age`). With `waitingFor` empty it waits for samples: too little traffic on its documents; it closes
+insufficient at `max-duration`.
 
 A shadow window that stays blocked has a `CANDIDATE_ERROR`: one instance cannot compile the candidate, usually because
 it reads an `ext.*` attribute whose provider runs on the control host but not on that instance. Providers and their
