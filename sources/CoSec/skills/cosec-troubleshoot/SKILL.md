@@ -64,6 +64,11 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 
 ## Startup failures
 
+- **A gateway restarts once right after `kubectl apply`**, and `kubectl logs --previous` ends with
+  `RedisConnectionException: Unable to connect to redis/...`: it started before Redis was reachable (the overlay is
+  applied whole). Startup fails closed without the store of record, and the kubelet restarts it until Redis answers: no
+  fix. A count that keeps growing is Redis unreachable (address, credentials, network policy).
+  https://cosec.ahoo.me/operations/troubleshooting#a-gateway-restarts-once-right-after-it-is-deployed
 - **`cosec.authorization.snapshot.revalidate-interval (<value>) must be ...`**: the periodic revalidation is the only
   bound on a lost invalidation (SNP-6), so the interval must be at least 1 second, at most 5 minutes, and,
   with `fail-closed.tenants`, less than `fail-closed.max-lag`. Use a value within the bounds; never
@@ -115,10 +120,10 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 - **`STA-5: <n> CorsConfigurationSource beans of the application`**: the starter's CORS filter takes one source. Keep one,
   or declare a `CorsFilter` bean of your own.
 - **`cosec.audit.kafka.delivery=[<value>] is neither required nor best-effort.`**: write one of the two.
-- **A message that names `server.forward-headers-strategy`, `RemoteIpValve` or `max-trusted-index`**: the host cannot say
+- **A message that names `server.request.header.forwarded.strategy` (or the deprecated `server.forward-headers-strategy`), `RemoteIpValve` or `max-trusted-index`**: the host cannot say
   which party writes the client address. `framework`, or a `ForwardedHeaderFilter` bean that rewrites the request: use
-  `native` and configure the proxies on the server, or `none` and set `cosec.authorization.remote-ip.max-trusted-index`;
-  Tomcat with `native`: remove `max-trusted-index`; Reactor Netty or Jetty with `native` and index `0`: set the number of
+  `web-server` and configure the proxies on the server, or `none` and set `cosec.authorization.remote-ip.max-trusted-index`;
+  Tomcat with `web-server`: remove `max-trusted-index`; Reactor Netty or Jetty with `web-server` and index `0`: set the number of
   proxies, or `none`.
   https://cosec.ahoo.me/operations/troubleshooting#startup-fails-on-the-client-address
 - **`Social sign-in, whose states are kept in Redis ..., needs cosec-cocache`** (STA-1): add `cosec-cocache`, declare
@@ -297,13 +302,13 @@ with the host stopped. Its probes are on the management port 8081, never on 8080
 ### One principal, tenant or route gets 503
 
 - **Memberships unavailable**: the token carries `cosec.membership: "provider"` and no `MembershipProvider` bean
-  exists, or it failed or exceeded `cosec.authorization.membership.timeout`; or the token has the marker together with
+  exists, or it failed or exceeded the membership timeout (10 % of `cosec.pipeline.timeout`); or the token has the marker together with
   `roles`/`policies` claims, or an unknown marker.
 - **Missing or ambiguous policy**: the token's `policies` claim names a policy that does not exist or is not
   `attachable`; a tenant binding names a platform policy that was removed; or a tenant defines a policy id the platform
   also defines.
 - **External attribute unavailable**: a statement reads `ext.<provider>.<name>` with `onMissing: indeterminate`
-  (default) and the provider failed, timed out (`cosec.authorization.attributes.timeout`) or is not registered on this
+  (default) and the provider failed, timed out (the attribute timeout, 6 % of `cosec.pipeline.timeout`) or is not registered on this
   instance. A blacklist source failure makes every request 503 unless a DENY matches.
 - **Only IPv6 clients get 503, on a statement reading `ext.ip2region.*`**: the host has only the bundled IPv4 ip2region
   database, and an address no loaded database covers is unavailable, not absent (`ATR-9`). Confirm with the startup
@@ -315,7 +320,7 @@ with the host stopped. Its probes are on the management port 8081, never on 8080
   values`); an ALLOW on it then does not match. One value repeated reads as that value.
 - **Rate limiter cannot count** and the matching rule has `strictFailure: true` (on a Redis Cluster, `CROSSSLOT` in
   the log: see Rate limiting; without Redis, a full `LocalRateLimiter`: see Rate limiting).
-- **A REQUIRED decision listener failed or timed out** (`cosec.observability.listener.required-timeout`): it turns a permit into 503.
+- **A REQUIRED decision listener failed or timed out** (20 % of `cosec.pipeline.timeout`): it turns a permit into 503.
 - **The authenticator's dependency failed** (for example the API key or revocation store); a revocation store that
   cannot be read lets the request's token through instead (the documented exception to fail closed), unless
   `cosec.authentication.revocation.fail-closed` is on. A refresh fails then (`RevocationUnavailableException`, `IDN-14`):
@@ -569,7 +574,12 @@ the approver's token was revoked since, the provider no longer gives the approve
 tenant principal approved a boundary change or (under four-eyes) a platform principal's change, or the approval names
 no credential (`the approval does not say what credential its approver approved with`: from before the upgrade, an
 older instance, or a credential without an id), so approve again. A 403 on `:approve` with `an API key cannot approve`
-in the log: approvals are a person's, so approve with a token; an API key is never the trust root either. A tenant
+in the log: approvals are a person's, so approve with a token; an API key is never the trust root either. A change a
+service makes through `ControlService` or the service port that waits for a person (`NOT_ANALYZED` on an app's catalog,
+`CROSS_TENANT` on a tenant's grant) although it states a platform administrator: no one is the trust root there
+(`CTL-81`); give a role projection the role class (`cosec:manage-roles`), or have a person approve on the operators'
+routes. A role change of such a service that waits with no `ROLE_CLASS`: the principal lacks `cosec:manage-roles` on
+the tenant's document, or the role is of the control plane's own app or has no app, never the class's. A tenant
 principal's `SetBoundary`, its `REPLACE` or rollback that would drop the platform's boundary, and its reject or abandon
 of a boundary change are 403: a tenant's boundary is the platform's. A 409 on staging means another change holds the
 document's slot; only a break-glass revoke of a live binding, or a change that only narrows by a holder of
@@ -633,9 +643,31 @@ from the last minute; one cut off from Redis longer is not waited for, and a hos
 `waitingFor` empty it waits for samples: too little traffic on its documents; it closes
 insufficient at `max-duration`.
 
+`propagation` answering `unknown` above 0 means some live instances have no resident record anyone can read
+(`CTL-75`), so "no instance is behind" cannot be said yet: instances still on 8.0.0-beta.5 (expected mid-upgrade, no
+log line), an instance whose resident write keeps failing (`Writing the resident documents failed` at `WARN` on it,
+usually a Redis user without the `shadow:resident` keys), or a record that does not decode (`The resident documents of
+instance [<instance>] do not read` at `WARN` on the control host: a newer version, or a corrupt value).
+
 A shadow window that stays blocked has a `CANDIDATE_ERROR`: one instance cannot compile the candidate, usually because
 it reads an `ext.*` attribute whose provider runs on the control host but not on that instance. Providers and their
 declared types must match on every instance and the control host; the change is never published while blocked.
+
+### Startup fails on two control services
+
+- `This instance runs the control plane, and cosec.control.service-url names a control-plane host as well` (`STA-11`):
+  one `ControlService` per application. Remove `cosec.control.service-url` to embed, or set `cosec.control.enabled=false`
+  to call the host. `cosec.control.service-url needs cosec-control-http`: add `me.ahoo.cosec:cosec-control-http`.
+  https://cosec.ahoo.me/operations/troubleshooting#startup-fails-on-two-control-services
+
+### The typed control client does not read a document
+
+- `ControlClient` throws `SnapshotFormatException` (`a <entry> has members this version does not know`): the control
+  host is newer than the application's `cosec-control-sdk` and the document holds a member only it knows. The client
+  refuses rather than drop it (an `:apply` of what it read would remove the member, `CTL-76`). Upgrade
+  `cosec-control-sdk`; meanwhile read the document through `ControlService` as JSON. An unknown closed-set value (a
+  state, a conflict) is not this error: it reads as unknown, with its text.
+  https://cosec.ahoo.me/operations/troubleshooting#the-typed-control-client-does-not-read-a-document
 
 ## Reproduce narrowly
 

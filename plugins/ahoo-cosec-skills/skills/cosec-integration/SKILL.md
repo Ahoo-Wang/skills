@@ -31,6 +31,7 @@ other CoSec module it finds on the classpath. Add each integration as a dependen
 | Spring Cloud Gateway | `cosec-gateway` | |
 | Redis: policy snapshot, revocation, API keys, cluster-wide rate limits, shadow | `cosec-cocache` | `org.springframework.boot:spring-boot-data-redis`, `me.ahoo.cocache:cocache-spring-boot-starter` |
 | Control plane (change, simulate, explain, publish) | `cosec-control` | `cosec-cocache` |
+| Code that calls the control plane (`ControlService`, `ControlCaller`, the typed `ControlClient`) | `cosec-control-sdk` (brought by `cosec-control`, the in-process implementation), or `cosec-control-http` to call a control-plane host (`cosec.control.service-url`; it brings `cosec-runtime`) | |
 | Social OAuth login | `cosec-social` | |
 | IP region attributes (`ext.ip2region.*`) | `cosec-ip2region` | |
 | Ids from CosId 5 | `cosec-cosid` | `me.ahoo.cosid:cosid-spring-boot-starter` 5.x |
@@ -49,7 +50,7 @@ implementation("me.ahoo.cocache:cocache-spring-boot-starter")
 ```
 
 Maven takes the same artifacts. The "Also add" column is what each module needs next to it; give each its version yourself, with Gradle or Maven: no CoSec module imports a platform
-([what CoSec needs from your build](https://cosec.ahoo.me/guide/introduction#what-cosec-needs-from-your-build): Spring Boot 4.1, CoCache 8 for `cosec-cocache`, JDK 21).
+([what CoSec needs from your build](https://cosec.ahoo.me/guide/introduction#what-cosec-needs-from-your-build): Spring Boot 4.2, CoCache 8 for `cosec-cocache`, JDK 21).
 There are no starter capabilities (`requireCapability(...-support)`) in 8.0: replace each with its module.
 Startup fails with `... needs <artifact> (me.ahoo.cosec:<artifact>) on the classpath ... (STA-1)` when the web stack's
 adapter is missing (MVC, WebFlux, or Gateway even with `cosec.enabled=false`), when `cosec.api-key.store=redis` lacks
@@ -224,7 +225,9 @@ cosec:
 - Tests of such a service, without a gateway: `IdentityHeader` (`cosec-testkit`, experimental) writes the header a
   gateway sends: `forSubject(subject, tenant, app, space, roles)`, `of(identity)`, or `withToken(token, verifier,
   revocations)` for a real token's session. A header is refused after 60s: make one per request. Never hand-write the
-  JSON, and never use it in production.
+  JSON, and never use it in production. A Spring Boot test that starts the service states the boundary too, or the
+  context fails to start: `@SpringBootTest(properties = [IdentityHeader.ONLY_GATEWAY_CAN_REACH])` (true in a test,
+  which only its own client reaches; never copied into a deployment).
 
 Details: https://cosec.ahoo.me/integration/web#services-behind-the-gateway and
 https://cosec.ahoo.me/guide/security-model#trust-boundaries.
@@ -318,9 +321,20 @@ it) or `only-trusted-callers-can-reach=true` (services call it directly, as the 
 that the network makes it so. The network is the boundary: a workload that reaches the host is whoever it claims, a
 platform administrator included. A service that was in `gateway` mode and now needs the control plane moves to `enforce`
 with `caller=forwarded-identity`. From code in the same process, `ControlService` with `ControlCaller.of(securityContext)`
-or `ControlCaller.service(...)`; `cosec.control.http.enabled=false` serves no routes. Every instance with the control plane runs
-its maintenance passes under their leases; no property turns them off. The service API has no client class of its own yet: a service writes `CoSec-Identity` with
-`IdentityHeader.write` (`cosec-document`).
+or `ControlCaller.service(...)`, or the typed `ControlClient(service)` over it (`proposeAndPublishWithoutShadow` for a
+service that writes what it already decided: it needs `cosec:skip-shadow`; `check` to validate a change before storing
+something of its own: the proposal's answer, nothing stored, `CTL-78`); `cosec.control.http.enabled=false` serves no routes. Every instance with the control plane runs
+its maintenance passes under their leases; no property turns them off. A service calls the service port through
+`HttpControlService` (`cosec-control-http`): set `cosec.control.service-url=http://<host>:8082/cosec/control/v1` and the
+starter's `ControlService` is it, writing `CoSec-Identity` for each call. One `ControlService` per application: naming a host on
+an instance that runs the control plane fails startup (`STA-11`). Through `ControlService`, in process or over the
+service port, no one is the trust root, whoever the caller states, a platform administrator included (`CTL-81`): every
+change is analyzed, and what the analysis cannot prove waits for a person, who approves on the operators' routes. It
+reaches the tenant and app documents and their change flow, never the platform document. A service that projects roles
+into tenants holds the role class instead: `cosec:manage-roles` with `cosec:write`, `cosec:skip-shadow` and
+`cosec:publish` on `doc/tenant/**`, and `cosec:grant` on `scope/**`; its `putRole`/`removeRole` of a business app's roles
+publish with no person (a `ROLE_CLASS` record), a role of the control plane's own app or with no app waits, and a
+catalog (`putCatalog`) always waits (https://cosec.ahoo.me/policies/testing#the-role-class).
 
 With `cosec-control` (and `cosec-cocache`), the host serves the control API under
 `{cosec.control.http.base-path}/v1` (default `/cosec/control/v1`): documents, changes, shadow windows, approval,
@@ -336,8 +350,10 @@ The control plane's token is issued for tenant `(platform)` (an administrator) o
 `cosec.control.app-id`: `TokenSubject(id = "alice", app = "cosec-control", tenant = "(platform)")`. A change is
 `POST /changes` (document, base revision, operations), then `:skip-shadow` with a `reason` (the trust root, and a
 tenant's administrator on its own document) or `:shadow`, then `:publish`. A console that edits roles sends one `putRole`
-per save; a service that mirrors an identity system's roles sends `putRole`, `removeRole` and `putCatalog` the same way
-and never writes Redis (https://cosec.ahoo.me/scenarios/roles, https://cosec.ahoo.me/scenarios/external-source).
+per save. A service that mirrors an identity system's roles calls `ControlClient.proposeAndPublishWithoutShadow` per
+event as `ControlCaller.service("<its principal>")`, holding the role class: `putRole` and `removeRole` publish alone,
+`putCatalog` answers the change `AWAITING_APPROVAL` for a person; it never writes Redis
+(https://cosec.ahoo.me/scenarios/roles, https://cosec.ahoo.me/scenarios/external-source).
 
 ## Scenarios
 
@@ -353,7 +369,7 @@ tokens and decides in its own code). Tokens are issued for one app (`TokenSubjec
 - Audit: decisions are logged under `me.ahoo.cosec.audit` (denies WARN, allows DEBUG) unless
   `cosec.audit.enabled=false`; `cosec-kafka` adds a Kafka listener (`cosec.audit.kafka.*`). Existing
   `AuditEventSink` beans are picked up as BEST_EFFORT listeners. Queued events drain on shutdown for up to
-  `cosec.observability.listener.drain-timeout` (5s). Metrics and tracing
+  a sixth of `spring.lifecycle.timeout-per-shutdown-phase` (5s at the default). Metrics and tracing
   listeners come with their features. https://cosec.ahoo.me/operations/observability.
 - Rate limits are rules in the documents. The limiter is Redis when a `ReactiveStringRedisTemplate` is present,
   otherwise per JVM.
