@@ -45,6 +45,7 @@
     </script>
   </head>
   <body>
+    <div class="progress" aria-hidden="true"></div>
     <a class="skip" href="#main">跳到正文</a>
     <header class="topbar">
       <div class="wrap topbar-inner">
@@ -60,26 +61,41 @@
     </header>
     <main id="main">
       <section class="hero">
-        <div class="wrap">
-          <p class="eyebrow">适用于 Claude Code 与 Codex 的插件</p>
-          <h1><span class="nowrap">Ahoo-Wang</span> 开源项目的 Agent Skills</h1>
-          <p class="lead">由各项目维护者编写的 skills，教会编码 Agent 正确使用对应的库。安装某个项目的插件后，你的 Agent 就能掌握它的 API、约定与迁移方法。</p>
-          <ul class="stats" aria-label="目录规模"><li><strong>10</strong> 个插件</li><li><strong>32</strong> 个 skills</li><li><strong>9</strong> 个源项目</li></ul>
-          <div class="actions">
-            <a class="button primary" href="#install">开始安装</a>
-            <a class="button" href="#plugins">浏览插件</a>
+        <div class="hero-bg" aria-hidden="true"><div class="hero-grid"></div><span class="orb orb-a"></span><span class="orb orb-b"></span><span class="orb orb-c"></span></div>
+        <div class="wrap hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="live-dot"></span>适用于 Claude Code 与 Codex 的插件</p>
+            <h1><span class="nowrap">Ahoo-Wang</span> 开源项目的 <span class="accent">Agent Skills</span></h1>
+            <p class="lead">由各项目维护者编写的 skills，教会编码 Agent 正确使用对应的库。安装某个项目的插件后，你的 Agent 就能掌握它的 API、约定与迁移方法。</p>
+            <ul class="stats" aria-label="目录规模"><li><strong data-count="10">10</strong> 个插件</li><li><strong data-count="32">32</strong> 个 skills</li><li><strong data-count="9">9</strong> 个源项目</li></ul>
+            <div class="actions">
+              <a class="button primary" href="#install">开始安装</a>
+              <a class="button ghost" href="#plugins">浏览插件</a>
+            </div>
           </div>
+          <figure class="terminal" aria-hidden="true">
+            <div class="terminal-bar"><span></span><span></span><span></span><em>claude</em></div>
+            <div class="terminal-body" data-marketplace="ahoo-skills" data-plugins="[{&quot;name&quot;:&quot;ahoo-coapi-skills&quot;,&quot;skills&quot;:1},{&quot;name&quot;:&quot;ahoo-cocache-skills&quot;,&quot;skills&quot;:2},{&quot;name&quot;:&quot;ahoo-cosec-skills&quot;,&quot;skills&quot;:4},{&quot;name&quot;:&quot;ahoo-cosid-skills&quot;,&quot;skills&quot;:4},{&quot;name&quot;:&quot;ahoo-cosky-skills&quot;,&quot;skills&quot;:2},{&quot;name&quot;:&quot;ahoo-fetcher-skills&quot;,&quot;skills&quot;:9},{&quot;name&quot;:&quot;ahoo-fluent-assert-skills&quot;,&quot;skills&quot;:1},{&quot;name&quot;:&quot;ahoo-simba-skills&quot;,&quot;skills&quot;:2},{&quot;name&quot;:&quot;ahoo-wow-skills&quot;,&quot;skills&quot;:6}]">
+              <span class="line t-comment"><span class="text"># 添加一次插件市场</span></span>
+              <span class="line t-cmd"><span class="mark">❯</span> <span class="text">/plugin marketplace add https://github.com/Ahoo-Wang/skills</span></span>
+              <span class="line t-out"><span class="mark">✓</span> <span class="text">ahoo-skills · 10 plugins</span></span>
+              <span class="line t-comment"><span class="text"># 为每个项目安装插件</span></span>
+              <span class="line t-cmd t-install"><span class="mark">❯</span> <span class="text">/plugin install ahoo-wow-skills@ahoo-skills</span></span>
+              <span class="line t-out t-result"><span class="mark">✓</span> <span class="text">ahoo-wow-skills · 6 skills</span></span>
+            </div>
+          </figure>
         </div>
       </section>
 
       <section class="section" id="install" aria-labelledby="install-title">
         <div class="wrap">
-          <div class="section-head">
+          <div class="section-head reveal">
+            <p class="kicker">01 / 安装</p>
             <h2 id="install-title">安装</h2>
             <p>先添加一次插件市场，再为你使用的每个项目安装对应插件。</p>
           </div>
           <div class="install-grid">
-            <article class="panel">
+            <article class="panel reveal">
               <h3>Claude Code</h3>
               <ol class="steps">
                 <li><span>添加插件市场</span><div class="cmd"><code>/plugin marketplace add https://github.com/Ahoo-Wang/skills</code><button type="button" class="copy" data-copied="已复制" aria-label="复制命令" hidden>复制</button></div></li>
@@ -87,7 +103,7 @@
               </ol>
               <p class="hint">运行 <code>/plugin update</code> 获取新版本。</p>
             </article>
-            <article class="panel">
+            <article class="panel reveal">
               <h3>Codex</h3>
               <ol class="steps">
                 <li><span>添加插件市场</span><div class="cmd"><code>codex plugin marketplace add Ahoo-Wang/skills --ref main</code><button type="button" class="copy" data-copied="已复制" aria-label="复制命令" hidden>复制</button></div></li>
@@ -101,7 +117,8 @@
 
       <section class="section" id="plugins" aria-labelledby="plugins-title">
         <div class="wrap">
-          <div class="section-head">
+          <div class="section-head reveal">
+            <p class="kicker">02 / 插件</p>
             <h2 id="plugins-title">插件</h2>
             <p>每个源项目对应一个插件。点击 skill 名称可查看完整说明。</p>
           </div>
@@ -111,7 +128,7 @@
           </div>
           <p class="empty" role="status" hidden>没有匹配的插件。</p>
           <div class="plugin-list">
-        <article class="plugin" id="ahoo-agent-skills" data-search="ahoo-agent-skills general ahoo agent skills that are maintained directly in this repository agent prompt agent-system-prompt use this skill when the user needs to write the actual instructional text that defines how an ai agent behaves.">
+        <article class="plugin reveal" id="ahoo-agent-skills" data-search="ahoo-agent-skills general ahoo agent skills that are maintained directly in this repository agent prompt agent-system-prompt use this skill when the user needs to write the actual instructional text that defines how an ai agent behaves.">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-agent-skills">ahoo-agent-skills</a></h3>
@@ -128,7 +145,7 @@
           </div>
         </article>
 
-        <article class="plugin" id="ahoo-coapi-skills" data-search="ahoo-coapi-skills coapi coapi skills for building and testing spring http interface client proxies with reactive webclient, synchronous restclient, and spring cloud loadbalancer support. coapi spring http-interface webclient restclient load-balancer reactive kotlin coapi-developer help developers use and maintain coapi, a spring http interface client auto-configuration library for typed @httpexchange proxies backed by reactive webclient or synchronous restclient.">
+        <article class="plugin reveal" id="ahoo-coapi-skills" data-search="ahoo-coapi-skills coapi coapi skills for building and testing spring http interface client proxies with reactive webclient, synchronous restclient, and spring cloud loadbalancer support. coapi spring http-interface webclient restclient load-balancer reactive kotlin coapi-developer help developers use and maintain coapi, a spring http interface client auto-configuration library for typed @httpexchange proxies backed by reactive webclient or synchronous restclient.">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-coapi-skills">ahoo-coapi-skills</a></h3>
@@ -145,7 +162,7 @@
           </div>
         </article>
 
-        <article class="plugin" id="ahoo-cocache-skills" data-search="ahoo-cocache-skills cocache agent skills for downstream java/kotlin applications built on cocache, the two-level coherent cache (local caffeine in front of shared redis): declaring, testing, reviewing and debugging caches, invalidation after commit, spring cache, joincache, and choosing between cache, versionedcache, store, versionedstore and setstore; and implementing coherencebackend extensions that pass the cocache-test tck. cocache coherent-cache two-level-cache distributed-cache cache-invalidation redis caffeine spring-boot spring-cache kotlin java join-cache tck cocache-develop build, test, review or debug cocache usage in downstream java/kotlin applications with me.ahoo.cocache imports or dependencies, or explicit cocache requests: cache types and declarations, loaders, invalidation after… cocache-extend implement or fix a cocache coherencebackend (l1store or futurel1store, plus invalidationchannel) outside the cocache repository: a new l1 store, a different invalidation transport, or a decorating backend, verified with…">
+        <article class="plugin reveal" id="ahoo-cocache-skills" data-search="ahoo-cocache-skills cocache agent skills for downstream java/kotlin applications built on cocache, the two-level coherent cache (local caffeine in front of shared redis): declaring, testing, reviewing and debugging caches, invalidation after commit, spring cache, joincache, and choosing between cache, versionedcache, store, versionedstore and setstore; and implementing coherencebackend extensions that pass the cocache-test tck. cocache coherent-cache two-level-cache distributed-cache cache-invalidation redis caffeine spring-boot spring-cache kotlin java join-cache tck cocache-develop build, test, review or debug cocache usage in downstream java/kotlin applications with me.ahoo.cocache imports or dependencies, or explicit cocache requests: cache types and declarations, loaders, invalidation after… cocache-extend implement or fix a cocache coherencebackend (l1store or futurel1store, plus invalidationchannel) outside the cocache repository: a new l1 store, a different invalidation transport, or a decorating backend, verified with…">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-cocache-skills">ahoo-cocache-skills</a></h3>
@@ -163,7 +180,7 @@
           </div>
         </article>
 
-        <article class="plugin" id="ahoo-cosec-skills" data-search="ahoo-cosec-skills cosec cosec skills for integrating a reactive multi-tenant rbac and policy-based security framework, authoring authorization policy documents, extending cosec, and troubleshooting access decisions. cosec security authorization authentication rbac policy multi-tenant spring-boot reactive jwt rate-limiting audit cosec-extending extend cosec 8.0 with spring beans - attributeprovider (external ext.* attributes fetched per request), membershipprovider (roles and attached policies kept outside tokens), decisionlistener (audit, metrics, alerts)… cosec-integration integrate cosec 8.0 into a spring boot service - choose the cosec modules to add next to the starter (webflux, webmvc, gateway, redis cache, control plane, ...), configure jwt and revocation, redis with noeviction… cosec-policy-author write, review, validate, or explain cosec 8.0 policy documents (platform, app and tenant documents) - policies and statements, actions and resources, condition asts, bindings, permission catalogs, rate limit rules… cosec-troubleshoot diagnose cosec 8.0 failures - startup failures (unknown cosec.* keys, pipeline mode, redis eviction check, missing tokenstore or revocation reader, route maps, actuator endpoints on a gateway), instances that stay not…">
+        <article class="plugin reveal" id="ahoo-cosec-skills" data-search="ahoo-cosec-skills cosec cosec skills for integrating a reactive multi-tenant rbac and policy-based security framework, authoring authorization policy documents, extending cosec, and troubleshooting access decisions. cosec security authorization authentication rbac policy multi-tenant spring-boot reactive jwt rate-limiting audit cosec-extending extend cosec 8.0 with spring beans - attributeprovider (external ext.* attributes fetched per request), membershipprovider (roles and attached policies kept outside tokens), decisionlistener (audit, metrics, alerts)… cosec-integration integrate cosec 8.0 into a spring boot service - choose the cosec modules to add next to the starter (webflux, webmvc, gateway, redis cache, control plane, ...), configure jwt and revocation, redis with noeviction… cosec-policy-author write, review, validate, or explain cosec 8.0 policy documents (platform, app and tenant documents) - policies and statements, actions and resources, condition asts, bindings, permission catalogs, rate limit rules… cosec-troubleshoot diagnose cosec 8.0 failures - startup failures (unknown cosec.* keys, pipeline mode, redis eviction check, missing tokenstore or revocation reader, route maps, actuator endpoints on a gateway), instances that stay not…">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-cosec-skills">ahoo-cosec-skills</a></h3>
@@ -183,7 +200,7 @@
           </div>
         </article>
 
-        <article class="plugin" id="ahoo-cosid-skills" data-search="ahoo-cosid-skills cosid cosid 5 skills for choosing and integrating distributed id generators: snowflake, cosid80, segment, periodic-segment, uuidv7 and custom strategies, the cosidruntime, spring boot configuration, leased and named machine slots on jdbc/redis/mongodb/zookeeper/cosid-server, and sharding. cosid distributed-id snowflake segment periodic-segment uuidv7 machine-slot sharding spring-boot java cosid-manual-integration integrate cosid 5 programmatically into java or kotlin applications without spring boot. cosid-sharding design, implement, and validate database sharding with the cosid-sharding module (modcycle, intervaltimeline, cachedsharding, shardingrange, standardlocaldatetimeconvertor, snowflakelocaldatetimeconvertor on a layout)… cosid-spring-boot configure and troubleshoot cosid 5 in spring boot with cosid-spring-boot-starter. cosid-strategy-guide choose a cosid 5 id generation strategy for java distributed systems.">
+        <article class="plugin reveal" id="ahoo-cosid-skills" data-search="ahoo-cosid-skills cosid cosid 5 skills for choosing and integrating distributed id generators: snowflake, cosid80, segment, periodic-segment, uuidv7 and custom strategies, the cosidruntime, spring boot configuration, leased and named machine slots on jdbc/redis/mongodb/zookeeper/cosid-server, and sharding. cosid distributed-id snowflake segment periodic-segment uuidv7 machine-slot sharding spring-boot java cosid-manual-integration integrate cosid 5 programmatically into java or kotlin applications without spring boot. cosid-sharding design, implement, and validate database sharding with the cosid-sharding module (modcycle, intervaltimeline, cachedsharding, shardingrange, standardlocaldatetimeconvertor, snowflakelocaldatetimeconvertor on a layout)… cosid-spring-boot configure and troubleshoot cosid 5 in spring boot with cosid-spring-boot-starter. cosid-strategy-guide choose a cosid 5 id generation strategy for java distributed systems.">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-cosid-skills">ahoo-cosid-skills</a></h3>
@@ -203,7 +220,7 @@
           </div>
         </article>
 
-        <article class="plugin" id="ahoo-cosky-skills" data-search="ahoo-cosky-skills cosky cosky skills for connecting spring boot applications to a cosky 8 server for configuration and service discovery, and for moving applications and their configs from cosky 5.x/6.x to 8.0. cosky configuration service-discovery service-registry spring-boot spring-cloud grpc kubernetes migration cosky-integration connect a spring boot (or plain kotlin/java) application to a cosky 8 server — starter and bom on spring boot 4.2 and spring cloud 2026.0, the cosky.* settings in application.yaml, importing configs with… cosky-migration move applications and data from cosky 5.x/6.x to cosky 8.0.">
+        <article class="plugin reveal" id="ahoo-cosky-skills" data-search="ahoo-cosky-skills cosky cosky skills for connecting spring boot applications to a cosky 8 server for configuration and service discovery, and for moving applications and their configs from cosky 5.x/6.x to 8.0. cosky configuration service-discovery service-registry spring-boot spring-cloud grpc kubernetes migration cosky-integration connect a spring boot (or plain kotlin/java) application to a cosky 8 server — starter and bom on spring boot 4.2 and spring cloud 2026.0, the cosky.* settings in application.yaml, importing configs with… cosky-migration move applications and data from cosky 5.x/6.x to cosky 8.0.">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-cosky-skills">ahoo-cosky-skills</a></h3>
@@ -221,7 +238,7 @@
           </div>
         </article>
 
-        <article class="plugin" id="ahoo-fetcher-skills" data-search="ahoo-fetcher-skills fetcher skills for building with the fetcher typescript ecosystem: the core http client, decorator services, typed event buses, persisted storage, sse/llm streaming, openai chat completions, openapi types and react hooks, plus upgrading from fetcher 5.x to 6.0. wow cqrs clients and openapi client generation live in the wow repository&#39;s skills. fetcher typescript http-client decorators eventbus storage sse llm-streaming openai openapi react migration fetcher-decorator-service declare http endpoints as a typed class with `@ahoo-wang/fetcher-decorator`: `@api`, `@get`/`@post`/`@put`/`@patch`/`@del`, `@path`/`@query`/`@header`/`@body`, return types, result extractors… fetcher-eventbus publish and subscribe typed events with `@ahoo-wang/fetcher-eventbus`: `serialtypedeventbus` (ordered), `paralleltypedeventbus`, `broadcasttypedeventbus` across browser tabs, the multi-type `eventbus`, `once` handlers… fetcher-integration call http apis with the core `@ahoo-wang/fetcher` client: `fetcher`/`namedfetcher`, baseurl, timeouts, `{id}` path and query params, request/response/error interceptors, status validation and error classes, result… fetcher-llm-streaming consume server-sent events and llm token streams with `@ahoo-wang/fetcher-eventstream`: the `response.prototype` helpers (`requiredjsoneventstream`), standalone converters, `terminatedetector` for `[done]`-style… fetcher-openai-client call openai-compatible chat completions with `@ahoo-wang/fetcher-openai`: `openai`, `chatclient`, `chat.completions` streaming and non-streaming, `donedetector`, gateway base urls, headers and interceptors, http and… fetcher-openapi-types type openapi 3.0/3.1 documents in typescript with the type-only `@ahoo-wang/fetcher-openapi`: `openapi`, `pathitem`, `operation`, `schema` (incl. json schema 2020-12 keywords), `parameter`, `components`, `x | reference`… fetcher-react-hooks drive react component state from requests with `@ahoo-wang/fetcher-react` 6: `usefetcher`, `usefetcherquery`, `usequery`, `useexecutepromise`, debounced variants, `usekeystorage`, `useeventsubscription`, and hooks… fetcher-storage persist one typed value per key with `@ahoo-wang/fetcher-storage`: `keystorage` (defaults, serializers, change listeners, caching), `inmemorystorage` for tests and ssr, and cross-tab sync through a broadcast bus. fetcher-v6-migration upgrade a project from fetcher 5.x to 6.0.">
+        <article class="plugin reveal" id="ahoo-fetcher-skills" data-search="ahoo-fetcher-skills fetcher skills for building with the fetcher typescript ecosystem: the core http client, decorator services, typed event buses, persisted storage, sse/llm streaming, openai chat completions, openapi types and react hooks, plus upgrading from fetcher 5.x to 6.0. wow cqrs clients and openapi client generation live in the wow repository&#39;s skills. fetcher typescript http-client decorators eventbus storage sse llm-streaming openai openapi react migration fetcher-decorator-service declare http endpoints as a typed class with `@ahoo-wang/fetcher-decorator`: `@api`, `@get`/`@post`/`@put`/`@patch`/`@del`, `@path`/`@query`/`@header`/`@body`, return types, result extractors… fetcher-eventbus publish and subscribe typed events with `@ahoo-wang/fetcher-eventbus`: `serialtypedeventbus` (ordered), `paralleltypedeventbus`, `broadcasttypedeventbus` across browser tabs, the multi-type `eventbus`, `once` handlers… fetcher-integration call http apis with the core `@ahoo-wang/fetcher` client: `fetcher`/`namedfetcher`, baseurl, timeouts, `{id}` path and query params, request/response/error interceptors, status validation and error classes, result… fetcher-llm-streaming consume server-sent events and llm token streams with `@ahoo-wang/fetcher-eventstream`: the `response.prototype` helpers (`requiredjsoneventstream`), standalone converters, `terminatedetector` for `[done]`-style… fetcher-openai-client call openai-compatible chat completions with `@ahoo-wang/fetcher-openai`: `openai`, `chatclient`, `chat.completions` streaming and non-streaming, `donedetector`, gateway base urls, headers and interceptors, http and… fetcher-openapi-types type openapi 3.0/3.1 documents in typescript with the type-only `@ahoo-wang/fetcher-openapi`: `openapi`, `pathitem`, `operation`, `schema` (incl. json schema 2020-12 keywords), `parameter`, `components`, `x | reference`… fetcher-react-hooks drive react component state from requests with `@ahoo-wang/fetcher-react` 6: `usefetcher`, `usefetcherquery`, `usequery`, `useexecutepromise`, debounced variants, `usekeystorage`, `useeventsubscription`, and hooks… fetcher-storage persist one typed value per key with `@ahoo-wang/fetcher-storage`: `keystorage` (defaults, serializers, change listeners, caching), `inmemorystorage` for tests and ssr, and cross-tab sync through a broadcast bus. fetcher-v6-migration upgrade a project from fetcher 5.x to 6.0.">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-fetcher-skills">ahoo-fetcher-skills</a></h3>
@@ -246,7 +263,7 @@
           </div>
         </article>
 
-        <article class="plugin" id="ahoo-fluent-assert-skills" data-search="ahoo-fluent-assert-skills fluentassert skills for writing kotlin tests with fluentassert&#39;s assertj-backed .assert() extensions for jdk types, nullable values, exceptions, and custom assertprovider assertions. fluent-assert kotlin assertj testing junit5 assertions fluent-assert write and refactor kotlin assertions with fluentassert&#39;s assertj-backed `.assert()` extensions and `assertthrownby`.">
+        <article class="plugin reveal" id="ahoo-fluent-assert-skills" data-search="ahoo-fluent-assert-skills fluentassert skills for writing kotlin tests with fluentassert&#39;s assertj-backed .assert() extensions for jdk types, nullable values, exceptions, and custom assertprovider assertions. fluent-assert kotlin assertj testing junit5 assertions fluent-assert write and refactor kotlin assertions with fluentassert&#39;s assertj-backed `.assert()` extensions and `assertthrownby`.">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-fluent-assert-skills">ahoo-fluent-assert-skills</a></h3>
@@ -263,7 +280,7 @@
           </div>
         </article>
 
-        <article class="plugin" id="ahoo-simba-skills" data-search="ahoo-simba-skills simba skills for using and testing simba, a jvm leader-election and distributed-lock library with jdbc (mysql, postgresql), redis, and zookeeper backends. simba distributed-lock distributed-mutex leader-election jvm kotlin spring-boot redis jdbc zookeeper simba guide for using simba 5, the jvm leader-election and distributed-lock library, in applications. simba-testing guide for testing code built on simba 5 (leader election and distributed locks).">
+        <article class="plugin reveal" id="ahoo-simba-skills" data-search="ahoo-simba-skills simba skills for using and testing simba, a jvm leader-election and distributed-lock library with jdbc (mysql, postgresql), redis, and zookeeper backends. simba distributed-lock distributed-mutex leader-election jvm kotlin spring-boot redis jdbc zookeeper simba guide for using simba 5, the jvm leader-election and distributed-lock library, in applications. simba-testing guide for testing code built on simba 5 (leader election and distributed locks).">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-simba-skills">ahoo-simba-skills</a></h3>
@@ -281,7 +298,7 @@
           </div>
         </article>
 
-        <article class="plugin" id="ahoo-wow-skills" data-search="ahoo-wow-skills wow agent skills for downstream applications built on wow, the reactive ddd, event sourcing and cqrs framework: building, reviewing and debugging wow services, breaking migrations, typescript clients generated from the manifest or written by hand, answering business data questions from a running service&#39;s read-only queries, and writing and hosting wow view engine views. wow ddd cqrs event-sourcing saga aggregate kotlin java spring-boot reactor migration typescript openapi code-generation client data-query analytics view-definition view-engine view-host wow-client write typescript code that calls wow v10 services: clients generated from the service&#39;s manifest with wow-generator, @ahoo-wang/wow-client commands with wait plans, state reads, snapshot/events/dataset queries and the… wow-data-query answer business data questions from a running wow v10 service: read a query model&#39;s capability descriptor, run read-only snapshot, events or dataset queries, and explain counts, lists, breakdowns or trends with the… wow-develop build, review, debug or explain wow v10 services in downstream kotlin/java code with me.ahoo.wow imports, wow-* dependencies or wow requests: aggregates, rejections, sagas, projections, reactors, failures, tests, spring… wow-migrate handle breaking wow migrations, chiefly 9.x to v10, in downstream services and their typescript callers: kotlin source, configuration, generated contracts, http routes, 9.x typescript clients, wow event data import… wow-view-definition write wow view engine view definitions with defineview over a wow v10 query model&#39;s committed descriptor: fields and their words, narrowing, system record and analysis views, boards, event streams, self-checked with… wow-view-host wire the wow view engine into a host app over wow v10 services: one engine with query-route sources, datasets and a view store (memoryviewstore, wowviewstore), viewhost, bind and routes, commands on records as declared…">
+        <article class="plugin reveal" id="ahoo-wow-skills" data-search="ahoo-wow-skills wow agent skills for downstream applications built on wow, the reactive ddd, event sourcing and cqrs framework: building, reviewing and debugging wow services, breaking migrations, typescript clients generated from the manifest or written by hand, answering business data questions from a running service&#39;s read-only queries, and writing and hosting wow view engine views. wow ddd cqrs event-sourcing saga aggregate kotlin java spring-boot reactor migration typescript openapi code-generation client data-query analytics view-definition view-engine view-host wow-client write typescript code that calls wow v10 services: clients generated from the service&#39;s manifest with wow-generator, @ahoo-wang/wow-client commands with wait plans, state reads, snapshot/events/dataset queries and the… wow-data-query answer business data questions from a running wow v10 service: read a query model&#39;s capability descriptor, run read-only snapshot, events or dataset queries, and explain counts, lists, breakdowns or trends with the… wow-develop build, review, debug or explain wow v10 services in downstream kotlin/java code with me.ahoo.wow imports, wow-* dependencies or wow requests: aggregates, rejections, sagas, projections, reactors, failures, tests, spring… wow-migrate handle breaking wow migrations, chiefly 9.x to v10, in downstream services and their typescript callers: kotlin source, configuration, generated contracts, http routes, 9.x typescript clients, wow event data import… wow-view-definition write wow view engine view definitions with defineview over a wow v10 query model&#39;s committed descriptor: fields and their words, narrowing, system record and analysis views, boards, event streams, self-checked with… wow-view-host wire the wow view engine into a host app over wow v10 services: one engine with query-route sources, datasets and a view store (memoryviewstore, wowviewstore), viewhost, bind and routes, commands on records as declared…">
           <header class="plugin-head">
             <div>
               <h3><a href="#ahoo-wow-skills">ahoo-wow-skills</a></h3>
@@ -308,13 +325,15 @@
 
       <section class="section how" id="how" aria-labelledby="how-title">
         <div class="wrap">
-          <div class="section-head">
+          <div class="section-head reveal">
+            <p class="kicker">03 / 工作原理</p>
             <h2 id="how-title">工作原理</h2>
           </div>
+          <div class="pipeline reveal" role="img" aria-label="Skills 如何到达你的 Agent"><div class="node"><span class="node-icon"><svg viewBox="0 0 24 24"><path d="M6 3h11a1 1 0 0 1 1 1v13H7a2 2 0 0 0-2 2V5a2 2 0 0 1 1-2Z"/><path d="M5 19a2 2 0 0 0 2 2h11v-4"/><path d="M9 7h5"/></svg></span><strong>9 个源仓库</strong><small>skills 与代码放在一起</small></div><span class="wire" aria-hidden="true"><span></span></span><div class="node"><span class="node-icon"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.6 4.5L20 16"/><path d="M20 20v-4h-4"/></svg></span><strong>每 6 小时同步</strong><small>固定到上游 commit</small></div><span class="wire" aria-hidden="true"><span></span></span><div class="node"><span class="node-icon"><svg viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5"/><path d="M12 12v9"/></svg></span><strong>10 个插件</strong><small>按内容生成版本号</small></div><span class="wire" aria-hidden="true"><span></span></span><div class="node"><span class="node-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3"/><path d="M13 15h4"/></svg></span><strong>你的 Agent</strong><small>Claude Code · Codex</small></div></div>
           <ol class="facts">
-          <li><span class="fact-index">01</span><h3>由各项目维护</h3><p>Skills 存放在各项目自己的仓库里，紧挨着它所描述的代码，并随同一个 PR 一起修改。</p></li>
-          <li><span class="fact-index">02</span><h3>每 6 小时同步</h3><p>本插件市场定时镜像这些 skills，并把每个插件固定到确切的上游 commit，安装结果可复现。</p></li>
-          <li><span class="fact-index">03</span><h3>内容变化才更新</h3><p>插件版本号是其文件内容的哈希。只有该插件的 skills 变化时 Agent 才会收到更新，无关提交不会触发。</p></li>
+          <li class="reveal"><span class="fact-index">01</span><h3>由各项目维护</h3><p>Skills 存放在各项目自己的仓库里，紧挨着它所描述的代码，并随同一个 PR 一起修改。</p></li>
+          <li class="reveal"><span class="fact-index">02</span><h3>每 6 小时同步</h3><p>本插件市场定时镜像这些 skills，并把每个插件固定到确切的上游 commit，安装结果可复现。</p></li>
+          <li class="reveal"><span class="fact-index">03</span><h3>内容变化才更新</h3><p>插件版本号是其文件内容的哈希。只有该插件的 skills 变化时 Agent 才会收到更新，无关提交不会触发。</p></li>
           </ol>
         </div>
       </section>

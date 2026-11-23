@@ -122,9 +122,12 @@ gh workflow run sync-skills.yml --repo Ahoo-Wang/skills
   never lists anything that does not ship. UI text for both languages lives in
   `scripts/lib/site.mjs`; upstream text stays in English, marked `lang="en"`.
   Styles and behavior are hand-written in `docs/assets/` (`site.css`;
-  `site.js` for copy buttons and the filter; `lang.js` remembers the chosen
-  language and sends Chinese browsers to `/zh-CN/`). The pages work without
-  JavaScript. `.github/workflows/pages.yml` publishes `docs/` on every push to
+  `site.js` for copy buttons, the filter, and motion: the typing hero
+  terminal, count-up stats, scroll reveal and pointer glow; `lang.js`
+  remembers the chosen language and sends Chinese browsers to `/zh-CN/`). The
+  pages work without JavaScript, and every animation is off under
+  `prefers-reduced-motion`; scroll reveal only hides elements that start below
+  the fold, so nothing stays hidden if a script fails. `.github/workflows/pages.yml` publishes `docs/` on every push to
   `main`; the sync workflow starts it after each sync commit, because pushes
   made with `GITHUB_TOKEN` do not trigger other workflows.
 
