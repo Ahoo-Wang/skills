@@ -28,6 +28,7 @@ Skills 通过 GitHub Actions **每 6 小时**自动从源仓库同步（需要�
 | `ahoo-fetcher-skills` | Fetcher client、decorator、React、OpenAPI types、storage、event bus、LLM streaming、OpenAI、CoSec 认证与 6.0 迁移 skills |
 | `ahoo-cocache-skills` | CoCache 分布式缓存 skill |
 | `ahoo-simba-skills` | Simba 分布式锁、leader election、测试 skills |
+| `ahoo-cosky-skills` | CoSky 8 应用接入与 5.x/6.x 迁移 skills |
 | `ahoo-agent-skills` | 本仓库直接维护的通用 agent prompt skills |
 
 ## 源仓库与 Skills
@@ -42,6 +43,7 @@ Skills 通过 GitHub Actions **每 6 小时**自动从源仓库同步（需要�
 | [Fetcher](https://github.com/Ahoo-Wang/fetcher) | [`fetcher-cosec-auth`](./sources/fetcher/skills/fetcher-cosec-auth/SKILL.md)、[`fetcher-decorator-service`](./sources/fetcher/skills/fetcher-decorator-service/SKILL.md)、[`fetcher-eventbus`](./sources/fetcher/skills/fetcher-eventbus/SKILL.md)、[`fetcher-integration`](./sources/fetcher/skills/fetcher-integration/SKILL.md)、[`fetcher-llm-streaming`](./sources/fetcher/skills/fetcher-llm-streaming/SKILL.md)、[`fetcher-openai-client`](./sources/fetcher/skills/fetcher-openai-client/SKILL.md)、[`fetcher-openapi-types`](./sources/fetcher/skills/fetcher-openapi-types/SKILL.md)、[`fetcher-react-hooks`](./sources/fetcher/skills/fetcher-react-hooks/SKILL.md)、[`fetcher-storage`](./sources/fetcher/skills/fetcher-storage/SKILL.md)、[`fetcher-v6-migration`](./sources/fetcher/skills/fetcher-v6-migration/SKILL.md) |
 | [CoCache](https://github.com/Ahoo-Wang/CoCache) | [`cocache`](./sources/CoCache/skills/cocache/SKILL.md) |
 | [Simba](https://github.com/Ahoo-Wang/Simba) | [`simba`](./sources/Simba/skills/simba/SKILL.md)、[`simba-testing`](./sources/Simba/skills/simba-testing/SKILL.md) |
+| [CoSky](https://github.com/Ahoo-Wang/CoSky) | [`cosky-integration`](./sources/CoSky/skills/cosky-integration/SKILL.md)、[`cosky-migration`](./sources/CoSky/skills/cosky-migration/SKILL.md) |
 | 本地插件 | [`agent-system-prompt`](./plugins/ahoo-agent-skills/skills/agent-system-prompt/SKILL.md) |
 
 ## 安装

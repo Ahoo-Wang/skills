@@ -28,6 +28,7 @@ Skills are automatically synced from source repositories **every 6 hours** via G
 | `ahoo-fetcher-skills` | Fetcher client, decorator, React, OpenAPI types, storage, event bus, LLM streaming, OpenAI, CoSec auth, and 6.0 migration skills |
 | `ahoo-cocache-skills` | CoCache distributed cache skill |
 | `ahoo-simba-skills` | Simba mutex, leader election, and testing skills |
+| `ahoo-cosky-skills` | CoSky 8 application integration and 5.x/6.x migration skills |
 | `ahoo-agent-skills` | General agent prompt skills maintained directly here |
 
 ## Source Repositories & Skills
@@ -42,6 +43,7 @@ Skills are automatically synced from source repositories **every 6 hours** via G
 | [Fetcher](https://github.com/Ahoo-Wang/fetcher) | [`fetcher-cosec-auth`](./sources/fetcher/skills/fetcher-cosec-auth/SKILL.md), [`fetcher-decorator-service`](./sources/fetcher/skills/fetcher-decorator-service/SKILL.md), [`fetcher-eventbus`](./sources/fetcher/skills/fetcher-eventbus/SKILL.md), [`fetcher-integration`](./sources/fetcher/skills/fetcher-integration/SKILL.md), [`fetcher-llm-streaming`](./sources/fetcher/skills/fetcher-llm-streaming/SKILL.md), [`fetcher-openai-client`](./sources/fetcher/skills/fetcher-openai-client/SKILL.md), [`fetcher-openapi-types`](./sources/fetcher/skills/fetcher-openapi-types/SKILL.md), [`fetcher-react-hooks`](./sources/fetcher/skills/fetcher-react-hooks/SKILL.md), [`fetcher-storage`](./sources/fetcher/skills/fetcher-storage/SKILL.md), [`fetcher-v6-migration`](./sources/fetcher/skills/fetcher-v6-migration/SKILL.md) |
 | [CoCache](https://github.com/Ahoo-Wang/CoCache) | [`cocache`](./sources/CoCache/skills/cocache/SKILL.md) |
 | [Simba](https://github.com/Ahoo-Wang/Simba) | [`simba`](./sources/Simba/skills/simba/SKILL.md), [`simba-testing`](./sources/Simba/skills/simba-testing/SKILL.md) |
+| [CoSky](https://github.com/Ahoo-Wang/CoSky) | [`cosky-integration`](./sources/CoSky/skills/cosky-integration/SKILL.md), [`cosky-migration`](./sources/CoSky/skills/cosky-migration/SKILL.md) |
 | Local plugin | [`agent-system-prompt`](./plugins/ahoo-agent-skills/skills/agent-system-prompt/SKILL.md) |
 
 ## Installation

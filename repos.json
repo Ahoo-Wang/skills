@@ -47,6 +47,12 @@
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
       "skills_path": "skills"
+    },
+    {
+      "name": "CoSky",
+      "url": "https://github.com/Ahoo-Wang/CoSky.git",
+      "branch": "main",
+      "skills_path": "skills"
     }
   ]
 }
