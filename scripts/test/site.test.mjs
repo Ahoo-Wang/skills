@@ -62,6 +62,22 @@ describe("published pages", () => {
     });
   }
 
+  test("the hero terminal cycles through every generated plugin with its skill count", () => {
+    const html = read(PAGES.en);
+    const json = /data-plugins="([^"]+)"/.exec(html)[1].replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+    const expected = plugins.filter((p) => p.kind === "generated").map((p) => ({ name: p.name, skills: p.skills.length }));
+    assert.deepEqual(JSON.parse(json), expected);
+  });
+
+  test("reduced motion turns every animation and transition off", () => {
+    const css = read("assets/site.css");
+    const block = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce)"));
+    assert.match(block, /animation: none !important;/);
+    assert.match(block, /transition: none !important;/);
+    assert.match(block, /\.reveal\.pending \{\s*opacity: 1;/);
+    assert.match(read("assets/site.js"), /prefers-reduced-motion: reduce/);
+  });
+
   test("every brand token the stylesheet uses is defined", () => {
     const defined = new Set([...read("assets/tokens/skills-brand.css").matchAll(/(--skills-[\w-]+)\s*:/g)].map(([, t]) => t));
     for (const [, token] of read("assets/site.css").matchAll(/var\((--skills-[\w-]+)\)/g)) {

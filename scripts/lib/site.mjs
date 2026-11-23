@@ -24,6 +24,18 @@ const LANGS = {
     langLabel: "Language",
     eyebrow: "Plugins for Claude Code and Codex",
     heading: "Agent skills for Ahoo-Wang's open source projects",
+    headingAccent: "Agent skills",
+    terminal: { label: "Example session", add: "# add the marketplace once", install: "# install a plugin per project" },
+    kickers: { install: "01 / install", plugins: "02 / plugins", how: "03 / how it works" },
+    pipeline: {
+      label: "How skills reach your agent",
+      nodes: (r, p) => [
+        [`${r} source repos`, "skills next to the code"],
+        ["Sync every 6h", "pinned to upstream commits"],
+        [`${p} plugins`, "versioned by content"],
+        ["Your agent", "Claude Code · Codex"],
+      ],
+    },
     lead:
       "Each project's maintainers write skills that teach coding agents how to use their library correctly. Install the plugin for a project and your agent knows its APIs, conventions and migrations.",
     stats: (p, s, r) => [
@@ -87,6 +99,18 @@ const LANGS = {
     langLabel: "语言",
     eyebrow: "适用于 Claude Code 与 Codex 的插件",
     heading: "Ahoo-Wang 开源项目的 Agent Skills",
+    headingAccent: "Agent Skills",
+    terminal: { label: "示例会话", add: "# 添加一次插件市场", install: "# 为每个项目安装插件" },
+    kickers: { install: "01 / 安装", plugins: "02 / 插件", how: "03 / 工作原理" },
+    pipeline: {
+      label: "Skills 如何到达你的 Agent",
+      nodes: (r, p) => [
+        [`${r} 个源仓库`, "skills 与代码放在一起"],
+        ["每 6 小时同步", "固定到上游 commit"],
+        [`${p} 个插件`, "按内容生成版本号"],
+        ["你的 Agent", "Claude Code · Codex"],
+      ],
+    },
     lead: "由各项目维护者编写的 skills，教会编码 Agent 正确使用对应的库。安装某个项目的插件后，你的 Agent 就能掌握它的 API、约定与迁移方法。",
     stats: (p, s, r) => [
       [p, "个插件"],
@@ -185,7 +209,7 @@ function renderPlugin(plugin, data, t) {
     )
     .join("\n            ");
   return `
-        <article class="plugin" id="${escapeHtml(plugin.name)}" data-search="${escapeHtml(search)}">
+        <article class="plugin reveal" id="${escapeHtml(plugin.name)}" data-search="${escapeHtml(search)}">
           <header class="plugin-head">
             <div>
               <h3><a href="#${escapeHtml(plugin.name)}">${escapeHtml(plugin.name)}</a></h3>
@@ -203,6 +227,38 @@ function renderPlugin(plugin, data, t) {
         </article>`;
 }
 
+// Line icons for the pipeline: repository, sync, package, agent.
+const ICONS = [
+  '<svg viewBox="0 0 24 24"><path d="M6 3h11a1 1 0 0 1 1 1v13H7a2 2 0 0 0-2 2V5a2 2 0 0 1 1-2Z"/><path d="M5 19a2 2 0 0 0 2 2h11v-4"/><path d="M9 7h5"/></svg>',
+  '<svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.6 4.5L20 16"/><path d="M20 20v-4h-4"/></svg>',
+  '<svg viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5"/><path d="M12 12v9"/></svg>',
+  '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3"/><path d="M13 15h4"/></svg>',
+];
+
+/**
+ * An illustrative session. The static markup is the full transcript; site.js
+ * types it out and then cycles the install line through data-plugins.
+ */
+function renderTerminal(data, t) {
+  const example = data.plugins.find((p) => p.name === "ahoo-wow-skills") ?? data.plugins[0];
+  const cycle = data.plugins
+    .filter((p) => p.source)
+    .map((p) => ({ name: p.name, skills: p.skills.length }));
+  const line = (kind, mark, text) =>
+    `<span class="line ${kind}">${mark ? `<span class="mark">${mark}</span> ` : ""}<span class="text">${escapeHtml(text)}</span></span>`;
+  return `<figure class="terminal" aria-hidden="true">
+            <div class="terminal-bar"><span></span><span></span><span></span><em>claude</em></div>
+            <div class="terminal-body" data-marketplace="${escapeHtml(data.marketplace)}" data-plugins="${escapeHtml(JSON.stringify(cycle))}">
+              ${line("t-comment", "", t.terminal.add)}
+              ${line("t-cmd", "❯", `/plugin marketplace add ${data.repo}`)}
+              ${line("t-out", "✓", `${data.marketplace} · ${data.plugins.length} plugins`)}
+              ${line("t-comment", "", t.terminal.install)}
+              ${line("t-cmd t-install", "❯", `/plugin install ${example.name}@${data.marketplace}`)}
+              ${line("t-out t-result", "✓", `${example.name} · ${example.skills.length} skills`)}
+            </div>
+          </figure>`;
+}
+
 function renderPage(lang, data, base) {
   const t = LANGS[lang];
   const up = lang === "en" ? "./" : "../"; // from this page to docs/
@@ -210,7 +266,7 @@ function renderPage(lang, data, base) {
   const url = `${base}${t.dir}`;
   const example = data.plugins.find((p) => p.name === "ahoo-wow-skills")?.name ?? data.plugins[0]?.name ?? "";
   const stats = t.stats(data.plugins.length, data.skillCount, data.sourceCount)
-    .map(([n, label]) => `<li><strong>${n}</strong> ${escapeHtml(label)}</li>`)
+    .map(([n, label]) => `<li><strong data-count="${n}">${n}</strong> ${escapeHtml(label)}</li>`)
     .join("");
   const langLinks = Object.entries(LANGS)
     .map(
@@ -221,8 +277,15 @@ function renderPage(lang, data, base) {
   const jump = data.plugins
     .map((p) => `<li><a href="#${escapeHtml(p.name)}">${escapeHtml(p.source?.name ?? p.name.replace(/^ahoo-|-skills$/g, ""))}</a></li>`)
     .join("");
+  const heading = escapeHtml(t.heading)
+    .replace(escapeHtml(t.headingAccent), `<span class="accent">${escapeHtml(t.headingAccent)}</span>`)
+    .replace("Ahoo-Wang", '<span class="nowrap">Ahoo-Wang</span>');
+  const pipeline = t.pipeline
+    .nodes(data.sourceCount, data.plugins.length)
+    .map(([title, sub], i) => `<div class="node"><span class="node-icon">${ICONS[i]}</span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(sub)}</small></div>`)
+    .join('<span class="wire" aria-hidden="true"><span></span></span>');
   const facts = t.how.facts
-    .map(([title, body], i) => `<li><span class="fact-index">0${i + 1}</span><h3>${escapeHtml(title)}</h3><p>${escapeHtml(body)}</p></li>`)
+    .map(([title, body], i) => `<li class="reveal"><span class="fact-index">0${i + 1}</span><h3>${escapeHtml(title)}</h3><p>${escapeHtml(body)}</p></li>`)
     .join("\n          ");
   const jsonLd = JSON.stringify(
     {
@@ -268,6 +331,7 @@ function renderPage(lang, data, base) {
     </script>
   </head>
   <body>
+    <div class="progress" aria-hidden="true"></div>
     <a class="skip" href="#main">${escapeHtml(t.skip)}</a>
     <header class="topbar">
       <div class="wrap topbar-inner">
@@ -283,26 +347,31 @@ function renderPage(lang, data, base) {
     </header>
     <main id="main">
       <section class="hero">
-        <div class="wrap">
-          <p class="eyebrow">${escapeHtml(t.eyebrow)}</p>
-          <h1>${escapeHtml(t.heading).replace("Ahoo-Wang", '<span class="nowrap">Ahoo-Wang</span>')}</h1>
-          <p class="lead">${escapeHtml(t.lead)}</p>
-          <ul class="stats" aria-label="${escapeHtml(t.statsLabel)}">${stats}</ul>
-          <div class="actions">
-            <a class="button primary" href="#install">${escapeHtml(t.ctaInstall)}</a>
-            <a class="button" href="#plugins">${escapeHtml(t.ctaBrowse)}</a>
+        <div class="hero-bg" aria-hidden="true"><div class="hero-grid"></div><span class="orb orb-a"></span><span class="orb orb-b"></span><span class="orb orb-c"></span></div>
+        <div class="wrap hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="live-dot"></span>${escapeHtml(t.eyebrow)}</p>
+            <h1>${heading}</h1>
+            <p class="lead">${escapeHtml(t.lead)}</p>
+            <ul class="stats" aria-label="${escapeHtml(t.statsLabel)}">${stats}</ul>
+            <div class="actions">
+              <a class="button primary" href="#install">${escapeHtml(t.ctaInstall)}</a>
+              <a class="button ghost" href="#plugins">${escapeHtml(t.ctaBrowse)}</a>
+            </div>
           </div>
+          ${renderTerminal(data, t)}
         </div>
       </section>
 
       <section class="section" id="install" aria-labelledby="install-title">
         <div class="wrap">
-          <div class="section-head">
+          <div class="section-head reveal">
+            <p class="kicker">${escapeHtml(t.kickers.install)}</p>
             <h2 id="install-title">${escapeHtml(t.install.title)}</h2>
             <p>${escapeHtml(t.install.lead)}</p>
           </div>
           <div class="install-grid">
-            <article class="panel">
+            <article class="panel reveal">
               <h3>Claude Code</h3>
               <ol class="steps">
                 <li><span>${escapeHtml(t.install.addMarketplace)}</span>${command(`/plugin marketplace add ${data.repo}`, t)}</li>
@@ -310,7 +379,7 @@ function renderPage(lang, data, base) {
               </ol>
               <p class="hint">${t.install.claudeHint}</p>
             </article>
-            <article class="panel">
+            <article class="panel reveal">
               <h3>Codex</h3>
               <ol class="steps">
                 <li><span>${escapeHtml(t.install.addMarketplace)}</span>${command(`codex plugin marketplace add ${data.repo.replace("https://github.com/", "")} --ref main`, t)}</li>
@@ -324,7 +393,8 @@ function renderPage(lang, data, base) {
 
       <section class="section" id="plugins" aria-labelledby="plugins-title">
         <div class="wrap">
-          <div class="section-head">
+          <div class="section-head reveal">
+            <p class="kicker">${escapeHtml(t.kickers.plugins)}</p>
             <h2 id="plugins-title">${escapeHtml(t.plugins.title)}</h2>
             <p>${escapeHtml(t.plugins.lead)}</p>
           </div>
@@ -340,9 +410,11 @@ function renderPage(lang, data, base) {
 
       <section class="section how" id="how" aria-labelledby="how-title">
         <div class="wrap">
-          <div class="section-head">
+          <div class="section-head reveal">
+            <p class="kicker">${escapeHtml(t.kickers.how)}</p>
             <h2 id="how-title">${escapeHtml(t.how.title)}</h2>
           </div>
+          <div class="pipeline reveal" role="img" aria-label="${escapeHtml(t.pipeline.label)}">${pipeline}</div>
           <ol class="facts">
           ${facts}
           </ol>
