@@ -27,12 +27,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install script dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq rsync
-
-      - name: Run regression tests
+      - name: Test and check the marketplace
         run: npm test
 
       - name: Check whitespace errors

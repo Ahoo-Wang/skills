@@ -1,0 +1,484 @@
+{
+  "sources": [
+    {
+      "name": "CoApi",
+      "url": "https://github.com/Ahoo-Wang/CoApi.git",
+      "branch": "main",
+      "commit": "0db3fabb90f2406c8c0df2e09241c9086ce0e812",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "plugins": [
+        {
+          "name": "ahoo-coapi-skills",
+          "description": "CoApi skills for building and testing Spring HTTP Interface client proxies with reactive WebClient, synchronous RestClient, and Spring Cloud LoadBalancer support.",
+          "skills": {
+            "include": [
+              "*"
+            ],
+            "exclude": [
+              "*-workspace"
+            ]
+          },
+          "keywords": [
+            "coapi",
+            "spring",
+            "http-interface",
+            "webclient",
+            "restclient",
+            "load-balancer",
+            "reactive",
+            "kotlin"
+          ],
+          "category": "development",
+          "interface": {
+            "displayName": "Ahoo CoApi Skills",
+            "capabilities": [
+              "Skills"
+            ],
+            "defaultPrompt": "Help me build and test CoApi Spring HTTP Interface clients with reactive or synchronous mode."
+          },
+          "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL"
+          }
+        }
+      ],
+      "skills": {
+        "coapi-developer": "f49b5f224fbba7652b135295e8143cdd83da9258290b9d09154c23cb93835cad"
+      }
+    },
+    {
+      "name": "CoCache",
+      "url": "https://github.com/Ahoo-Wang/CoCache.git",
+      "branch": "main",
+      "commit": "7299b05eb36dd54573d6de8647c37f7c73ebc5d0",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "plugins": [
+        {
+          "name": "ahoo-cocache-skills",
+          "version": "0.3.0",
+          "description": "Agent Skills for downstream Java/Kotlin applications built on CoCache, the two-level coherent cache (local Caffeine in front of shared Redis): declaring, testing, reviewing and debugging caches, invalidation after commit, Spring Cache, JoinCache, and choosing between Cache, VersionedCache, Store, VersionedStore and SetStore; and implementing CoherenceBackend extensions that pass the cocache-test TCK.",
+          "skills": {
+            "include": [
+              "cocache-develop",
+              "cocache-extend"
+            ]
+          },
+          "keywords": [
+            "cocache",
+            "coherent-cache",
+            "two-level-cache",
+            "distributed-cache",
+            "cache-invalidation",
+            "redis",
+            "caffeine",
+            "spring-boot",
+            "spring-cache",
+            "kotlin",
+            "java",
+            "join-cache",
+            "tck"
+          ],
+          "category": "development",
+          "interface": {
+            "displayName": "Ahoo CoCache Skills",
+            "capabilities": [
+              "Skills"
+            ],
+            "defaultPrompt": "Help me build, test, review or debug this application's CoCache caches, or implement a CoherenceBackend, using verifiable evidence."
+          },
+          "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL"
+          }
+        }
+      ],
+      "skills": {
+        "cocache-develop": "02c9e900089b75cd57871989dc73847239037d9ef0ed06c299965ec51e26d067",
+        "cocache-extend": "293ed1960fa4035754048589decb66f37bea63b43d788bef8790ba24e58202b3"
+      }
+    },
+    {
+      "name": "CoSec",
+      "url": "https://github.com/Ahoo-Wang/CoSec.git",
+      "branch": "main",
+      "commit": "121482e3b3da1d032d8559783a1e51dc50dc9a0b",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "plugins": [
+        {
+          "name": "ahoo-cosec-skills",
+          "description": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, authoring authorization policy documents, extending CoSec, and troubleshooting access decisions.",
+          "skills": {
+            "include": [
+              "cosec-extending",
+              "cosec-integration",
+              "cosec-policy-author",
+              "cosec-troubleshoot"
+            ],
+            "exclude": [
+              "*-workspace"
+            ]
+          },
+          "keywords": [
+            "cosec",
+            "security",
+            "authorization",
+            "authentication",
+            "rbac",
+            "policy",
+            "multi-tenant",
+            "spring-boot",
+            "reactive",
+            "jwt",
+            "rate-limiting",
+            "audit"
+          ],
+          "category": "development",
+          "interface": {
+            "displayName": "Ahoo CoSec Skills",
+            "capabilities": [
+              "Skills"
+            ],
+            "defaultPrompt": "Help me integrate CoSec, author authorization policy documents, extend CoSec, and troubleshoot authentication or authorization issues."
+          },
+          "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL"
+          }
+        }
+      ],
+      "skills": {
+        "cosec-extending": "c303b0cb78174c16d4a2a6cf6bb2938929bd6309e76e2c5f4444e5eb3db5bc3f",
+        "cosec-integration": "21701b74e3ce8948e42de7692b809c9ae59fd4f42a311de4329da8e7ad346387",
+        "cosec-policy-author": "8bf86347dc5697975e3a61e69eea4babee1331ea6ca862770c431da7f9a3f8d0",
+        "cosec-troubleshoot": "c37601d39b12a958f1e78d46027cd0beeabdf7a5bc31e4d3f5221c063bab10ee"
+      }
+    },
+    {
+      "name": "CoSky",
+      "url": "https://github.com/Ahoo-Wang/CoSky.git",
+      "branch": "main",
+      "commit": "f85cd3a8d2528a9917fdec4c78f8d85cfa7ee451",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "plugins": [
+        {
+          "name": "ahoo-cosky-skills",
+          "description": "CoSky skills for connecting Spring Boot applications to a CoSky 8 server for configuration and service discovery, and for moving applications and their Configs from CoSky 5.x/6.x to 8.0.",
+          "skills": {
+            "include": [
+              "cosky-integration",
+              "cosky-migration"
+            ],
+            "exclude": [
+              "*-workspace"
+            ]
+          },
+          "keywords": [
+            "cosky",
+            "configuration",
+            "service-discovery",
+            "service-registry",
+            "spring-boot",
+            "spring-cloud",
+            "grpc",
+            "kubernetes",
+            "migration"
+          ],
+          "category": "development",
+          "interface": {
+            "displayName": "Ahoo CoSky Skills",
+            "capabilities": [
+              "Skills"
+            ],
+            "defaultPrompt": "Help me connect a Spring Boot service to CoSky 8, or move services and their Configs from CoSky 6.x to 8.0."
+          },
+          "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL"
+          }
+        }
+      ],
+      "skills": {
+        "cosky-integration": "b81c5a9a93f413e62083145e90937c3c662e02e3596d6b7dd27a42f472a6b9c4",
+        "cosky-migration": "b51a52b80508c11585bbfa0fb22bde7d6d4bddb6d8641964036edbebdd9f0c11"
+      }
+    },
+    {
+      "name": "CosId",
+      "url": "https://github.com/Ahoo-Wang/CosId.git",
+      "branch": "main",
+      "commit": "5e6a72721440f52cb656b1d8f97e97fe9bc7b656",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "plugins": [
+        {
+          "name": "ahoo-cosid-skills",
+          "version": "0.2.0",
+          "description": "CosId 5 skills for choosing and integrating distributed ID generators: snowflake, cosid80, segment, periodic-segment, uuidv7 and custom strategies, the CosIdRuntime, Spring Boot configuration, leased and named machine slots on JDBC/Redis/MongoDB/ZooKeeper/cosid-server, and sharding.",
+          "skills": {
+            "include": [
+              "*"
+            ],
+            "exclude": [
+              "*-workspace"
+            ]
+          },
+          "keywords": [
+            "cosid",
+            "distributed-id",
+            "snowflake",
+            "segment",
+            "periodic-segment",
+            "uuidv7",
+            "machine-slot",
+            "sharding",
+            "spring-boot",
+            "java"
+          ],
+          "category": "development",
+          "interface": {
+            "displayName": "Ahoo CosId Skills",
+            "capabilities": [
+              "Skills"
+            ],
+            "defaultPrompt": "Help me choose and integrate CosId 5 id generation strategies, Spring Boot configuration, machine slot leases, and sharding."
+          },
+          "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL"
+          }
+        }
+      ],
+      "skills": {
+        "cosid-manual-integration": "a7ea4f24a3b707d01b352d96209bbf2f3955c59fc429d91b386028431ce7c21d",
+        "cosid-sharding": "68ca8248c29b67f35c6daa42331423c938929b7556dbfcef152fb80b25976aee",
+        "cosid-spring-boot": "87b55fd3df97e892042a0fba5f749dda6f186d140a361a65c955a3226785a9a0",
+        "cosid-strategy-guide": "d44b2aa7bb6e340b0a551eae79fec04e77f217dbcd3bdfa3ed4fd8e676e7e716"
+      }
+    },
+    {
+      "name": "FluentAssert",
+      "url": "https://github.com/Ahoo-Wang/FluentAssert.git",
+      "branch": "main",
+      "commit": "84dbc5d4589a7d18f4c45c624437fd93ccd08024",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "plugins": [
+        {
+          "name": "ahoo-fluent-assert-skills",
+          "description": "Skills for writing Kotlin tests with FluentAssert's AssertJ-backed .assert() extensions for JDK types, nullable values, exceptions, and custom AssertProvider assertions.",
+          "skills": {
+            "include": [
+              "*"
+            ],
+            "exclude": [
+              "*-workspace"
+            ]
+          },
+          "keywords": [
+            "fluent-assert",
+            "kotlin",
+            "assertj",
+            "testing",
+            "junit5",
+            "assertions"
+          ],
+          "category": "development",
+          "interface": {
+            "displayName": "Ahoo FluentAssert Skills",
+            "capabilities": [
+              "Skills"
+            ],
+            "defaultPrompt": "Help me use FluentAssert skills for Kotlin test assertions."
+          },
+          "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL"
+          }
+        }
+      ],
+      "skills": {
+        "fluent-assert": "8833255ba3241c2e9cf4dc065aac134892d4707be844b36cb1f6f38e5f0846c1"
+      }
+    },
+    {
+      "name": "Simba",
+      "url": "https://github.com/Ahoo-Wang/Simba.git",
+      "branch": "main",
+      "commit": "deaed5688a3c0bf44e20a995d90db5da0f6fc689",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "plugins": [
+        {
+          "name": "ahoo-simba-skills",
+          "description": "Skills for using and testing Simba, a JVM leader-election and distributed-lock library with JDBC (MySQL, PostgreSQL), Redis, and Zookeeper backends.",
+          "skills": {
+            "include": [
+              "*"
+            ],
+            "exclude": [
+              "*-workspace"
+            ]
+          },
+          "keywords": [
+            "simba",
+            "distributed-lock",
+            "distributed-mutex",
+            "leader-election",
+            "jvm",
+            "kotlin",
+            "spring-boot",
+            "redis",
+            "jdbc",
+            "zookeeper"
+          ],
+          "category": "development",
+          "interface": {
+            "displayName": "Ahoo Simba Skills",
+            "capabilities": [
+              "Skills"
+            ],
+            "defaultPrompt": "Help me use Simba distributed locks, leader election, backend configuration, and tests for JVM applications."
+          },
+          "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL"
+          }
+        }
+      ],
+      "skills": {
+        "simba": "f4e7bd8a78a434902ea374593f3f8df2dd0b25e2447fca3fc2ae8eb85b8cc66d",
+        "simba-testing": "1fc1ea50f70fde9a30d32868113d33bdc01e8c53146115a78a887eaa1dab9142"
+      }
+    },
+    {
+      "name": "Wow",
+      "url": "https://github.com/Ahoo-Wang/Wow.git",
+      "branch": "main",
+      "commit": "a54a7fa10e9f73dcca9642df4c2679481db1acb3",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "plugins": [
+        {
+          "name": "ahoo-wow-skills",
+          "version": "0.2.0",
+          "description": "Agent Skills for downstream applications built on Wow, the reactive DDD, Event Sourcing and CQRS framework: building, reviewing and debugging Wow services, breaking migrations, TypeScript clients generated from the Manifest or written by hand, answering business data questions from a running service's read-only queries, and writing and hosting Wow View Engine views.",
+          "skills": {
+            "include": [
+              "wow-develop",
+              "wow-migrate",
+              "wow-client",
+              "wow-data-query",
+              "wow-view-definition",
+              "wow-view-host"
+            ]
+          },
+          "keywords": [
+            "wow",
+            "ddd",
+            "cqrs",
+            "event-sourcing",
+            "saga",
+            "aggregate",
+            "kotlin",
+            "java",
+            "spring-boot",
+            "reactor",
+            "migration",
+            "typescript",
+            "openapi",
+            "code-generation",
+            "client",
+            "data-query",
+            "analytics",
+            "view-definition",
+            "view-engine",
+            "view-host"
+          ],
+          "category": "development",
+          "interface": {
+            "displayName": "Ahoo Wow Skills",
+            "capabilities": [
+              "Skills"
+            ],
+            "defaultPrompt": "Help me build, review, debug or migrate this downstream Wow application, or write its TypeScript clients, using verifiable evidence."
+          },
+          "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL"
+          }
+        }
+      ],
+      "skills": {
+        "wow-client": "e9f1896b364cdc625fa2b4701b5534818f811fb781e46894d19f6e643b889d67",
+        "wow-data-query": "2cf94f5e837284a9f89784b7157b41fcfb33d401ed193952e17ea9d62320d270",
+        "wow-develop": "4a6e891bfe208c46f4924a775c16f1938ee5e6b4cb8fa1301e4c1358f0ca644d",
+        "wow-migrate": "e0213185f5b0762f17f4ae550891e43fc313b1e878109ddd8346eadeeb063f96",
+        "wow-view-definition": "0aaf178817390a9283eff2335ee1ae36682e007fd8de510d0c5909bb6a70020c",
+        "wow-view-host": "c058d9bffc4372358e197bc0bac1e2eb4b04e87f1bdf59ea892b2a96cd8119b9"
+      }
+    },
+    {
+      "name": "fetcher",
+      "url": "https://github.com/Ahoo-Wang/fetcher.git",
+      "branch": "main",
+      "commit": "b473887130795afa74582746bd86b5860ce4731a",
+      "skills_path": "skills",
+      "plugins_path": "skills/plugins.json",
+      "plugins": [
+        {
+          "name": "ahoo-fetcher-skills",
+          "description": "Skills for building with the Fetcher TypeScript ecosystem: the core HTTP client, decorator services, typed event buses, persisted storage, SSE/LLM streaming, OpenAI chat completions, OpenAPI types and React hooks, plus upgrading from Fetcher 5.x to 6.0. Wow CQRS clients and OpenAPI client generation live in the Wow repository's skills.",
+          "skills": {
+            "include": [
+              "*"
+            ],
+            "exclude": [
+              "*-workspace"
+            ]
+          },
+          "keywords": [
+            "fetcher",
+            "typescript",
+            "http-client",
+            "decorators",
+            "eventbus",
+            "storage",
+            "sse",
+            "llm-streaming",
+            "openai",
+            "openapi",
+            "react",
+            "migration"
+          ],
+          "category": "development",
+          "interface": {
+            "displayName": "Ahoo Fetcher Skills",
+            "capabilities": [
+              "Skills"
+            ],
+            "defaultPrompt": "Help me use Fetcher skills for TypeScript HTTP clients, decorator services, streaming, React hooks, storage, OpenAPI types, or upgrading from Fetcher 5.x to 6.0."
+          },
+          "policy": {
+            "installation": "AVAILABLE",
+            "authentication": "ON_INSTALL"
+          }
+        }
+      ],
+      "skills": {
+        "fetcher-decorator-service": "3949f8b61a1e14263f8eb8fe75485beecd3ad3beed308c58b9f6145c045217f3",
+        "fetcher-eventbus": "b1221bcb8b01de68376deb44b252b60c511c1a4cc97fd0194aa10eed84bb0d72",
+        "fetcher-integration": "d07a669291bf38ca1acd161a28c66387be7e868173e3f13117694c0d9f81cd1e",
+        "fetcher-llm-streaming": "fb3c6d9bd6bce09f91631acecd0cb1d9d73462f4e71e6d5867924afe50d9cc7a",
+        "fetcher-openai-client": "4ba43100e505c90fccb6cc61c929a0320f5ab63c0e080d6170e0582575879141",
+        "fetcher-openapi-types": "483a9ca640a3b97c601b4b25d2005b3d7f5b645003a4a9875bd764133ac58815",
+        "fetcher-react-hooks": "ca656cf22cfe73906b493b199bbe8c08e005533e635c787d49e7192ca2324191",
+        "fetcher-storage": "8c5d9d165069b996887402eb98068f6be5ca47eb4bbc9250b0550a159959d4c2",
+        "fetcher-v6-migration": "cf95dac832d5f5b564aaddaa2d1b0cc2667c56c75f333da1471e72dd8ba9e364"
+      }
+    }
+  ]
+}

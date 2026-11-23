@@ -1,4 +1,0 @@
-interface:
-  display_name: "Wow Develop"
-  short_description: "Build, review and debug downstream Wow services"
-  default_prompt: "Use $wow-develop to build, review or debug this downstream application's Wow behavior against the target version, changing files only where I authorize it."

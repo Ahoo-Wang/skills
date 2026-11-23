@@ -3,213 +3,146 @@
 This file is the canonical agent guide for this repository. Claude Code should
 also follow this file; `CLAUDE.md` only contains Claude-specific entry notes.
 
-## Repository Role
+## What This Repository Is
 
-This repository is a marketplace and distribution repository for Ahoo-Wang
-skills. It aggregates skill sources from upstream projects, generates split
-plugins, and publishes marketplace metadata for Codex and Claude Code.
+A marketplace that distributes Ahoo-Wang's agent skills to Claude Code and
+Codex. It owns no upstream skill content. Three facts drive the design:
 
-Keep the responsibility boundary sharp:
-- Upstream repositories own skills and plugin source metadata.
-- Upstream plugin source metadata lives at `skills/plugins.json`.
-- This repository mirrors upstream content into `sources/<source>/`.
-- This repository generates source-owned distribution plugins under `plugins/`.
-- Marketplace-local plugins are allowed, but they must live directly under
-  `plugins/<plugin-name>/`.
-- Do not reintroduce a top-level `skills/` distribution directory.
+1. **Upstream repositories own their skills** and declare how they split into
+   plugins in their own `skills/plugins.json`.
+2. **Users install plugins**, so `plugins/<plugin>/` is the only copy of any
+   skill here. Nothing else is distributed.
+3. **Every commit is a potential update for users.** A plugin's version is a
+   hash of its files, so it changes exactly when its content changes, and a
+   sync that finds no content change commits nothing.
+
+Everything that can be derived is derived, and `check` proves it by deriving
+it again and comparing.
 
 ## Installation
 
-Codex marketplace:
-
-```bash
-codex plugin marketplace add Ahoo-Wang/skills --ref main
-codex plugin add ahoo-wow-skills@ahoo-skills
-```
-
-Claude Code marketplace:
+Claude Code:
 
 ```bash
 /plugin marketplace add https://github.com/Ahoo-Wang/skills
 /plugin install ahoo-wow-skills
 ```
 
-Install the split plugin you need, such as `ahoo-wow-skills`,
-`ahoo-fetcher-skills`, `ahoo-cosec-skills`, or `ahoo-agent-skills`.
+Codex:
 
-## Directory Layout
+```bash
+codex plugin marketplace add Ahoo-Wang/skills --ref main
+codex plugin add ahoo-wow-skills@ahoo-skills
+```
+
+## Layout
 
 ```text
 .
-├── repos.json                         # Source repository list
-├── sources/<source>/                  # Mirrored upstream source content
-│   ├── plugins.json                   # Upstream-owned plugin metadata
-│   └── skills/<skill-name>/           # Mirrored upstream skills
-├── plugins/<plugin-name>/             # Distributed plugin packages
-│   ├── .codex-plugin/plugin.json
-│   ├── .claude-plugin/plugin.json
-│   └── skills/<skill-name>/
-├── .agents/plugins/marketplace.json   # Codex marketplace manifest
-├── .claude-plugin/marketplace.json    # Claude Code marketplace manifest
-├── .sync-sources.json                 # Sync snapshot
-├── schemas/                           # Local metadata schemas
-└── scripts/                           # Sync, generation, and validation
+├── repos.json                         # Input: source repositories
+├── skills.lock.json                   # Written by sync: what was mirrored
+├── plugins/<plugin>/                  # Distributed plugins (generated or local)
+│   ├── .claude-plugin/plugin.json     # Derived (local: hand-written + version)
+│   ├── .codex-plugin/plugin.json      # Derived (local: hand-written + version)
+│   └── skills/<skill>/SKILL.md
+├── .claude-plugin/marketplace.json    # Derived: Claude Code marketplace
+├── .agents/plugins/marketplace.json   # Derived: Codex marketplace
+├── README.md, README.zh-CN.md         # Plugin table between catalog markers is derived
+├── schemas/                           # Schemas for repos.json and upstream plugins.json
+└── scripts/
+    ├── skills.mjs                     # CLI: sync | build | check
+    ├── lib/                           # fsutil, catalog (derivation), sync, check
+    └── test/                          # node:test suite
 ```
 
-## Source Sync
+The tool is plain Node.js (22+) with no dependencies.
 
-Source repositories are listed in `repos.json`:
+## Commands
 
-```json
-{ "name": "<repo>", "url": "https://github.com/Ahoo-Wang/<repo>.git", "branch": "main", "skills_path": "skills" }
-```
+| Command | What it does |
+|---|---|
+| `npm run sync` | Fetch every source, replace generated plugins, update `skills.lock.json`, then build |
+| `npm run build` | Rewrite every derived file from `skills.lock.json`, `plugins/` and `package.json` |
+| `npm run check` | Fail if any derived file is stale, a generated skill was edited, or a skill is malformed |
+| `npm test` | Unit and end-to-end tests, `check`, and the GitHub Pages checks |
 
-`scripts/sync-sources.sh` shallow-clones each source repo and mirrors
-`<skills_path>/skills/` plus `<skills_path>/plugins.json` into
-`sources/<source>/`. The GitHub Actions workflow
-`.github/workflows/sync-skills.yml` runs this sync every 6 hours at 02:17,
-08:17, 14:17, and 20:17 UTC. To ship an upstream change sooner, trigger it
-manually:
+## Sync
+
+For each entry in `repos.json`
+(`{ "name", "url", "branch": "main", "skills_path": "skills" }`), sync
+shallow-clones the repository, reads `<skills_path>/plugins.json`, and copies
+the skills each plugin selects into `plugins/<plugin>/skills/`.
+
+- Skills ending in `-workspace` are ignored.
+- A plugin selects skills with an explicit list or with `include`/`exclude`
+  shell globs (defaults `["*"]` and `["*-workspace"]`).
+- Whitespace-only lines in Markdown are emptied so mirrored files pass
+  `git diff --check`.
+- All-or-nothing: a clone failure, a missing `plugins.json`, a skill or plugin
+  name owned twice, a plugin clashing with a local plugin, an upstream skill in
+  no plugin, or a plugin naming a missing skill fails the sync before anything
+  on disk changes.
+- Plugins a source no longer declares are deleted; local plugins are untouched.
+- `skills.lock.json` records each source's URL, branch, commit, paths, its
+  `plugins` metadata verbatim, and a hash of every mirrored skill. When only
+  commits differ from the previous lock, the previous lock is kept, so an
+  upstream commit that does not change skills produces no diff.
+
+`.github/workflows/sync-skills.yml` runs sync and check every 6 hours (02:17,
+08:17, 14:17, 20:17 UTC) and commits any change. One sync runs at a time; if
+`main` moved meanwhile it rebases once before pushing. To ship sooner:
 
 ```bash
 gh workflow run sync-skills.yml --repo Ahoo-Wang/skills
 ```
 
-Upstream repos do not notify this repository: a cross-repository trigger needs
-a credential for this repo stored in every upstream, which is not worth it for
-skill content that tolerates a few hours of delay.
+## Derived Files
 
-Only one sync runs at a time (`concurrency: sync-skills`); if `main` moves
-during a sync, the workflow rebases once before pushing.
+`build` derives, and `check` verifies:
 
-Sync rules:
-- Workspace skills ending in `-workspace` are skipped.
-- Duplicate skill names across source repos fail the sync.
-- `.sync-sources.json` records mirrored source repos, paths, and commits.
-- A sync reports changes only when mirrored content or source configuration
-  changes. When upstream commits move without changing mirrored content, the
-  previous `.sync-sources.json` is kept and nothing is committed, because every
-  commit to this repository is a new plugin version for users.
-- Removed upstream skills are removed from generated distribution output on the
-  next sync.
+- **Generated plugin manifests** from the plugin's metadata in the lock plus
+  marketplace defaults in `package.json` (author, homepage, repository,
+  license). Codex manifests get `skills: "./skills/"` and an `interface` block.
+- **Local plugin manifests** are hand-written; build only stamps `version`.
+- **Versions**: both manifests of a plugin carry `1.0.0+<12 hex>`, the SHA-256
+  over the plugin's files (each manifest hashed without its `version`). The
+  fixed `1.0.0` core keeps it semver-valid and above legacy `0.x` Codex caches.
+  Upstream `version` fields are ignored.
+- **Marketplaces**: one entry per plugin, sorted by name. The Claude marketplace
+  never declares a version (Claude Code reads it from `plugin.json`).
+- **README catalog**: the plugin table between the `catalog:start` and
+  `catalog:end` markers in both READMEs.
 
-## Plugin Generation
+`check` also requires that every skill has `SKILL.md` with YAML frontmatter
+whose `name` equals its directory and that has a `description`; that skill
+names are unique across plugins; that generated skills hash to the lock; and
+that Codex manifests have `displayName`, `shortDescription`, `longDescription`
+and `defaultPrompt`. It runs the Codex plugin validator when installed
+(`~/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py`, or
+`CODEX_PLUGIN_VALIDATOR`).
 
-`scripts/generate-plugins.sh` reads each `sources/<source>/plugins.json` and
-regenerates source-owned plugins under `plugins/<plugin-name>/`.
+## Common Tasks
 
-Generation rules:
-- Generated plugins are tracked in `plugins/.generated-plugins.json`.
-- Each plugin name has exactly one owner. Generation fails before deleting
-  anything when two sources declare the same plugin name, or when a source
-  plugin name clashes with a marketplace-local plugin.
-- Source-owned plugin directories may be deleted and rebuilt during generation.
-- Marketplace-local plugin directories under `plugins/` are preserved.
-- Do not manually edit generated plugin copies to fix upstream skill content;
-  update the upstream repo and rerun sync.
-- Local plugins must provide both `.codex-plugin/plugin.json` and
-  `.claude-plugin/plugin.json`.
-
-## Marketplace Metadata
-
-This repository publishes two marketplace manifests:
-- Codex: `.agents/plugins/marketplace.json`
-- Claude Code: `.claude-plugin/marketplace.json`
-
-Each split plugin also publishes both manifests:
-- `plugins/<plugin-name>/.codex-plugin/plugin.json`
-- `plugins/<plugin-name>/.claude-plugin/plugin.json`
-
-Codex manifests must keep `skills` set to `./skills/` and include the Codex
-`interface` metadata expected by the plugin validator.
-
-## Versioning
-
-No version in this repository is maintained by hand. Each plugin has one
-content-derived version, shared by both of its manifests:
-
-- `plugins/<plugin>/.claude-plugin/plugin.json` and
-  `plugins/<plugin>/.codex-plugin/plugin.json` carry the same `version`:
-  `1.0.0+<12-hex SHA-256 of the plugin's files>`, with both manifests hashed
-  without their own `version`. `generate-plugins.sh` stamps it for generated
-  and local plugins alike (`scripts/lib/plugin-version.sh`).
-- The version changes exactly when that plugin's files change. Claude Code and
-  Codex both reinstall only when the version changes, so users get an update
-  for real content changes and never for commits that touch other plugins or
-  repository docs. Because it is recomputed on every generation, it never pins
-  users to stale content the way a hand-written version would.
-- The fixed `1.0.0` core keeps the value semver-valid and above legacy `0.x`
-  Codex cache entries.
-- `.claude-plugin/marketplace.json` (top level and plugin entries) must omit
-  `version`; Claude Code reads the plugin manifest first, and declaring it in
-  both places is reported as a mismatch.
-- Upstream `plugins.json` `version` fields are ignored.
-- `package.json` is `private` and has no `version`; it is not published.
-
-`validate-skills.sh` fails when the Claude marketplace declares a version, or
-when either manifest's `version` differs from the content-derived value; rerun
-`npm run generate:plugins` to fix it.
-
-## Skill Structure
-
-Each mirrored or distributed skill uses this shape:
-
-```text
-<skill-name>/
-├── SKILL.md
-├── agents/        # optional runtime-specific metadata
-├── references/    # optional detailed documentation
-└── evals/         # optional evaluation data
-```
-
-`SKILL.md` must start with YAML frontmatter:
-
-```yaml
----
-name: <skill-name>
-description: |
-  When to invoke this skill and what it covers
-compatibility: <comma-separated list of technologies>  # optional
----
-```
-
-## Common Workflows
-
-Add or change an upstream skill:
-- Update the upstream repository's `skills/` content.
-- Update the upstream repository's `skills/plugins.json`.
-- In this repository, run `npm run sync`.
-
-Add a new upstream source repo:
-- Add the source to `repos.json`.
-- Ensure the upstream repo has `skills/plugins.json`.
-- Run `npm run sync`.
-
-Add a marketplace-local plugin:
-- Create the complete plugin under `plugins/<plugin-name>/`.
-- Include both Codex and Claude plugin manifests.
-- Run `npm run generate:plugins` so marketplace manifests include it.
-
-Resolve sync-generated conflicts:
-- Treat `sources/`, generated `plugins/`, and marketplace JSON as generated
-  distribution state.
-- Prefer rerunning `npm run sync` from current upstreams instead of manually
-  merging stale generated files.
+- **Change an upstream skill**: change it upstream, then run the sync workflow
+  or `npm run sync`. Never edit a generated plugin's skills here; check rejects
+  it.
+- **Add a source repository**: make sure it publishes `skills/plugins.json`
+  (see `schemas/plugins.schema.json`), add it to `repos.json`, run
+  `npm run sync`.
+- **Add or edit a local plugin**: create `plugins/<plugin>/` with both
+  manifests and its skills, then `npm run build`.
+- **Change marketplace defaults**: edit `package.json`, then `npm run build`.
+- **Resolve conflicts in generated files**: take either side, then rerun
+  `npm run sync` (or `npm run build` if no upstream is involved).
 
 ## Validation
 
-Before pushing repository changes, run:
+Before pushing:
 
 ```bash
 npm test
 git diff --check
 ```
 
-`npm test` exercises sync behavior, plugin generation, and marketplace
-consistency. For plugin metadata changes, also run the Codex plugin validator
-when available.
-
-Pull requests are checked by `.github/workflows/ci.yml`, which runs the same
-test suite and whitespace check. The scheduled sync workflow remains separate
-in `.github/workflows/sync-skills.yml` and is responsible only for refreshing
-mirrored source content and generated distribution files.
+`.github/workflows/ci.yml` runs the same on every pull request and push to
+`main`.
