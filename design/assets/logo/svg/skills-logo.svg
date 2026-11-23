@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344 96" width="344" height="96" role="img" aria-label="Ahoo Skills">
+<g transform="translate(4 8) scale(1.25)"><path d="M7 52L14 38" stroke="#8AA9FF" stroke-width="8" stroke-linecap="round"/><path d="M22 52L35.5 25" stroke="#4F7EFF" stroke-width="8" stroke-linecap="round"/><path d="M37 52L57 12" stroke="#1F4ED8" stroke-width="8" stroke-linecap="round"/></g>
+<text x="104" y="75" font-family="Inter, 'SF Pro Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="700" letter-spacing="-0.8"><tspan fill="#545D6E" font-weight="600">Ahoo</tspan> <tspan fill="#0B1020">Skills</tspan></text>
+</svg>

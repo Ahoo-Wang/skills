@@ -2,7 +2,10 @@
 
 <p align="center">
   <a href="https://skills.ahoo.me/">
-    <img src="./docs/assets/logo/skills-logo-primary.svg" width="280" alt="Ahoo-Wang's skills logo">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/logo/skills-logo-dark.svg">
+      <img src="./docs/assets/logo/skills-logo.svg" width="320" alt="Ahoo Skills">
+    </picture>
   </a>
 </p>
 

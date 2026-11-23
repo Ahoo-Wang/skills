@@ -317,11 +317,16 @@ function renderPage(lang, data, base) {
     <meta property="og:title" content="${escapeHtml(t.title)}">
     <meta property="og:description" content="${escapeHtml(t.description)}">
     <meta property="og:url" content="${url}">
-    <meta property="og:image" content="${base}assets/brand-board/skills-brand-board.webp">
+    <meta property="og:image" content="${base}assets/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Ahoo Skills">
     <meta property="og:locale" content="${t.ogLocale}">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="${base}assets/og.png">
     <meta name="theme-color" content="#0B1020">
-    <link rel="icon" href="${up}assets/logo/skills-mark.svg" type="image/svg+xml">
+    <link rel="icon" href="${up}assets/logo/skills-icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="${up}assets/logo/skills-icon-180.png">
     <link rel="stylesheet" href="${up}assets/tokens/skills-brand.css">
     <link rel="stylesheet" href="${up}assets/site.css">
     <script src="${up}assets/lang.js" data-en="${href("en")}" data-zh="${href("zh-CN")}"></script>
@@ -335,7 +340,7 @@ function renderPage(lang, data, base) {
     <a class="skip" href="#main">${escapeHtml(t.skip)}</a>
     <header class="topbar">
       <div class="wrap topbar-inner">
-        <a class="brand" href="./"><img src="${up}assets/logo/skills-mark.svg" alt="" width="28" height="28"><span>Ahoo Skills</span></a>
+        <a class="brand" href="./"><img src="${up}assets/logo/skills-mark-dark.svg" alt="" width="28" height="28"><span>Ahoo Skills</span></a>
         <nav class="nav" aria-label="${escapeHtml(t.nav.label)}">
           <a href="#install">${escapeHtml(t.nav.install)}</a>
           <a href="#plugins">${escapeHtml(t.nav.plugins)}</a>
@@ -423,7 +428,7 @@ function renderPage(lang, data, base) {
     </main>
     <footer class="footer">
       <div class="wrap footer-inner">
-        <span class="brand"><img src="${up}assets/logo/skills-mark.svg" alt="" width="22" height="22"><span>Ahoo Skills</span></span>
+        <span class="brand"><picture><source media="(prefers-color-scheme: dark)" srcset="${up}assets/logo/skills-mark-dark.svg"><img src="${up}assets/logo/skills-mark.svg" alt="" width="22" height="22"></picture><span>Ahoo Skills</span></span>
         <nav class="footer-links" aria-label="Footer">
           <a href="${data.repo}">${escapeHtml(t.footer.repo)}</a>
           <a href="${data.repo}/blob/main/.claude-plugin/marketplace.json">${escapeHtml(t.footer.claude)}</a>

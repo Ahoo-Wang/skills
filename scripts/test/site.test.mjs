@@ -43,7 +43,7 @@ describe("published pages", () => {
     test(`${lang}: local links and anchors resolve, ids are unique`, () => {
       const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(([, id]) => id);
       assert.equal(new Set(ids).size, ids.length, "duplicate id");
-      for (const [, ref] of html.matchAll(/\s(?:href|src)="([^"]+)"/g)) {
+      for (const [, ref] of html.matchAll(/\s(?:href|src|srcset)="([^"]+)"/g)) {
         if (/^(https?:|mailto:)/.test(ref)) continue;
         if (ref.startsWith("#")) {
           assert.ok(ids.includes(ref.slice(1)), `anchor ${ref}`);
