@@ -19,6 +19,9 @@
     "cosid",
     "fluent-assert",
     "fetcher",
+    "cocache",
+    "simba",
+    "cosky",
     "ddd",
     "cqrs",
     "event-sourcing"
