@@ -1,4 +1,0 @@
-interface:
-  display_name: "CoSec Integration"
-  short_description: "Integrate CoSec in Spring Boot"
-  default_prompt: "Use $cosec-integration to add CoSec 8.0 to a Spring Boot service with JWT, Redis and its first platform document."

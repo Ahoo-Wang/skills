@@ -1,4 +1,0 @@
-interface:
-  display_name: "Wow View Definition"
-  short_description: "Decide what a Wow view definition declares"
-  default_prompt: "Use $wow-view-definition to decide and write this view definition, its words, system views and boards with defineView over the committed descriptor, and self-check it with admit."

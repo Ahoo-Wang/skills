@@ -1,5 +1,5 @@
-# Sync skills from source repositories
-# 从源仓库同步 skills 到聚合仓库
+# Mirror upstream skills into plugins/ and regenerate the marketplaces.
+# 从源仓库同步 skills 并重新生成 marketplace
 name: Sync Skills
 
 on:
@@ -27,38 +27,29 @@ jobs:
     steps:
       - name: Checkout skills repo
         uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          node-version: 22
 
+      # Nothing on disk changes unless every source syncs. When only upstream
+      # commits moved, the lock is kept and the worktree stays clean.
       - name: Sync skills from source repos
-        id: sync
-        run: |
-          set +e
-          scripts/sync-sources.sh repos.json sources .sync-sources.json
-          EXIT_CODE=$?
-          set -e
-          if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 2 ]; then
-            echo "Error: Sync failed with exit code $EXIT_CODE" >&2
-            exit 1
-          fi
+        run: node scripts/skills.mjs sync
 
-          scripts/generate-plugins.sh
-
-          if [ -n "$(git status --porcelain -- sources .sync-sources.json plugins .claude-plugin/marketplace.json .agents/plugins/marketplace.json)" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Validate skill files
-        run: bash scripts/validate-skills.sh
+      - name: Check the result
+        run: node scripts/skills.mjs check
 
       - name: Commit and push changes
-        if: steps.sync.outputs.changed == 'true'
         run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes"
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A sources/ .sync-sources.json plugins/ .claude-plugin/marketplace.json .agents/plugins/marketplace.json
+          git add -A
           git commit -m "chore: sync skills from source repos [skip ci]"
           # main may have moved during the sync (for example a merged PR).
           # Rebase once and retry; a conflict fails the run and the next sync
