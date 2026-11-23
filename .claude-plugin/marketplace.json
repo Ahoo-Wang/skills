@@ -128,6 +128,30 @@
       "category": "development"
     },
     {
+      "name": "ahoo-cosky-skills",
+      "description": "CoSky skills for connecting Spring Boot applications to a CoSky 8 server for configuration and service discovery, and for moving applications and their Configs from CoSky 5.x/6.x to 8.0.",
+      "author": {
+        "name": "Ahoo Wang",
+        "email": "ahoowang@gmail.com"
+      },
+      "homepage": "https://github.com/Ahoo-Wang/skills",
+      "repository": "https://github.com/Ahoo-Wang/skills",
+      "license": "Apache-2.0",
+      "keywords": [
+        "cosky",
+        "configuration",
+        "service-discovery",
+        "service-registry",
+        "spring-boot",
+        "spring-cloud",
+        "grpc",
+        "kubernetes",
+        "migration"
+      ],
+      "source": "./plugins/ahoo-cosky-skills",
+      "category": "development"
+    },
+    {
       "name": "ahoo-fetcher-skills",
       "description": "Skills for building with the Fetcher TypeScript ecosystem: the core HTTP client, decorator services, typed event buses, persisted storage, SSE/LLM streaming, OpenAI chat completions, OpenAPI types and React hooks, plus upgrading from Fetcher 5.x to 6.0. Wow CQRS clients and OpenAPI client generation live in the Wow repository's skills.",
       "author": {

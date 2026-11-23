@@ -37,6 +37,14 @@
       ]
     },
     {
+      "name": "ahoo-cosky-skills",
+      "source": "CoSky",
+      "skills": [
+        "cosky-integration",
+        "cosky-migration"
+      ]
+    },
+    {
       "name": "ahoo-fetcher-skills",
       "source": "fetcher",
       "skills": [

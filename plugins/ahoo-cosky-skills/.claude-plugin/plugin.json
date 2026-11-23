@@ -1,0 +1,23 @@
+{
+  "name": "ahoo-cosky-skills",
+  "description": "CoSky skills for connecting Spring Boot applications to a CoSky 8 server for configuration and service discovery, and for moving applications and their Configs from CoSky 5.x/6.x to 8.0.",
+  "version": "1.0.0+891dbd141d4c",
+  "author": {
+    "name": "Ahoo Wang",
+    "email": "ahoowang@gmail.com"
+  },
+  "homepage": "https://github.com/Ahoo-Wang/skills",
+  "repository": "https://github.com/Ahoo-Wang/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "cosky",
+    "configuration",
+    "service-discovery",
+    "service-registry",
+    "spring-boot",
+    "spring-cloud",
+    "grpc",
+    "kubernetes",
+    "migration"
+  ]
+}
