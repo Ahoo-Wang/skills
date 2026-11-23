@@ -6,19 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { PATHS, deriveFiles, loadPlugins } from "./catalog.mjs";
 import { SkillsError, listDirs, treeHash } from "./fsutil.mjs";
-
-/** Reads `name` and `description` from a SKILL.md YAML frontmatter block. */
-export function readFrontmatter(file) {
-  const text = fs.readFileSync(file, "utf8");
-  const match = /^---\r?\n([\s\S]*?)\r?\n---(\r?\n|$)/.exec(text);
-  if (!match) return null;
-  const fields = {};
-  for (const line of match[1].split(/\r?\n/)) {
-    const field = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
-    if (field) fields[field[1]] = field[2].trim().replace(/^(["'])(.*)\1$/, "$2");
-  }
-  return fields;
-}
+import { readFrontmatter } from "./skillmd.mjs";
 
 function checkSkill(dir, name, errors) {
   const file = path.join(dir, "SKILL.md");
@@ -26,7 +14,7 @@ function checkSkill(dir, name, errors) {
   const fields = readFrontmatter(file);
   if (!fields) return errors.push(`${file}: missing YAML frontmatter`);
   if (fields.name !== name) errors.push(`${file}: frontmatter name "${fields.name ?? ""}" must equal the directory name "${name}"`);
-  if (!fields.description) errors.push(`${file}: frontmatter has no description`);
+  if (!fields.description?.trim()) errors.push(`${file}: frontmatter has no description`);
 }
 
 /** Runs the Codex plugin validator when it is installed (or given). */

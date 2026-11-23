@@ -48,6 +48,9 @@ codex plugin add ahoo-wow-skills@ahoo-skills
 ├── .claude-plugin/marketplace.json    # Derived: Claude Code marketplace
 ├── .agents/plugins/marketplace.json   # Derived: Codex marketplace
 ├── README.md, README.zh-CN.md         # Plugin table between catalog markers is derived
+├── docs/                              # GitHub Pages site (skills.ahoo.me)
+│   ├── index.html, zh-CN/index.html   # Derived: one static page per language
+│   └── assets/                        # Hand-written: site.css, site.js, lang.js, brand assets
 ├── schemas/                           # Schemas for repos.json and upstream plugins.json
 └── scripts/
     ├── skills.mjs                     # CLI: sync | build | check
@@ -64,7 +67,7 @@ The tool is plain Node.js (22+) with no dependencies.
 | `npm run sync` | Fetch every source, replace generated plugins, update `skills.lock.json`, then build |
 | `npm run build` | Rewrite every derived file from `skills.lock.json`, `plugins/` and `package.json` |
 | `npm run check` | Fail if any derived file is stale, a generated skill was edited, or a skill is malformed |
-| `npm test` | Unit and end-to-end tests, `check`, and the GitHub Pages checks |
+| `npm test` | Unit, end-to-end and site tests, then `check` |
 
 ## Sync
 
@@ -112,6 +115,18 @@ gh workflow run sync-skills.yml --repo Ahoo-Wang/skills
   never declares a version (Claude Code reads it from `plugin.json`).
 - **README catalog**: the plugin table between the `catalog:start` and
   `catalog:end` markers in both READMEs.
+- **Site pages** (`docs/index.html`, `docs/zh-CN/index.html`), generated when
+  `docs/CNAME` exists, whose host becomes the site URL. Each page holds only its
+  own language. Plugin descriptions come from the manifests and each skill's
+  summary from the first sentence of its `SKILL.md` description, so the site
+  never lists anything that does not ship. UI text for both languages lives in
+  `scripts/lib/site.mjs`; upstream text stays in English, marked `lang="en"`.
+  Styles and behavior are hand-written in `docs/assets/` (`site.css`;
+  `site.js` for copy buttons and the filter; `lang.js` remembers the chosen
+  language and sends Chinese browsers to `/zh-CN/`). The pages work without
+  JavaScript. `.github/workflows/pages.yml` publishes `docs/` on every push to
+  `main`; the sync workflow starts it after each sync commit, because pushes
+  made with `GITHUB_TOKEN` do not trigger other workflows.
 
 `check` also requires that every skill has `SKILL.md` with YAML frontmatter
 whose `name` equals its directory and that has a `description`; that skill

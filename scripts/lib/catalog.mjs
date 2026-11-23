@@ -16,6 +16,7 @@ import {
   sortKeysDeep,
   treeHash,
 } from "./fsutil.mjs";
+import { renderSite } from "./site.mjs";
 
 export const PATHS = {
   repos: "repos.json",
@@ -300,6 +301,7 @@ export function deriveFiles(root, model = loadPlugins(root)) {
     if (!fs.existsSync(abs)) continue;
     files.set(file, withCatalog(fs.readFileSync(abs, "utf8"), file, renderCatalog(plugins, lang)));
   }
+  for (const [file, html] of Object.entries(renderSite(root, model))) files.set(file, html);
   return files;
 }
 

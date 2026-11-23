@@ -38,7 +38,7 @@
     "sync": "node scripts/skills.mjs sync",
     "build": "node scripts/skills.mjs build",
     "check": "node scripts/skills.mjs check",
-    "test": "node --test 'scripts/test/*.test.mjs' && node scripts/skills.mjs check && node scripts/test-pages-i18n.mjs"
+    "test": "node --test 'scripts/test/*.test.mjs' && node scripts/skills.mjs check"
   },
   "engines": {
     "node": ">=22"

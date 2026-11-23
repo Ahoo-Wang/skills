@@ -272,6 +272,17 @@ describe("check", () => {
     fails(root, /name "not-bad" must equal the directory name "bad"[\s\S]*bare\/SKILL\.md: missing YAML frontmatter/);
   });
 
+  test("generates the site when docs/CNAME exists and rejects edits to it", () => {
+    const root = synced();
+    write(path.join(root, "docs", "CNAME"), "skills.example.test\n");
+    ok("build", root);
+    const page = path.join(root, "docs", "zh-CN", "index.html");
+    assert.match(fs.readFileSync(page, "utf8"), /<link rel="canonical" href="https:\/\/skills\.example\.test\/zh-CN\/">/);
+    assert.match(fs.readFileSync(path.join(root, "docs", "index.html"), "utf8"), /id="a-skills"[\s\S]*a-skill skill/);
+    fs.appendFileSync(page, "<!-- edit -->");
+    fails(root, /docs\/zh-CN\/index\.html is out of date/);
+  });
+
   test("rejects a local plugin without both manifests", () => {
     const root = synced();
     fs.rmSync(path.join(root, "plugins", "local-plugin", ".codex-plugin"), { recursive: true });
