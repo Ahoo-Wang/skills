@@ -65,7 +65,8 @@ codex plugin add ahoo-wow-skills@ahoo-skills
   `plugins/<plugin>/skills/`，并把源 commit、插件元数据和每个 skill 的内容哈希记录在
   `skills.lock.json`。若上游只有 commit 变化而内容未变，lock 保持不变，不产生任何改动。
 - `npm run build` 从 `skills.lock.json` 和 `plugins/` 派生其余一切：两份插件清单、
-  内容派生的版本号、Claude Code 与 Codex 的 marketplace，以及上面的插件表。
+  内容派生的版本号、Claude Code 与 Codex 的 marketplace、上面的插件表，以及 `docs/` 中的
+  [网站](https://skills.ahoo.me/zh-CN/)页面。
 - `npm run check` 重新派生并比对，任何差异、手工修改过的生成 skill 或格式错误的 skill
   都会失败。CI 通过 `npm test` 运行它。
 - `.github/workflows/sync-skills.yml` 每 6 小时同步一次并提交结果。

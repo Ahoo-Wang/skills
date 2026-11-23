@@ -13,6 +13,8 @@ on:
 
 permissions:
   contents: write
+  # To start the Pages deployment after a sync commit (see below).
+  actions: write
 
 # One sync at a time. A run that starts while another is in flight waits, and
 # GitHub keeps only the newest pending run, which syncs the latest upstreams.
@@ -41,7 +43,9 @@ jobs:
       - name: Check the result
         run: node scripts/skills.mjs check
 
-      - name: Commit and push changes
+      - name: Commit, push and redeploy the site
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -z "$(git status --porcelain)" ]; then
             echo "No changes"
@@ -58,3 +62,6 @@ jobs:
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi
+          # Pushes made with GITHUB_TOKEN do not start other workflows, and the
+          # site pages are generated from the synced skills, so deploy explicitly.
+          gh workflow run pages.yml --ref "${GITHUB_REF_NAME}"

@@ -69,7 +69,8 @@ plugins in `skills/plugins.json`. This repository only distributes them:
   When only upstream commits moved, the lock is kept and nothing changes.
 - `npm run build` derives everything else from `skills.lock.json` and
   `plugins/`: both plugin manifests, their content-derived versions, the Claude
-  Code and Codex marketplaces, and the plugin table above.
+  Code and Codex marketplaces, the plugin table above, and the
+  [website](https://skills.ahoo.me/) pages in `docs/`.
 - `npm run check` re-derives all of that and fails on any difference, on
   generated skills edited by hand, and on malformed skills. CI runs it with
   `npm test`.
