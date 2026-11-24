@@ -103,7 +103,7 @@
       "name": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "d3cba76fc1bcd28089c385fdaeaac89c00a18f33",
+      "commit": "d244009baf79e4e8f5009f8791712b972be9e0b0",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -150,10 +150,10 @@
         }
       ],
       "skills": {
-        "cosec-extending": "c303b0cb78174c16d4a2a6cf6bb2938929bd6309e76e2c5f4444e5eb3db5bc3f",
-        "cosec-integration": "21701b74e3ce8948e42de7692b809c9ae59fd4f42a311de4329da8e7ad346387",
+        "cosec-extending": "6bb0f51456e7a2a064d220b073e2474e93245381f3fc4f3ff11cdb327ee91a88",
+        "cosec-integration": "a27c64fbb78d896ddc024defb5bc70ffdd1053c594eceb6df8e26dfdea621997",
         "cosec-policy-author": "8bf86347dc5697975e3a61e69eea4babee1331ea6ca862770c431da7f9a3f8d0",
-        "cosec-troubleshoot": "8e5e92a2a42b4acbf819f53812fe496243317aead45bc9de4c7c0a9845a1fc59"
+        "cosec-troubleshoot": "d673e8ce8522e8d4e8d54703a42fd1ecd2c064dbfd0cd91cb9129dc9e23d2887"
       }
     },
     {
@@ -210,7 +210,7 @@
       "name": "CosId",
       "url": "https://github.com/Ahoo-Wang/CosId.git",
       "branch": "main",
-      "commit": "5e6a72721440f52cb656b1d8f97e97fe9bc7b656",
+      "commit": "5f3cc366c0b4ed2d0dcc659230b3f422476c2172",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -358,7 +358,7 @@
       "name": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "36babab56d2d971699b780d94b4b17ff7c203147",
+      "commit": "150d2c58f892d0449161a1770d3d18e93365bba6",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -415,8 +415,8 @@
       "skills": {
         "wow-client": "e9f1896b364cdc625fa2b4701b5534818f811fb781e46894d19f6e643b889d67",
         "wow-data-query": "2cf94f5e837284a9f89784b7157b41fcfb33d401ed193952e17ea9d62320d270",
-        "wow-develop": "4a6e891bfe208c46f4924a775c16f1938ee5e6b4cb8fa1301e4c1358f0ca644d",
-        "wow-migrate": "e0213185f5b0762f17f4ae550891e43fc313b1e878109ddd8346eadeeb063f96",
+        "wow-develop": "205671366053cd7ea7e19d449514499abfaa2c009ac8ef15d5ba8f7e9912a858",
+        "wow-migrate": "b3bea82cb100f266079d977c86d41efe740e6315659033bbc719ca08c276087c",
         "wow-view-definition": "0aaf178817390a9283eff2335ee1ae36682e007fd8de510d0c5909bb6a70020c",
         "wow-view-host": "c058d9bffc4372358e197bc0bac1e2eb4b04e87f1bdf59ea892b2a96cd8119b9"
       }

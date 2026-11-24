@@ -110,8 +110,8 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 - **`CoSec is off: cosec.enabled=false.` (WARN, not a failure):** nothing is protected by CoSec on that application;
   ask whether that is intended.
 - **`This is a Spring Cloud Gateway host: CoSec decides the requests of gateway routes only. ... would be answered with
-  no CoSec decision: <beans> ... (STA-13)` (startup fails):** the application's own controllers or functional routes are
-  outside CoSec; move them behind the gateway, or list the ones something else protects, by bean name, in
+  no CoSec decision: <beans> ... (STA-13)` (startup fails):** the application's own controllers, functional routes or
+  handler mappings (a WebSocket endpoint's) are outside CoSec; move them behind the gateway, or list the ones something else protects, by bean name, in
   `cosec.gateway.unprotected-handlers` (never a pattern). Never list a handler just to start.
 - **`No platform document under [<prefix>:snapshot:platform] in Redis <host:port/db>: this instance is not ready ...`
   (WARN, repeated every 6 revalidation intervals):** the instance waits for its platform document. Check, in this order, that
@@ -127,6 +127,8 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   is there but no CoSec filter is registered, so every request would pass undecided. Usually the application excluded
   `CoSecPipelineWebAutoConfiguration`, or declared a filter of another type under the adapter's bean name. Keep the
   auto-configuration, or register CoSec's filter itself; never suggest turning CoSec off unless the user wants no gate.
+  On a Spring Cloud Gateway host in `cosec.pipeline.mode=gateway` the message says that a gateway host decides only in
+  enforce mode: remove the mode (it is for services behind the gateway).
 - **`cosec.control.enabled=true, but cosec.pipeline.mode=gateway`** (STA-1): a service behind a gateway wires no
   control plane. Run the control plane on an `enforce` host, or remove the key.
 - **`cosec.audit.kafka.delivery=required, but no Kafka audit listener was created`** (STA-1): `cosec-kafka` is there,
@@ -218,7 +220,11 @@ Full model: https://cosec.ahoo.me/guide/security-model.
 - **`API key format [<n>] is not 3.`** (a request with that key is `503`): `null` is a 7.x key, convert it with
   `cosec-migrate api-keys`; `2` is a key an 8.0 pre-release stored, which nothing converts: issue a new key, delete
   the old one. **`[<key>] was stored by an 8.0 pre-release in format <n>`** from `cosec-migrate api-keys`: the same key;
-  the run is refused until it is gone.
+  the run is refused until it is gone. **`its principal [<p>] is named by a DENY or the blacklist, which a principal of its
+  own ... would escape (MIG-6)`**: a DENY reads the key's principal by `subject.id` or is bound to it, or `--blacklist`
+  blocks it; keep the key on its principal (in place with `--memberships`, or `--grant-to-principal <p>`). Without
+  `--blacklist`, block each moved key's `blockIfPrincipalBlocked` value if its principal is blocked. **`[<key>] is not an API key: its <member> is not
+  ...`**: the stored record has a member of the wrong type; fix it at the source or delete the key.
 - **`Cache[<CoSec cache>] - ... locked by cosec`**: a `cocache.caches.[name].*` entry or a `CacheSpecCustomizer` sets a
   field CoSec locks on its caches (a store of record's `ttl` or `unknown-read`, the snapshot store's `local-max-age`,
   any `key-prefix`). Remove the setting or exclude CoSec's caches; never suggest `unlock` for these, whose constrained
@@ -410,6 +416,11 @@ with the host stopped. Its probes are on the management port 8081, never on 8080
   which JSON writes as an escape (`"beta\uD800"`), IDN-10: a Redis key would write it as `?` and read another id's
   documents, memberships and revocations. CoSec's own `JwtTokenConverter` refuses to sign one (login fails with
   `holds an unpaired UTF-16 surrogate`). Fix the issuer or the user store; surrogate pairs (emoji) are fine.
+- `token-invalid` for a token whose `sub` is white space only (IDN-38): a principal id is never blank. CoSec's own
+  `JwtTokenConverter` refuses to sign one (login fails with `A token has a subject that is not blank`); an
+  `Authenticator` of your own that makes a blank `PrincipalId` throws, so the request is `503`. An API key record whose
+  `principalId` is blank does not load (`503`), and a document binding a blank principal does not compile. Ids are not
+  trimmed: `" alice "` is its own id, and a binding of `alice` does not match it.
 - `token-invalid` for a token whose `tenantId` or `aud` holds `/` (`acme/west`, SCP-13): a tenant or app id is one path
   segment, so it names neither `acme/west` nor `acme`. Behind a gateway, such a forwarded identity is `400
   invalid-request`; a preview's document of such a tenant is left out of `GET /documents` with a warning. Rename the
@@ -484,7 +495,7 @@ is counted in `cosec.identity.refused{problem}` (with cosec-micrometer), where a
 or a request that bypassed the gateway:
 
 - 400 `invalid-request`: not base64url JSON of format v1, unknown or missing members, an id with an unpaired
-  surrogate (IDN-10), over
+  surrogate (IDN-10), a blank `sub`, `tenant` or `rid` (IDN-38), over
   `cosec.pipeline.identity.max-size` (8KB), sent more than once, or a scope that does not resolve here.
 - 401 `token-invalid`: unsupported version, no `auth.exp`, or issued in the future (beyond
   `cosec.authentication.revocation.skew`).
@@ -650,6 +661,15 @@ When `GET /changes/{id}` is `404` for a change that ended, the bound removed it 
 `max-count` ended changes, and reclamation removes older ones past `min-age` whose revision is gone. Read who published
 a revision from `GET /documents/{key}/revisions/{revision}` (`provenance`), and the rest from the audit events.
 
+When `cosec.control.revisions.reclaimed-young` counts, or a `WARN` says records younger than `min-age` were reclaimed,
+a document's records weighed more than it may retain (`max-count` × the document cap in all, its `max-count` most
+recent included, or 26,214 index entries beyond them, `CTL-84`): find the client publishing large documents in a loop and rate-limit it per
+tenant. The `max-count` most recent revisions stay, so a rollback to a recent one still works.
+
+When a change event `HEAD_LOST` arrives, or `cosec.control.revisions.lost` counts, a published revision's head write was
+lost in a Redis failover (`CTL-86`): the head is back at the event's base and the change is not in effect. Publish it
+again or roll back, and set `min-replicas-to-write` on Redis.
+
 When a tenant change waits for approval with `TOO_LARGE`, the grant analysis spent its four million comparisons
 before it reached those grants (`CTL-49`): split the change; what counts is what it adds or rewrites, times what its
 author holds. One entry `change of tenant:<t>` means it grants more than 80,000 fragments (actions × resources × bindings
@@ -709,6 +729,9 @@ declared types must match on every instance and the control host; the change is 
 - `This instance runs the control plane, and cosec.control.service-url names a control-plane host as well` (`STA-11`):
   one `ControlService` per application. Remove `cosec.control.service-url` to embed, or set `cosec.control.enabled=false`
   to call the host. `cosec.control.service-url needs cosec-control-http`: add `me.ahoo.cosec:cosec-control-http`.
+- `The control API's client follows redirects` (`CTL-77`): `HttpControlService` was given an `HttpClient` that follows
+  redirects, which would resend `CoSec-Identity` where one points; build it with `followRedirects(NEVER)`. `The control
+  plane's answer is over 20971520 bytes`: something other than a control-plane host answered at the service URL.
   https://cosec.ahoo.me/operations/troubleshooting#startup-fails-on-two-control-services
 
 ### The typed control client does not read a document
@@ -737,3 +760,7 @@ In this repository, run a focused class first, for example:
 
 Use `$cosec-policy-author` to rewrite a confirmed-bad document and `$cosec-integration` to change confirmed-bad Spring
 configuration. For diagnosis-only requests, report the root cause and evidence without modifying files.
+
+When a control call is `503` with `Retry-After: 1` and `cosec.control.work.refused` counts, it is not the store: the
+control plane's work budget (an eighth of the heap) was full of large documents parsed or compiled at once (`CTL-85`).
+Retry; if steady, give the host more heap or spread out large `POST /changes` and `:apply` calls.

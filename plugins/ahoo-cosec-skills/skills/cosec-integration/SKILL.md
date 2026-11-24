@@ -159,7 +159,8 @@ Use `$cosec-policy-author` to write the documents. Storage details: https://cose
 ## Services behind a CoSec gateway
 
 The gateway strips any client `CoSec-Identity` and, on a permit for an authenticated principal, forwards the identity it
-verified (tenant, principal, app, space, the roles there, credential id and expiry, and the claims named in
+verified (tenant, principal, app, space, the roles there, its roles in other spaces and its attached policy ids under
+`memberships` (`IDN-39`, always written, empty when nothing), credential id and expiry, and the claims named in
 `cosec.gateway.identity.claims`) to a route that receives it: a route to a registered service (`uri: lb://...`), or one
 whose metadata says `cosec-identity: true`. Any other route, and one marked `cosec-identity: false`, gets none: mark
 your own `http(s)://` services `true`, never a third party. It forwards no credentials (`Authorization`, the API key
@@ -251,6 +252,12 @@ https://cosec.ahoo.me/guide/security-model#trust-boundaries.
   `MembershipRefresh.CLAIMS` (keeps the old token's memberships: a removed role applies at the next sign-in or after
   `revokeSubject`) or a `MembershipRefresh` that looks the user up again. Only the newest pair refreshes, an older
   one presented again ends the session, and a session lasts `cosec.jwt.session.lifetime` (30 days).
+- Tenant or app switch: `SwitchTenantAuthentication(verifier, tokenFamilies, tokenRevocation, YourCredentials::class.java)
+  { credentials -> TenantMembership(...) }`, as an `Authentication` bean behind your own endpoint. Your credentials
+  implement `SwitchTenantCredentials`: the target tenant (and app), the request's `SecurityContext`, and the session's
+  token pair (`accessToken`, `refreshToken`), read from the body as the refresh route reads it. An access token alone
+  does not switch; the pair is judged as a refresh's (an older one ends the session), and the switch moves nothing of
+  the session it came from (`IDN-22`).
 - Refresh and logout routes: set `cosec.authentication.login.refresh.path` and `logout.path` and the starter serves them
   (`POST`, the pair as JSON; `200` pair, `401` token-*, `503` unavailable, `500` error; logout `204`), on Spring MVC and
   WebFlux, never on a gateway. A document must permit an anonymous `POST` of each path, or every refresh is
@@ -328,7 +335,9 @@ service that writes what it already decided: it needs `cosec:skip-shadow`; `chec
 something of its own: the proposal's answer, nothing stored, `CTL-78`); `cosec.control.http.enabled=false` serves no routes. Every instance with the control plane runs
 its maintenance passes under their leases; no property turns them off. A service calls the service port through
 `HttpControlService` (`cosec-control-http`): set `cosec.control.service-url=http://<host>:8082/cosec/control/v1` and the
-starter's `ControlService` is it, writing `CoSec-Identity` for each call. One `ControlService` per application: naming a host on
+starter's `ControlService` is it, writing `CoSec-Identity` for each call. A client of your own for it follows no redirect
+(`followRedirects(HttpClient.Redirect.NEVER)`, the JDK's default), or construction fails; an answer over 20 MB fails the
+call. One `ControlService` per application: naming a host on
 an instance that runs the control plane fails startup (`STA-11`). Through `ControlService`, in process or over the
 service port, no one is the trust root, whoever the caller states, a platform administrator included (`CTL-81`): every
 change is analyzed, and what the analysis cannot prove waits for a person, who approves on the operators' routes. It
