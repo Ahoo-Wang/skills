@@ -1,7 +1,7 @@
 {
   "name": "ahoo-cosec-skills",
-  "description": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, authoring authorization policy documents, extending CoSec, and troubleshooting access decisions.",
-  "version": "1.0.0+1f971a4781dd",
+  "description": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, connecting a browser or React client to it, authoring authorization policy documents, extending CoSec, and troubleshooting access decisions.",
+  "version": "1.0.0+45fe559b29e4",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
@@ -21,19 +21,21 @@
     "reactive",
     "jwt",
     "rate-limiting",
-    "audit"
+    "audit",
+    "typescript",
+    "react"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Ahoo CoSec Skills",
-    "shortDescription": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, authoring authorization policy documents, extending CoSec, and troubleshooting access decisions.",
-    "longDescription": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, authoring authorization policy documents, extending CoSec, and troubleshooting access decisions.",
+    "shortDescription": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, connecting a browser or React client to it, authoring authorization policy documents, extending CoSec, and troubleshooting access decisions.",
+    "longDescription": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, connecting a browser or React client to it, authoring authorization policy documents, extending CoSec, and troubleshooting access decisions.",
     "developerName": "Ahoo Wang",
     "category": "Development",
     "capabilities": [
       "Skills"
     ],
     "websiteURL": "https://github.com/Ahoo-Wang/skills",
-    "defaultPrompt": "Help me integrate CoSec, author authorization policy documents, extend CoSec, and troubleshoot authentication or authorization issues."
+    "defaultPrompt": "Help me integrate CoSec, connect a web client to it, author authorization policy documents, extend CoSec, and troubleshoot authentication or authorization issues."
   }
 }

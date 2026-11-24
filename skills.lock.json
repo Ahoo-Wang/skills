@@ -4,7 +4,7 @@
       "name": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
-      "commit": "0db3fabb90f2406c8c0df2e09241c9086ce0e812",
+      "commit": "78bd2b3d55838ab98369a11a2be32ed9aa9dc1cb",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -51,7 +51,7 @@
       "name": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
-      "commit": "7299b05eb36dd54573d6de8647c37f7c73ebc5d0",
+      "commit": "2fa14f3076bb8b4fea8ee7970bf145ea63487f60",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -103,15 +103,16 @@
       "name": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "d244009baf79e4e8f5009f8791712b972be9e0b0",
+      "commit": "b6e7bd46411be3b26a0ef1eeea4a4ec3842cdce9",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
         {
           "name": "ahoo-cosec-skills",
-          "description": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, authoring authorization policy documents, extending CoSec, and troubleshooting access decisions.",
+          "description": "CoSec skills for integrating a reactive multi-tenant RBAC and policy-based security framework, connecting a browser or React client to it, authoring authorization policy documents, extending CoSec, and troubleshooting access decisions.",
           "skills": {
             "include": [
+              "cosec-client",
               "cosec-extending",
               "cosec-integration",
               "cosec-policy-author",
@@ -133,7 +134,9 @@
             "reactive",
             "jwt",
             "rate-limiting",
-            "audit"
+            "audit",
+            "typescript",
+            "react"
           ],
           "category": "development",
           "interface": {
@@ -141,7 +144,7 @@
             "capabilities": [
               "Skills"
             ],
-            "defaultPrompt": "Help me integrate CoSec, author authorization policy documents, extend CoSec, and troubleshoot authentication or authorization issues."
+            "defaultPrompt": "Help me integrate CoSec, connect a web client to it, author authorization policy documents, extend CoSec, and troubleshoot authentication or authorization issues."
           },
           "policy": {
             "installation": "AVAILABLE",
@@ -150,10 +153,11 @@
         }
       ],
       "skills": {
+        "cosec-client": "bea93a3c9343ed8ac8ce5b8802309d9fe9cd9a0c025195f914fa9428f99ddb2a",
         "cosec-extending": "6bb0f51456e7a2a064d220b073e2474e93245381f3fc4f3ff11cdb327ee91a88",
-        "cosec-integration": "a27c64fbb78d896ddc024defb5bc70ffdd1053c594eceb6df8e26dfdea621997",
-        "cosec-policy-author": "8bf86347dc5697975e3a61e69eea4babee1331ea6ca862770c431da7f9a3f8d0",
-        "cosec-troubleshoot": "d673e8ce8522e8d4e8d54703a42fd1ecd2c064dbfd0cd91cb9129dc9e23d2887"
+        "cosec-integration": "38e76544ac84d69547459c02bc91805139dcc334cd4b57b25a777ac6ae275e36",
+        "cosec-policy-author": "9510c10011764bbdd77069ac6c87fc0afdc2338ae9819b587f72276e57e482ad",
+        "cosec-troubleshoot": "d29806277e23e342a1f43c50d03f8a1f68cf6f4c2ec1ec1d36aa04d5ce975bf5"
       }
     },
     {
@@ -210,7 +214,7 @@
       "name": "CosId",
       "url": "https://github.com/Ahoo-Wang/CosId.git",
       "branch": "main",
-      "commit": "5f3cc366c0b4ed2d0dcc659230b3f422476c2172",
+      "commit": "9beb07d303d8ea1a3e16d6901416b3fc09d1ec5e",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -263,7 +267,7 @@
       "name": "FluentAssert",
       "url": "https://github.com/Ahoo-Wang/FluentAssert.git",
       "branch": "main",
-      "commit": "84dbc5d4589a7d18f4c45c624437fd93ccd08024",
+      "commit": "9550763e8af61d09f5b599fcd3d8157203d5a41e",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -301,14 +305,14 @@
         }
       ],
       "skills": {
-        "fluent-assert": "8833255ba3241c2e9cf4dc065aac134892d4707be844b36cb1f6f38e5f0846c1"
+        "fluent-assert": "f449a8372b5ccce1b4384495b5962f4e5c28991f11eb8b9ba077a7d4b51bda86"
       }
     },
     {
       "name": "Simba",
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
-      "commit": "deaed5688a3c0bf44e20a995d90db5da0f6fc689",
+      "commit": "321aceb6952c590d04399c440bf656a9e6e1078b",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -358,7 +362,7 @@
       "name": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "150d2c58f892d0449161a1770d3d18e93365bba6",
+      "commit": "d024ac56e05e5863c6e5057771f145a5e61da175",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -413,19 +417,19 @@
         }
       ],
       "skills": {
-        "wow-client": "e9f1896b364cdc625fa2b4701b5534818f811fb781e46894d19f6e643b889d67",
+        "wow-client": "d7521a28c1beeb63f61155bae78cd6fd0ece311b25ce02b01902e7d7e181e489",
         "wow-data-query": "2cf94f5e837284a9f89784b7157b41fcfb33d401ed193952e17ea9d62320d270",
-        "wow-develop": "205671366053cd7ea7e19d449514499abfaa2c009ac8ef15d5ba8f7e9912a858",
+        "wow-develop": "a649998aad92d078cfe08f2cd29aca0686396ace26ff00c607592c88327b673d",
         "wow-migrate": "b3bea82cb100f266079d977c86d41efe740e6315659033bbc719ca08c276087c",
         "wow-view-definition": "0aaf178817390a9283eff2335ee1ae36682e007fd8de510d0c5909bb6a70020c",
-        "wow-view-host": "c058d9bffc4372358e197bc0bac1e2eb4b04e87f1bdf59ea892b2a96cd8119b9"
+        "wow-view-host": "4eacf260bf626d7971be6ff7726e6e377d750a0549ae67f979e309e9fc0ffbf7"
       }
     },
     {
       "name": "fetcher",
       "url": "https://github.com/Ahoo-Wang/fetcher.git",
       "branch": "main",
-      "commit": "b473887130795afa74582746bd86b5860ce4731a",
+      "commit": "061526f51a75da73db3b7078514d36adff588578",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
