@@ -103,7 +103,7 @@
       "name": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "121482e3b3da1d032d8559783a1e51dc50dc9a0b",
+      "commit": "d3cba76fc1bcd28089c385fdaeaac89c00a18f33",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -153,14 +153,14 @@
         "cosec-extending": "c303b0cb78174c16d4a2a6cf6bb2938929bd6309e76e2c5f4444e5eb3db5bc3f",
         "cosec-integration": "21701b74e3ce8948e42de7692b809c9ae59fd4f42a311de4329da8e7ad346387",
         "cosec-policy-author": "8bf86347dc5697975e3a61e69eea4babee1331ea6ca862770c431da7f9a3f8d0",
-        "cosec-troubleshoot": "c37601d39b12a958f1e78d46027cd0beeabdf7a5bc31e4d3f5221c063bab10ee"
+        "cosec-troubleshoot": "8e5e92a2a42b4acbf819f53812fe496243317aead45bc9de4c7c0a9845a1fc59"
       }
     },
     {
       "name": "CoSky",
       "url": "https://github.com/Ahoo-Wang/CoSky.git",
       "branch": "main",
-      "commit": "f85cd3a8d2528a9917fdec4c78f8d85cfa7ee451",
+      "commit": "f4a7fcb460c59042f986d94950501ed5263fbc8f",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -358,7 +358,7 @@
       "name": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "a54a7fa10e9f73dcca9642df4c2679481db1acb3",
+      "commit": "36babab56d2d971699b780d94b4b17ff7c203147",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [

@@ -77,6 +77,10 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   bound on a lost invalidation (SNP-6), so the interval must be at least 1 second, at most 5 minutes, and,
   with `fail-closed.tenants`, less than `fail-closed.max-lag`. Use a value within the bounds; never
   suggest turning revalidation off.
+- **`cosec.key-prefix [<p>] holds ...: a key prefix is letters, digits, '_', '.' and '-' (cosec), or ... ({cosec})`**
+  (SNP-9): a prefix that could nest inside another deployment's. A trailing `:` names the same keys: remove it. A `:`
+  inside it: move the keys to an allowed prefix (stop the writers, copy with their TTL, switch). Braces are a hash tag
+  only around the whole prefix.
 - **`CoSec does not read ... cosec.authorization.snapshot.key-prefix`** (or `cosec.authorization.cache.key-prefix`,
   `cosec.api-key.key-prefix`): one `cosec.key-prefix` replaced them (SNP-9), and they fail startup as unknown keys. Which
   families move, from where to where, is at https://cosec.ahoo.me/operations/upgrading-previews#from-8-0-0-alpha-2. Have the token
@@ -105,9 +109,10 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   to get past it.
 - **`CoSec is off: cosec.enabled=false.` (WARN, not a failure):** nothing is protected by CoSec on that application;
   ask whether that is intended.
-- **`This is a Spring Cloud Gateway host: CoSec decides the requests of gateway routes only. ... answered with no CoSec
-  decision: <beans>` (WARN):** the application's own controllers or functional routes are outside CoSec; move them
-  behind the gateway, or secure them in the application.
+- **`This is a Spring Cloud Gateway host: CoSec decides the requests of gateway routes only. ... would be answered with
+  no CoSec decision: <beans> ... (STA-13)` (startup fails):** the application's own controllers or functional routes are
+  outside CoSec; move them behind the gateway, or list the ones something else protects, by bean name, in
+  `cosec.gateway.unprotected-handlers` (never a pattern). Never list a handler just to start.
 - **`No platform document under [<prefix>:snapshot:platform] in Redis <host:port/db>: this instance is not ready ...`
   (WARN, repeated every 6 revalidation intervals):** the instance waits for its platform document. Check, in this order, that
   something was published (`cosec-migrate publish --key-prefix <prefix>`), that `cosec.key-prefix` is the publisher's, and
@@ -118,6 +123,12 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   `cosec.enabled=false`: its filter strips a client's `CoSec-Identity`), `cosec.api-key.store=redis` `cosec-cocache`,
   `cosec.audit.kafka.delivery=required` `cosec-kafka`, `cosec.cosid.generator` `cosec-cosid`. Add the named artifact next to `cosec-spring-boot`. Do not
   suggest turning the feature off unless the user does not want it.
+- **`CoSec is on (cosec.enabled), but this web host registers none of its gates ...`** (STA-1): the adapter's module
+  is there but no CoSec filter is registered, so every request would pass undecided. Usually the application excluded
+  `CoSecPipelineWebAutoConfiguration`, or declared a filter of another type under the adapter's bean name. Keep the
+  auto-configuration, or register CoSec's filter itself; never suggest turning CoSec off unless the user wants no gate.
+- **`cosec.control.enabled=true, but cosec.pipeline.mode=gateway`** (STA-1): a service behind a gateway wires no
+  control plane. Run the control plane on an `enforce` host, or remove the key.
 - **`cosec.audit.kafka.delivery=required, but no Kafka audit listener was created`** (STA-1): `cosec-kafka` is there,
   but the listener is not: add a `KafkaOperations` bean (`spring-boot-starter-kafka` with `spring.kafka.*`), and keep
   `cosec.audit.enabled` and `cosec.audit.kafka.enabled` on; or use `best-effort`.
@@ -132,6 +143,10 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   https://cosec.ahoo.me/operations/troubleshooting#startup-fails-on-the-client-address
 - **`Social sign-in, whose states are kept in Redis ..., needs cosec-cocache`** (STA-1): add `cosec-cocache`, declare
   your own `SocialStateStore` bean, or set `cosec.authentication.login.social.enabled=false`.
+- **Sign-in refused with "too many sign-ins in progress: try again shortly", and a WARN `Refused <n> [<provider>]
+  sign-in start(s)`**: the deployment holds its bound of sign-ins in progress (a 64th of Redis's memory at 512 bytes a
+  sign-in, or 100,000 when Redis reports none). Starting a sign-in is anonymous: rate limit the start route at the edge.
+  https://cosec.ahoo.me/operations/troubleshooting#social-sign-in-is-refused-too-many-sign-ins-in-progress
 - **`cosec-cocache needs a ReactiveStringRedisTemplate bean`** (STA-1): add `spring-boot-data-redis` and configure
   Redis; without it no snapshot is read and rate limits would count per instance.
 - **`cosec.pipeline.mode=gateway: this service believes any CoSec-Identity header it receives ... State it once it is
@@ -144,7 +159,14 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   The key to write depends on who reaches it: `only-gateway-can-reach=true` when only the gateway does,
   `only-trusted-callers-can-reach=true` when services call it directly (the image has a service port by default, so the
   second; the gateway's key is refused beside a service port). The network first (a NetworkPolicy per port, as in
-  `k8s/control/`), then the line.
+  `k8s/control/`), then the line. On Kubernetes the overlay writes the line, never `k8s/control/` itself.
+- **The Job `cosec-control-boundary-check` fails** (`k8s/control/boundary-check.yaml`): `FAIL reached the control host at
+  <address>:<port>` means a pod no policy admits reached it, so the network plugin does not enforce the policies and the
+  overlay's boundary statement is false; anyone in the cluster can state any principal. Take the statement out of the
+  overlay (the host stops) until the policies are enforced; never delete the Job to make it pass. `FAIL could not tell`
+  means the host never listened within ten minutes, or the plugin refuses instead of dropping: check by hand. Delete the
+  Job before every apply (its pod template cannot change, and a finished one does not run again), or the verdict is the
+  last apply's.
 - **`cosec-control-server runs the control plane; cosec.control.enabled=false ...`, or `cosec-control-server verifies no
   credential and issues no token ... cosec.jwt.enabled=true`** (also `cosec.api-key.enabled`,
   `cosec.authentication.login.enabled`; `STA-10`): the `cosec-control` image refuses them. Remove the key; a control plane
@@ -171,8 +193,9 @@ Full model: https://cosec.ahoo.me/guide/security-model.
   `KafkaOperations` bean and `cosec.control.audit.kafka.enabled=true`, or use `best-effort`.
 - **`The control plane checks its approvers' revocations, but no revocation reader is available`**: enable CoSec's
   tokens with `cosec-cocache`, or declare a `RevocationReader` bean (`RevocationReader.NONE` only when no approver's
-  credential is ever revoked). **`cosec.jwt.token-validity.refresh (...), how long a token revocation is kept, is
-  shorter than cosec.control.approval.expire-after`**: raise the first or lower the second.
+  credential is ever revoked). **`A token revocation is kept for ...: the longer of cosec.jwt.token-validity.access
+  (...) and cosec.jwt.token-validity.refresh (...), plus cosec.authentication.revocation.skew (...), shorter than
+  cosec.control.approval.expire-after`**: raise a token validity or lower the approvals' expiry.
 - **`Redis may evict CoSec's policy snapshot: maxmemory-policy is {...}, not noeviction`**: set
   `maxmemory-policy noeviction` on every node. **`Cannot tell whether Redis may evict CoSec's policy snapshot (Redis
   refused INFO ...)`** or `(the CoCache backend ... is not one this check can read)`: a Redis user without `+info`, a
@@ -590,8 +613,9 @@ An approval that no longer counts at publish sends the change back to `AWAITING_
 the approver's token was revoked since, the provider no longer gives the approver its role or now binds it a DENY, a
 tenant principal approved a boundary change or (under four-eyes) a platform principal's change, or the approval names
 no credential (`the approval does not say what credential its approver approved with`: from before the upgrade, an
-older instance, or a credential without an id), so approve again. A 403 on `:approve` with `an API key cannot approve`
-in the log: approvals are a person's, so approve with a token; an API key is never the trust root either. A change a
+older instance, or a credential without an id), so approve again. A 403 on `:approve` with `a workload's credential (an API key, a service) cannot approve`
+in the log: approvals are a person's, so approve with a token; a workload's credential (an API key, or a service's own
+identity, whose credential is named `service`, IDN-34) is never the trust root either. A change a
 service makes through `ControlService` or the service port that waits for a person (`NOT_ANALYZED` on an app's catalog,
 `CROSS_TENANT` on a tenant's grant) although it states a platform administrator: no one is the trust root there
 (`CTL-81`); give a role projection the role class (`cosec:manage-roles`), or have a person approve on the operators'
@@ -618,9 +642,19 @@ bootstrap, a migration or an older instance, which may have been publishing the 
 over the same base first, by <id>` are publishes that crossed: rebase the change that lost. Blocking a principal is not
 a document change: use the blacklist's `BlacklistSource`, which waits for no slot.
 
+When a proposal is `409` with `conflict: OPEN_LIMIT`, the document holds `cosec.control.revisions.max-count` open
+changes (`CTL-83`); `heldBy` names the oldest. The author's own oldest failed draft was already abandoned for room:
+abandon, publish or let expire the open changes still there.
+
+When `GET /changes/{id}` is `404` for a change that ended, the bound removed it (`CTL-83`): a document keeps its latest
+`max-count` ended changes, and reclamation removes older ones past `min-age` whose revision is gone. Read who published
+a revision from `GET /documents/{key}/revisions/{revision}` (`provenance`), and the rest from the audit events.
+
 When a tenant change waits for approval with `TOO_LARGE`, the grant analysis spent its four million comparisons
 before it reached those grants (`CTL-49`): split the change; what counts is what it adds or rewrites, times what its
-author holds.
+author holds. One entry `change of tenant:<t>` means it grants more than 80,000 fragments (actions × resources × bindings
+of its granted ALLOWs), and none was analysed: spread the statement's actions or resources, or its bindings, over
+several changes.
 
 When every tenant grant over every app (a binding with app `*`, an attachment, also one whose condition narrows it to
 apps the change does not name) waits for approval as `UNREADABLE`
