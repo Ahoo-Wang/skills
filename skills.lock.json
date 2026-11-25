@@ -51,7 +51,7 @@
       "name": "CoCache",
       "url": "https://github.com/Ahoo-Wang/CoCache.git",
       "branch": "main",
-      "commit": "2fa14f3076bb8b4fea8ee7970bf145ea63487f60",
+      "commit": "76735158a49cd65f04f0117495bace38a521679b",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -103,7 +103,7 @@
       "name": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "012a13850ef3fd71bc3bc1536480eb20bded2b57",
+      "commit": "dd535d47231dacb42e8c3b5b339f434c4a8e23f4",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -153,18 +153,18 @@
         }
       ],
       "skills": {
-        "cosec-client": "a7403405a45557d4c3cdb1df84759f9d6727e0d156fb465bfe249c44e8211384",
-        "cosec-extending": "33a285039b921bd02cd0a1ea3557356643080575424a1c0b7dec9f2ce6b43131",
-        "cosec-integration": "b6950d1187da9b2e9989034906ca0350e2104a56d549fd695b7b618b1699d34e",
+        "cosec-client": "af08677b683bdb9380d3fe442cd2ed29a389fecdcfd186b251ca853533215a42",
+        "cosec-extending": "0a9d032833f9f05a753e82cf6401f09f5c32414827819dab2e3d20c76db52cd9",
+        "cosec-integration": "b103b5a964d06636c1990d46a84005d3246684ac22d77fb351a99dc141ad4d42",
         "cosec-policy-author": "9510c10011764bbdd77069ac6c87fc0afdc2338ae9819b587f72276e57e482ad",
-        "cosec-troubleshoot": "355a7e5397b23578f6fc55b88fa04464a1db08a1f8b04182bf719c079e5cff21"
+        "cosec-troubleshoot": "525e331de275a30f371fb8f2cab68d3cca88c09bdb1159fc66399ffe450bccc6"
       }
     },
     {
       "name": "CoSky",
       "url": "https://github.com/Ahoo-Wang/CoSky.git",
       "branch": "main",
-      "commit": "4c82b25d24768c4fd9229cdd70f28ac406b0f5cd",
+      "commit": "f396a17c068389c395cfcddfd8071e3b464ef910",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -312,7 +312,7 @@
       "name": "Simba",
       "url": "https://github.com/Ahoo-Wang/Simba.git",
       "branch": "main",
-      "commit": "321aceb6952c590d04399c440bf656a9e6e1078b",
+      "commit": "769e1beb97a5cf06f872c32e7794028fd4a1c8cb",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -362,7 +362,7 @@
       "name": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "d8b66be4d312645ad5ede791186a57dc2318a29a",
+      "commit": "83624e1e90b04fe9387aa4e6b2d4508460cb162a",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
