@@ -225,7 +225,8 @@ cosec:
   does not know is ignored, unless the header's `crit` names it, which is 503 (`IDN-41`): upgrade the service.
 - Startup fails for an unknown `cosec.pipeline.mode`, and for `mode=gateway` on a Spring Cloud Gateway host.
 - Tests of such a service, without a gateway: `IdentityHeader` (`cosec-testkit`, experimental) writes the header a
-  gateway sends: `forSubject(subject, tenant, app, space, roles)`, `of(identity)`, or `withToken(token, verifier,
+  gateway sends: `forSubject(subject, tenant, app, space, roles)` (a person's token), `forWorkload(...)` (a workload's:
+  never approves, never the trust root, no break-glass), `of(identity)`, or `withToken(token, verifier,
   revocations)` for a real token's session. A header is refused after 60s: make one per request. Never hand-write the
   JSON, and never use it in production. A Spring Boot test that starts the service states the boundary too, or the
   context fails to start: `@SpringBootTest(properties = [IdentityHeader.ONLY_GATEWAY_CAN_REACH])` (true in a test,
@@ -359,7 +360,7 @@ in app `cosec-control`. On WebFlux, raise `spring.codec.max-in-memory-size` for 
 10MB (the document cap and 2MB). Workflow: https://cosec.ahoo.me/policies/testing.
 
 The control plane's token is issued for tenant `(platform)` (an administrator) or the tenant's own, and for the app
-`cosec.control.app-id`: `TokenSubject(id = "alice", app = "cosec-control", tenant = "(platform)")`. A change is
+`cosec.control.app-id`: `TokenSubject(id = "alice", kind = Kind.PERSON, app = "cosec-control", tenant = "(platform)")`. A change is
 `POST /changes` (document, base revision, operations), then `:skip-shadow` with a `reason` (the trust root, and a
 tenant's administrator on its own document) or `:shadow`, then `:publish`. A console that edits roles sends one `putRole`
 per save. A service that mirrors an identity system's roles calls `ControlClient.proposeAndPublishWithoutShadow` per

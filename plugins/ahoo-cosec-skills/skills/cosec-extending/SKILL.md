@@ -200,7 +200,10 @@ fun interface Authenticator {
 
 `Credentials` holds the bearer token (`Authorization` header, or the query or the cookie when allowed) and the API key header.
 Return `AuthnResult.Authenticated(AuthenticatedPrincipal(id, tenant, memberships, attributes, credential), Identity.Method("name"))`,
-`Anonymous` (no credentials), `Rejected(reason)` (401 `token-*` on deny), or `Unavailable(cause)` (503). The id is
+`Anonymous` (no credentials), `Rejected(reason)` (401 `token-*` on deny), or `Unavailable(cause)` (503). A `TokenVerifier`
+of your own refuses a token whose JWS `crit` header names anything it does not understand (IDN-47): after the signature
+check, throw `TokenNotUnderstoodException` (the pipeline answers 503), and `TokenVerificationException` for a malformed
+`crit`; `java-jwt` ignores `crit`, so check it yourself. The id is
 never blank (IDN-38): `PrincipalId(" ")` throws, which makes the request 503, so answer `Rejected` for a credential that
 names no one. Ids are not trimmed. Memberships
 you pass have source `Memberships.Source.CLAIMS` (`MembershipClaims.parse(roles, policies)` builds them from
@@ -208,9 +211,13 @@ you pass have source `Memberships.Source.CLAIMS` (`MembershipClaims.parse(roles,
 (JWT with revocation, plus API keys when enabled): compose it yourself, for example
 `CompositeAuthenticator(myTokenAuthenticator, apiKeyAuthenticator)`, if you still need API keys.
 
-On a gateway, set `credential` (`Identity.Credential(method, id, expiresAt)`, method `JWT` or `API_KEY`, never the
-credential's value): without it the principal is forwarded to no backend, and with `expiresAt = null` the gateway
-answers 500 rather than forward an identity that never expires.
+Set `credential` (`Identity.Credential(method, kind, id, expiresAt)`, never the credential's value). `kind` is required
+(IDN-44): `Identity.Credential.Kind.PERSON` for a person's sign-in (SSO, SAML, LDAP), `WORKLOAD` for a machine client
+(client credentials, mTLS, a service account). A workload never approves a change, is never the control plane's trust
+root and has no break-glass; the method is only a label. `API_KEY` and `SERVICE` credentials are workloads' by
+construction, and a principal with no credential is a workload. On a gateway, without a credential the principal is
+forwarded to no backend, and with `expiresAt = null` the gateway answers 500 rather than forward an identity that never
+expires.
 
 ## ControlStore: the control plane's records
 

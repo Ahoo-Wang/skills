@@ -103,7 +103,7 @@
       "name": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "b6e7bd46411be3b26a0ef1eeea4a4ec3842cdce9",
+      "commit": "012a13850ef3fd71bc3bc1536480eb20bded2b57",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -153,18 +153,18 @@
         }
       ],
       "skills": {
-        "cosec-client": "bea93a3c9343ed8ac8ce5b8802309d9fe9cd9a0c025195f914fa9428f99ddb2a",
-        "cosec-extending": "6bb0f51456e7a2a064d220b073e2474e93245381f3fc4f3ff11cdb327ee91a88",
-        "cosec-integration": "38e76544ac84d69547459c02bc91805139dcc334cd4b57b25a777ac6ae275e36",
+        "cosec-client": "a7403405a45557d4c3cdb1df84759f9d6727e0d156fb465bfe249c44e8211384",
+        "cosec-extending": "33a285039b921bd02cd0a1ea3557356643080575424a1c0b7dec9f2ce6b43131",
+        "cosec-integration": "b6950d1187da9b2e9989034906ca0350e2104a56d549fd695b7b618b1699d34e",
         "cosec-policy-author": "9510c10011764bbdd77069ac6c87fc0afdc2338ae9819b587f72276e57e482ad",
-        "cosec-troubleshoot": "d29806277e23e342a1f43c50d03f8a1f68cf6f4c2ec1ec1d36aa04d5ce975bf5"
+        "cosec-troubleshoot": "355a7e5397b23578f6fc55b88fa04464a1db08a1f8b04182bf719c079e5cff21"
       }
     },
     {
       "name": "CoSky",
       "url": "https://github.com/Ahoo-Wang/CoSky.git",
       "branch": "main",
-      "commit": "f4a7fcb460c59042f986d94950501ed5263fbc8f",
+      "commit": "4c82b25d24768c4fd9229cdd70f28ac406b0f5cd",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -207,7 +207,7 @@
       ],
       "skills": {
         "cosky-integration": "b81c5a9a93f413e62083145e90937c3c662e02e3596d6b7dd27a42f472a6b9c4",
-        "cosky-migration": "b51a52b80508c11585bbfa0fb22bde7d6d4bddb6d8641964036edbebdd9f0c11"
+        "cosky-migration": "bfb4fab2c6ff5f1e4c0fd8647cf16f9281eedc6b6e0d5c153efa7a25aaf1e26b"
       }
     },
     {
@@ -362,7 +362,7 @@
       "name": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "d024ac56e05e5863c6e5057771f145a5e61da175",
+      "commit": "d8b66be4d312645ad5ede791186a57dc2318a29a",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -418,9 +418,9 @@
       ],
       "skills": {
         "wow-client": "d7521a28c1beeb63f61155bae78cd6fd0ece311b25ce02b01902e7d7e181e489",
-        "wow-data-query": "2cf94f5e837284a9f89784b7157b41fcfb33d401ed193952e17ea9d62320d270",
-        "wow-develop": "a649998aad92d078cfe08f2cd29aca0686396ace26ff00c607592c88327b673d",
-        "wow-migrate": "b3bea82cb100f266079d977c86d41efe740e6315659033bbc719ca08c276087c",
+        "wow-data-query": "0ef1b5d8d822027bd8b6fee60c2eb678ecd74b589d962f6a2b7b87d7385b4973",
+        "wow-develop": "3d09efc6570a5608939b7ff909c29d959d188e76db3d8ff9942adc831bc0fbc6",
+        "wow-migrate": "f1a1b264820439e786b7228911a9fd4762a42395c177a38dc5e89f558b1a6de1",
         "wow-view-definition": "0aaf178817390a9283eff2335ee1ae36682e007fd8de510d0c5909bb6a70020c",
         "wow-view-host": "4eacf260bf626d7971be6ff7726e6e377d750a0549ae67f979e309e9fc0ffbf7"
       }

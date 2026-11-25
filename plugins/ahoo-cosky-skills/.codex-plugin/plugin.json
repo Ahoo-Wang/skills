@@ -1,7 +1,7 @@
 {
   "name": "ahoo-cosky-skills",
   "description": "CoSky skills for connecting Spring Boot applications to a CoSky 8 server for configuration and service discovery, and for moving applications and their Configs from CoSky 5.x/6.x to 8.0.",
-  "version": "1.0.0+891dbd141d4c",
+  "version": "1.0.0+996d0fcbefa1",
   "author": {
     "name": "Ahoo Wang",
     "email": "ahoowang@gmail.com"
