@@ -4,7 +4,7 @@
       "name": "CoApi",
       "url": "https://github.com/Ahoo-Wang/CoApi.git",
       "branch": "main",
-      "commit": "78bd2b3d55838ab98369a11a2be32ed9aa9dc1cb",
+      "commit": "757478a495d2bce86b417a9eb62b4730b011e958",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -103,7 +103,7 @@
       "name": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "dd535d47231dacb42e8c3b5b339f434c4a8e23f4",
+      "commit": "7042c4ee6c617111c652e55f6dc58b6906cc1d69",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -164,7 +164,7 @@
       "name": "CoSky",
       "url": "https://github.com/Ahoo-Wang/CoSky.git",
       "branch": "main",
-      "commit": "f396a17c068389c395cfcddfd8071e3b464ef910",
+      "commit": "c7767d6df4aca6d2d044054bdb3786fa1bf74a39",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -214,7 +214,7 @@
       "name": "CosId",
       "url": "https://github.com/Ahoo-Wang/CosId.git",
       "branch": "main",
-      "commit": "9beb07d303d8ea1a3e16d6901416b3fc09d1ec5e",
+      "commit": "0075db2fbde2d505bb7c387a89865fa3e5060e67",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -362,7 +362,7 @@
       "name": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "83624e1e90b04fe9387aa4e6b2d4508460cb162a",
+      "commit": "d99435f30f38ca7de92fcf568cc7202cff844924",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -417,9 +417,9 @@
         }
       ],
       "skills": {
-        "wow-client": "d7521a28c1beeb63f61155bae78cd6fd0ece311b25ce02b01902e7d7e181e489",
+        "wow-client": "0e85974710e9ecbf0079080ceb3c3f6f12f40f1f9311612a436d106a1f2177fb",
         "wow-data-query": "0ef1b5d8d822027bd8b6fee60c2eb678ecd74b589d962f6a2b7b87d7385b4973",
-        "wow-develop": "3d09efc6570a5608939b7ff909c29d959d188e76db3d8ff9942adc831bc0fbc6",
+        "wow-develop": "716452ff8ea131b4366a08c0731e7a610a962afeb7abd2440b373db1dcb13e29",
         "wow-migrate": "f1a1b264820439e786b7228911a9fd4762a42395c177a38dc5e89f558b1a6de1",
         "wow-view-definition": "0aaf178817390a9283eff2335ee1ae36682e007fd8de510d0c5909bb6a70020c",
         "wow-view-host": "4eacf260bf626d7971be6ff7726e6e377d750a0549ae67f979e309e9fc0ffbf7"
@@ -429,7 +429,7 @@
       "name": "fetcher",
       "url": "https://github.com/Ahoo-Wang/fetcher.git",
       "branch": "main",
-      "commit": "061526f51a75da73db3b7078514d36adff588578",
+      "commit": "88518c2a072e2f6d61044d0508c8d9aae85cab5c",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
