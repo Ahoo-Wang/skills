@@ -103,7 +103,7 @@
       "name": "CoSec",
       "url": "https://github.com/Ahoo-Wang/CoSec.git",
       "branch": "main",
-      "commit": "77cbe040b52f053a42e8113f6b5805eb0f364090",
+      "commit": "1a5fe3ef8b51e02c1574b51ec8076fabbfe4ea09",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -153,18 +153,18 @@
         }
       ],
       "skills": {
-        "cosec-client": "cf27e699a364baa46db4e58a6fcc06ba1ecd06a341debb2057c4eb3d9e5ba131",
+        "cosec-client": "4de2bb53b0c1ab4f38e8a54ec8bf36d9ba8387682b2e9e8133eeeaa010d8a608",
         "cosec-extending": "0a9d032833f9f05a753e82cf6401f09f5c32414827819dab2e3d20c76db52cd9",
         "cosec-integration": "b103b5a964d06636c1990d46a84005d3246684ac22d77fb351a99dc141ad4d42",
         "cosec-policy-author": "9510c10011764bbdd77069ac6c87fc0afdc2338ae9819b587f72276e57e482ad",
-        "cosec-troubleshoot": "525e331de275a30f371fb8f2cab68d3cca88c09bdb1159fc66399ffe450bccc6"
+        "cosec-troubleshoot": "b704c9ab3099dc3a2cd1afb04c98706375b629e4647e65504f7311e7b64c3a05"
       }
     },
     {
       "name": "CoSky",
       "url": "https://github.com/Ahoo-Wang/CoSky.git",
       "branch": "main",
-      "commit": "a3972aab0f8d8fda529bee6d26844f95d041dc55",
+      "commit": "2723c4c3157c0eef6d8401c9384da34525c47d69",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -214,7 +214,7 @@
       "name": "CosId",
       "url": "https://github.com/Ahoo-Wang/CosId.git",
       "branch": "main",
-      "commit": "0075db2fbde2d505bb7c387a89865fa3e5060e67",
+      "commit": "de79adca2311bcb698d0a1c35b80fd44af6ad57f",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -362,7 +362,7 @@
       "name": "Wow",
       "url": "https://github.com/Ahoo-Wang/Wow.git",
       "branch": "main",
-      "commit": "e63920e486f88084bdd936f9fe7519b2d61b92c1",
+      "commit": "9161671ceb92e132c9691df73f6c930fb1916d26",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -422,14 +422,14 @@
         "wow-develop": "593e71b4cd8983914b1c23bd99173bb272a460ad5d1d1815bf85bc6cfb8fe99c",
         "wow-migrate": "f1a1b264820439e786b7228911a9fd4762a42395c177a38dc5e89f558b1a6de1",
         "wow-view-definition": "b1129be3b5732e8a2342b42d0a12092eb4004a5d067e9836f8bae5477ff5e185",
-        "wow-view-host": "df49dddc35c482cf6c5ef7ae127eeb80ef9241db22c15a89c8213896882bfd47"
+        "wow-view-host": "2868f6bf82eccdccff62dfcf774d9c2e4dd46a95df938245a43e9fd107c3d8e0"
       }
     },
     {
       "name": "fetcher",
       "url": "https://github.com/Ahoo-Wang/fetcher.git",
       "branch": "main",
-      "commit": "f76040b8ce4837b8165eacdf975cc0db1dc6a9fc",
+      "commit": "9fa99b945050d6c7c1d9ffd9c377a702e89565b2",
       "skills_path": "skills",
       "plugins_path": "skills/plugins.json",
       "plugins": [
@@ -479,7 +479,7 @@
         "fetcher-llm-streaming": "fb3c6d9bd6bce09f91631acecd0cb1d9d73462f4e71e6d5867924afe50d9cc7a",
         "fetcher-openai-client": "4ba43100e505c90fccb6cc61c929a0320f5ab63c0e080d6170e0582575879141",
         "fetcher-openapi-types": "483a9ca640a3b97c601b4b25d2005b3d7f5b645003a4a9875bd764133ac58815",
-        "fetcher-react-hooks": "ca656cf22cfe73906b493b199bbe8c08e005533e635c787d49e7192ca2324191",
+        "fetcher-react-hooks": "be9e0441f1a0984f822c8d0482748f3bf0e70f8a76ac86f630743d46193f0fc1",
         "fetcher-storage": "8c5d9d165069b996887402eb98068f6be5ca47eb4bbc9250b0550a159959d4c2",
         "fetcher-v6-migration": "cf95dac832d5f5b564aaddaa2d1b0cc2667c56c75f333da1471e72dd8ba9e364"
       }
